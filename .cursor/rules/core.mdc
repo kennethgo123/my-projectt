@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+NEVER RUN PHP ARTISAN MIGRATE FRESH YOU DELETED MY DATABASE EARLIER DONT DO THAT, please dont do anything that will delete any data from the database
+ description: 
+globs: 
+alwaysApply: true
+---
+## Core Rules
+1. always update /lexcav/memory-bank for everything you do. make sure to update it at the appropriate places.
+2. When you fetch names from the database to display, make sure you find the first_name and last_name of clients and lawyers at lawyer_profiles and client_profiles
