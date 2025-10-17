@@ -62,7 +62,12 @@
 
                         <div class="flex items-center">
                             <input id="agree" type="checkbox" wire:model="agreeTerms" class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
-                            <label for="agree" class="ml-2 block text-sm text-gray-700">I agree to the Terms and Privacy Policy</label>
+                            <label for="agree" class="ml-2 block text-sm text-gray-700">
+                                I agree to the 
+                                <a href="{{ route('terms') }}" target="_blank" class="text-indigo-600 hover:text-indigo-500 underline">Terms and Conditions</a> 
+                                and 
+                                <a href="{{ route('policy') }}" target="_blank" class="text-indigo-600 hover:text-indigo-500 underline">Privacy Policy</a>
+                            </label>
                         </div>
                         @error('agreeTerms')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>

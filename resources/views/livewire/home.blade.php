@@ -14,7 +14,7 @@
                     
                     <!-- Desktop Navigation -->
                     <div class="hidden md:flex flex-grow justify-between items-center">
-                        <div class="flex space-x-8">
+                        <div class="flex space-x-8 ml-8">
                             <a href="#home" class="text-white hover:text-green-300 transition">Home</a>
                             <a href="#services" class="text-white hover:text-green-300 transition">Services</a>
                             <a href="#featured-lawyers" class="text-white hover:text-green-300 transition">Featured Lawyers</a>
