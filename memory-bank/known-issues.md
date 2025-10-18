@@ -225,3 +225,35 @@
   - The case status might not be getting updated correctly when clients request changes.
   - There might be an issue with the modal rendering conditions or the `wire:click` action on the original button.
 - **Date Identified**: Current day
+
+## Missing case_tasks Table in Production
+
+- **Issue**: Production database was missing the `case_tasks` table, causing errors when lawyers tried to access their dashboard.
+- **Error**: `SQLSTATE[42S02]: Base table or view not found: 1146 Table 'forge.case_tasks' doesn't exist`
+- **Solution**: Created migration file `2025_10_19_050242_create_case_tasks_table.php` with complete table schema including:
+  - Foreign key to legal_cases table
+  - Task fields (title, description, due_date)
+  - Assignment fields (assigned_to_type, assigned_to_id, assigned_to, assigned_by)
+  - Status fields (is_completed, completed_at)
+  - Performance indexes for common queries
+- **Files Created**:
+  - `database/migrations/2025_10_19_050242_create_case_tasks_table.php`
+- **Date Fixed**: October 19, 2025
+- **Note**: Migration needs to be run on production server with `php artisan migrate`
+
+## SendGrid Mailer Not Defined Error
+
+- **Issue**: Registration was failing in production with "Mailer [sendgrid] is not defined" error when trying to send verification emails.
+- **Error**: `InvalidArgumentException: Mailer [sendgrid] is not defined.`
+- **Solution**: Added SendGrid mailer configuration to the `config/mail.php` file with proper SMTP settings for SendGrid:
+  - Host: smtp.sendgrid.net
+  - Port: 587
+  - Encryption: TLS
+  - Username: apikey
+  - Password: Loaded from SENDGRID_API_KEY environment variable
+- **Files Modified**:
+  - `config/mail.php`
+- **Date Fixed**: October 19, 2025
+- **Note**: Ensure that production environment has the following variables set:
+  - `MAIL_MAILER=sendgrid`
+  - `SENDGRID_API_KEY=your_sendgrid_api_key`
