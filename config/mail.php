@@ -50,13 +50,7 @@ return [
         ],
 
         'sendgrid' => [
-            'transport' => 'smtp',
-            'host' => env('SENDGRID_HOST', 'smtp.sendgrid.net'),
-            'port' => env('SENDGRID_PORT', 587),
-            'encryption' => env('SENDGRID_ENCRYPTION', 'tls'),
-            'username' => env('SENDGRID_USERNAME', 'apikey'),
-            'password' => env('SENDGRID_API_KEY'),
-            'timeout' => null,
+            'transport' => 'sendgrid',
         ],
 
         'ses' => [
