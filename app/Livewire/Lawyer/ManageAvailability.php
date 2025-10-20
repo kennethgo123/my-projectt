@@ -234,7 +234,7 @@ class ManageAvailability extends Component
         $this->newLunchEndTime = '13:00';
     }
     
-    private function resetEditForm()
+    public function resetEditForm()
     {
         $this->editId = null;
         $this->editDay = null;

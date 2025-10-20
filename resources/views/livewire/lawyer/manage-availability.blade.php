@@ -64,7 +64,7 @@
                             <div class="flex items-center">
                                 <input id="newHasLunchBreak" 
                                     type="checkbox" 
-                                    wire:model.defer="newHasLunchBreak" 
+                                    wire:model.live="newHasLunchBreak" 
                                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                 <label for="newHasLunchBreak" class="ml-2 block text-sm text-gray-900 font-open-sans">
                                     Include lunch break
@@ -148,7 +148,7 @@
                             <div class="flex items-center">
                                 <input id="editHasLunchBreak" 
                                     type="checkbox" 
-                                    wire:model.defer="editHasLunchBreak" 
+                                    wire:model.live="editHasLunchBreak" 
                                     class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                 <label for="editHasLunchBreak" class="ml-2 block text-sm text-gray-900 font-open-sans">
                                     Include lunch break
