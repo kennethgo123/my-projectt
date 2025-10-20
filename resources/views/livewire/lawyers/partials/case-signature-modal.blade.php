@@ -97,7 +97,12 @@
                         
                         <div class="relative flex items-start mt-3">
                             <div class="flex items-center h-5">
-                                <input wire:model="signatureAcknowledged" id="signature-acknowledgment" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                                <input 
+                                    wire:model.live="signatureAcknowledged" 
+                                    wire:change="acknowledgeSignature"
+                                    id="signature-acknowledgment" 
+                                    type="checkbox" 
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
                             </div>
                             <div class="ml-3 text-sm">
                                 <label for="signature-acknowledgment" class="font-medium text-gray-700">I acknowledge and agree to the statement above</label>
@@ -105,7 +110,7 @@
                         </div>
                     </div>
                     
-                    <div class="mt-4 flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0">
+                    <div class="mt-4">
                         <!-- Open in New Tab -->
                         <a href="{{ Storage::url($selectedCase->signature_path) }}" 
                            target="_blank" 
@@ -116,13 +121,6 @@
                             </svg>
                             Open in New Tab
                         </a>
-                        
-                        <button wire:click="acknowledgeSignature" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                            </svg>
-                            Acknowledge Signature
-                        </button>
                     </div>
                 @else
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">

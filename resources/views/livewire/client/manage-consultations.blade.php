@@ -241,7 +241,7 @@
                                                     @endif
 
                                                     {{-- Message Button --}}
-                                                    <a href="{{ route('messages', ['receiver_id' => $consultation->lawyer_id]) }}" 
+                                                    <a href="{{ route('messages.chat', ['userId' => $consultation->lawyer_id]) }}" 
                                                     class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-raleway transition duration-150">
                                                         <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -267,7 +267,7 @@
                                                             </svg>
                                                             View Results
                                                         </button>
-                                                        <a href="{{ route('messages', ['receiver_id' => $consultation->lawyer_id]) }}" 
+                                                        <a href="{{ route('messages.chat', ['userId' => $consultation->lawyer_id]) }}" 
                                                         class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-raleway transition duration-150">
                                                             <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -541,7 +541,7 @@
 
                                 <!-- Message Lawyer Button -->
                                 <div class="mt-4 flex justify-between items-center">
-                                    <a href="{{ route('messages', ['receiver_id' => $selectedConsultation->lawyer_id]) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-raleway transition duration-150">
+                                    <a href="{{ route('messages.chat', ['userId' => $selectedConsultation->lawyer_id]) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-raleway transition duration-150">
                                         <svg class="mr-2 -ml-1 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                         </svg>

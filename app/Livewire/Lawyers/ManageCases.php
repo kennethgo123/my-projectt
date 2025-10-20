@@ -352,7 +352,21 @@ class ManageCases extends Component
                 ->first();
                 
             if (!$contractAction) {
-                session()->flash('error', 'No signed contract found for this case.');
+                // Try to find any contract action with a signature
+                $contractAction = $this->selectedCase->contractActions()
+                    ->whereNotNull('signature_path')
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                    
+                if (!$contractAction) {
+                    session()->flash('error', 'No signed contract found for this case.');
+                    return;
+                }
+            }
+            
+            // Check if already acknowledged
+            if ($contractAction->lawyer_acknowledged) {
+                session()->flash('message', 'This signature has already been acknowledged.');
                 return;
             }
             
@@ -371,8 +385,7 @@ class ManageCases extends Component
                 'visibility' => 'both'
             ]);
             
-            session()->flash('message', 'Client signature has been acknowledged.');
-            $this->showSignatureModal = false;
+            session()->flash('message', 'Client signature has been acknowledged successfully.');
             
         } catch (\Exception $e) {
             Log::error('Signature acknowledgment failed', [
