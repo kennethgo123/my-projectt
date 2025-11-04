@@ -76,6 +76,17 @@
                 </template>
                 <span class="text-gray-400 ml-2">•</span>
                 <span class="ml-2" x-text="lawyerDetail.city"></span>
+                <template x-if="Array.isArray(lawyerDetail.languages) && lawyerDetail.languages.length">
+                    <span class="ml-2 flex items-center">
+                        <span class="text-gray-400 mx-2">•</span>
+                        <span class="text-gray-700">
+                            <span x-text="(lawyerDetail.languages.slice(0,2)).join(', ')"></span>
+                            <template x-if="lawyerDetail.languages.length > 2">
+                                <span class="text-gray-400 cursor-help" :title="lawyerDetail.languages.slice(2).join(', ')">+<span x-text="lawyerDetail.languages.length - 2"></span></span>
+                            </template>
+                        </span>
+                    </span>
+                </template>
             </div>
             
             <div class="mt-3 flex items-center text-sm text-gray-700">
@@ -233,7 +244,18 @@
             </svg>
             PROFESSIONAL EXPERIENCE
         </h4>
-        <div class="prose max-w-none text-gray-700 font-open-sans leading-relaxed" x-html="lawyerType === 'lawFirm' ? lawyerDetail.experience : (lawyerDetail.experience || 'No professional experience information available.')"></div>
+        <div class="prose max-w-none text-gray-700 font-open-sans leading-relaxed">
+            <template x-if="getExperiences().length > 0">
+                <ul class="list-disc list-inside space-y-1">
+                    <template x-for="(exp, idx) in getExperiences()" :key="idx">
+                        <li x-text="exp"></li>
+                    </template>
+                </ul>
+            </template>
+            <template x-if="getExperiences().length === 0">
+                <div>No professional experience information available.</div>
+            </template>
+        </div>
     </div>
     
     <!-- Services section -->
@@ -252,6 +274,26 @@
             </template>
             <template x-if="!lawyerDetail.services || lawyerDetail.services.length === 0">
                 <p class="text-gray-600 font-open-sans">No services listed.</p>
+            </template>
+        </div>
+    </div>
+
+    <!-- Languages and Dialects section -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-emerald-200 hover:shadow-md transition-all duration-300">
+        <h4 class="text-lg font-semibold text-emerald-800 mb-4 font-raleway flex items-center">
+            <svg class="w-5 h-5 mr-2 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 5a2 2 0 012-2h6a2 2 0 012 2H2zM2 9h10a2 2 0 012 2H2a2 2 0 01-2-2zM2 15h14a2 2 0 012 2H2a2 2 0 01-2-2z" />
+            </svg>
+            LANGUAGES AND DIALECTS
+        </h4>
+        <div class="flex flex-wrap gap-2">
+            <template x-if="getLanguages().length > 0">
+                <template x-for="(lang, idx) in getLanguages()" :key="idx">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200" x-text="lang"></span>
+                </template>
+            </template>
+            <template x-if="getLanguages().length === 0">
+                <p class="text-gray-600 font-open-sans">No languages specified.</p>
             </template>
         </div>
     </div>

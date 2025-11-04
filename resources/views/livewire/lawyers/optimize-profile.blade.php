@@ -38,8 +38,13 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Optimize Your Profile</h2>
 
                 @if (session()->has('message'))
-                    <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                    <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                         {{ session('message') }}
+                    </div>
+                @endif
+                @if (session()->has('error'))
+                    <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        {{ session('error') }}
                     </div>
                 @endif
 
@@ -149,15 +154,40 @@
                         @error('education') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Experience -->
+                    <!-- Professional Experience (Dynamic) -->
                     <div>
-                        <x-label for="experience" value="Professional Experience" />
-                        <div class="mt-1">
-                            <textarea id="experience" wire:model="experience" rows="4" 
-                                class="shadow-sm block w-full border-gray-300 rounded-md"
-                                placeholder="Detail your work experience, notable cases, and areas of practice"></textarea>
+                        <x-label for="experiences" value="Professional Experience" />
+                        <p class="text-sm text-gray-500 mb-2">Add your roles, firms, notable work, and durations</p>
+                        <div class="mt-2 space-y-2">
+                            @if(count($experiences) > 0)
+                                <div class="space-y-2">
+                                    @foreach($experiences as $index => $exp)
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm text-gray-700 truncate" title="{{ $exp }}">
+                                                {{ $exp }}
+                                            </div>
+                                            <button type="button" wire:click="removeExperience({{ $index }})" 
+                                                class="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-300 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <div class="flex items-center gap-2">
+                                <input type="text" wire:model="newExperience" 
+                                       placeholder="e.g., Associate Lawyer at ABC Law (2019–2023)"
+                                       class="flex-1 shadow-sm block border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                       wire:keydown.enter.prevent="addExperience">
+                                <button type="button" wire:click="addExperience" 
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    Add
+                                </button>
+                            </div>
                         </div>
-                        @error('experience') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Achievements -->

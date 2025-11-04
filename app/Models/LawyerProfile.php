@@ -54,6 +54,7 @@ class LawyerProfile extends Model
         'offers_inhouse_consultation' => 'boolean',
         'show_office_address' => 'boolean',
         'languages' => 'array',
+        'experience' => 'array',
     ];
 
     public function user()

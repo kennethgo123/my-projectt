@@ -81,14 +81,34 @@
                             @php
                                 $languagesArray = is_array($lawyer->languages) ? $lawyer->languages : 
                                     (is_string($lawyer->languages) ? json_decode($lawyer->languages, true) : []);
-                                $languagesArray = $languagesArray ?: [];
+                                $languagesArray = array_values(array_filter($languagesArray ?: []));
+                                $visibleLanguages = array_slice($languagesArray, 0, 2);
+                                $extraLanguages = array_slice($languagesArray, 2);
                             @endphp
                             @if(!empty($languagesArray))
                                 <span class="text-gray-400 mx-2">•</span>
                                 <span class="text-gray-600">
-                                    {{ implode(', ', array_slice($languagesArray, 0, 2)) }}
-                                    @if(count($languagesArray) > 2)
-                                        <span class="text-gray-400">+{{ count($languagesArray) - 2 }}</span>
+                                    {{ implode(', ', $visibleLanguages) }}
+                                    @if(count($extraLanguages) > 0)
+                                        <span 
+                                            x-data="{ open:false, pos:{left:0, top:0}, place($el){ const r = $el.getBoundingClientRect(); this.pos.left = r.left + window.scrollX; this.pos.top = r.bottom + window.scrollY; } }"
+                                            @mouseenter="open = true; $nextTick(() => place($el))"
+                                            @mouseleave="open = false"
+                                            class="text-gray-400 cursor-help inline-block"
+                                        >
+                                            +{{ count($extraLanguages) }}
+                                            <template x-teleport="body">
+                                                <div
+                                                    x-cloak
+                                                    x-show="open"
+                                                    x-transition.opacity
+                                                    class="fixed z-50 whitespace-nowrap px-2 py-1 rounded bg-gray-800 text-white text-xs shadow-lg"
+                                                    :style="`left:${pos.left}px; top:${pos.top + 6}px`"
+                                                >
+                                                    {{ implode(', ', $extraLanguages) }}
+                                                </div>
+                                            </template>
+                                        </span>
                                     @endif
                                 </span>
                             @endif
@@ -127,6 +147,8 @@
                         No detailed description available.
                     @endif
                 </p>
+
+                
                 
                 @if($lawyer->services->count() > 0)
                     <div class="mt-4 flex flex-wrap gap-2 min-h-[2rem]">

@@ -104,6 +104,21 @@
                         @endif
                         <span class="text-gray-400 ml-2">•</span>
                         <span class="ml-2">{{ $lawyer->city }}</span>
+                        @php
+                            $languagesArray = is_array($lawyer->languages) ? $lawyer->languages : (is_string($lawyer->languages) ? json_decode($lawyer->languages, true) : []);
+                            $languagesArray = array_values(array_filter($languagesArray ?: []));
+                            $visibleLanguages = array_slice($languagesArray, 0, 2);
+                            $extraLanguages = array_slice($languagesArray, 2);
+                        @endphp
+                        @if(!empty($languagesArray))
+                            <span class="text-gray-400 mx-2">•</span>
+                            <span class="text-gray-700">
+                                {{ implode(', ', $visibleLanguages) }}
+                                @if(count($extraLanguages) > 0)
+                                    <span class="text-gray-400 cursor-help" title="{{ implode(', ', $extraLanguages) }}">+{{ count($extraLanguages) }}</span>
+                                @endif
+                            </span>
+                        @endif
                     </div>
                     
                     <div class="mt-3 flex items-center text-sm text-gray-700">

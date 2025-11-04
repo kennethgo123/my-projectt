@@ -126,6 +126,36 @@
                 } else {
                     return this.lawyerDetail.user.rating_count || 0;
                 }
+            },
+            getExperiences() {
+                if (!this.lawyerDetail) return [];
+                const exp = this.lawyerDetail.experience;
+                if (Array.isArray(exp)) return exp.filter(Boolean);
+                if (typeof exp === 'string') {
+                    if (!exp) return [];
+                    try {
+                        const parsed = JSON.parse(exp);
+                        return Array.isArray(parsed) ? parsed.filter(Boolean) : [exp];
+                    } catch (e) {
+                        return [exp];
+                    }
+                }
+                return [];
+            },
+            getLanguages() {
+                if (!this.lawyerDetail) return [];
+                const langs = this.lawyerDetail.languages;
+                if (Array.isArray(langs)) return langs.filter(Boolean);
+                if (typeof langs === 'string') {
+                    if (!langs) return [];
+                    try {
+                        const parsed = JSON.parse(langs);
+                        return Array.isArray(parsed) ? parsed.filter(Boolean) : [langs];
+                    } catch (e) {
+                        return [langs];
+                    }
+                }
+                return [];
             }
         };
     }

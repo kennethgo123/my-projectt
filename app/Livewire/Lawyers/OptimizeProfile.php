@@ -18,9 +18,11 @@ class OptimizeProfile extends Component
     public $about = '';
     public $education = '';
     public $experience = '';
+    public $experiences = [];
     public $achievements = '';
     public $languages = [];
     public $newLanguage = '';
+    public $newExperience = '';
     
     public function addLanguage()
     {
@@ -40,6 +42,20 @@ class OptimizeProfile extends Component
     {
         // Reset barangay when city changes
         $this->barangay = '';
+    }
+
+    public function addExperience()
+    {
+        if (!empty($this->newExperience)) {
+            $this->experiences[] = trim($this->newExperience);
+            $this->newExperience = '';
+        }
+    }
+
+    public function removeExperience($index)
+    {
+        unset($this->experiences[$index]);
+        $this->experiences = array_values($this->experiences);
     }
     public $photo;
     public $existingPhoto;
@@ -66,7 +82,15 @@ class OptimizeProfile extends Component
             $profile = $user->lawFirmLawyer;
             $this->about = $profile->about ?? '';
             $this->education = $profile->education ?? '';
-            $this->experience = $profile->experience ?? '';
+            // Normalize experience to array for law firm lawyer
+            if (is_array($profile->experience)) {
+                $this->experiences = $profile->experience;
+            } else if (is_string($profile->experience)) {
+                $decoded = json_decode($profile->experience, true);
+                $this->experiences = is_array($decoded) ? $decoded : (empty($profile->experience) ? [] : [$profile->experience]);
+            } else {
+                $this->experiences = [];
+            }
             $this->achievements = $profile->achievements ?? '';
             $this->languages = $profile->languages ? (is_array($profile->languages) ? $profile->languages : json_decode($profile->languages, true)) : [];
             $this->existingPhoto = $profile->photo_path;
@@ -98,7 +122,15 @@ class OptimizeProfile extends Component
         if ($profile) {
             $this->about = $profile->about;
             $this->education = $profile->education;
-            $this->experience = $profile->experience;
+            // Normalize experience to array for regular lawyer
+            if (is_array($profile->experience)) {
+                $this->experiences = $profile->experience;
+            } else if (is_string($profile->experience)) {
+                $decoded = json_decode($profile->experience, true);
+                $this->experiences = is_array($decoded) ? $decoded : (empty($profile->experience) ? [] : [$profile->experience]);
+            } else {
+                $this->experiences = [];
+            }
             $this->achievements = $profile->achievements;
             $this->languages = is_string($profile->languages) ? json_decode($profile->languages, true) : ($profile->languages ?? []);
             $this->existingPhoto = $profile->photo_path;
@@ -174,6 +206,14 @@ class OptimizeProfile extends Component
         $user = auth()->user();
         $profile = null;
         $photoPath = null;
+
+        // Require at least one consultation type
+        if (!$this->offersOnlineConsultation && !$this->offersInhouseConsultation) {
+            session()->flash('error', 'Kindly select a consultation type');
+            // Scroll to top via existing JS listener
+            $this->dispatch('profile-optimized-js', ['scrollToTop' => true]);
+            return;
+        }
 
         // Process photo if provided
         if ($this->photo && !$this->croppedPhoto) {
@@ -291,7 +331,7 @@ class OptimizeProfile extends Component
         $updateData = [
             'about' => $this->about,
             'education' => $this->education,
-            'experience' => $this->experience,
+            'experience' => json_encode($this->experiences),
             'achievements' => $this->achievements,
             'languages' => json_encode($this->languages),
             'offers_online_consultation' => $this->offersOnlineConsultation,
