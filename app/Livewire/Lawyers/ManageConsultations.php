@@ -47,6 +47,7 @@ class ManageConsultations extends Component
     public $reviewCaseTitle = '';
     public $reviewCaseDescription = '';
     public $reviewContractPath = '';
+    public $reviewCaseId = null;
     public $selectedConsultationForReview = null;
 
     public $googleMeetLink = '';
@@ -389,6 +390,16 @@ class ManageConsultations extends Component
             return;
         }
 
+        // Validate that the file is a PDF
+        $fileExtension = strtolower($this->contractDocument->getClientOriginalExtension());
+        $mimeType = $this->contractDocument->getMimeType();
+        
+        if ($fileExtension !== 'pdf' || $mimeType !== 'application/pdf') {
+            session()->flash('error', 'Kindly upload a pdf file');
+            $this->contractDocument = null;
+            return;
+        }
+
         try {
             $consultation = Consultation::find($this->selectedConsultation);
             
@@ -455,17 +466,29 @@ class ManageConsultations extends Component
 
     public function showReviewContractModal($consultationId)
     {
-        $consultation = Consultation::with('case.client.clientProfile')->findOrFail($consultationId); // Eager load client profile for display if needed
+        $consultation = Consultation::with('case.client.clientProfile')->findOrFail($consultationId);
+        
+        // Check if lawyer is authorized
+        $lawyerId = auth()->id();
+        if ($consultation->lawyer_id !== $lawyerId && $consultation->specific_lawyer_id !== $lawyerId) {
+            session()->flash('error', 'You are not authorized to view this consultation.');
+            return;
+        }
+        
         if ($consultation->case) {
+            $case = $consultation->case;
             $this->selectedConsultationForReview = $consultation;
-            $this->reviewCaseTitle = $consultation->case->title;
-            $this->reviewCaseDescription = $consultation->case->description;
-            $this->reviewContractPath = $consultation->case->contract_path;
+            $this->reviewCaseTitle = $case->title;
+            $this->reviewCaseDescription = $case->description;
+            $this->reviewContractPath = $case->contract_path;
+            $this->reviewCaseId = $case->id;
             $this->resetValidation();
             $this->showReviewContractModal = true;
         } else {
             session()->flash('error', 'No case contract found for this consultation.');
-            $this->selectedConsultationForReview = null; // Ensure it's reset
+            $this->selectedConsultationForReview = null;
+            $this->reviewContractPath = null;
+            $this->reviewCaseId = null;
         }
     }
 
@@ -617,7 +640,9 @@ class ManageConsultations extends Component
                 // OR specifically assigned to the lawyer by a law firm
                 ->orWhere('specific_lawyer_id', $userId);
             })
-            ->with(['client.clientProfile', 'lawyer.lawFirmProfile', 'case']) // Eager load the 'case' relationship
+            ->with(['client.clientProfile', 'lawyer.lawFirmProfile', 'case' => function($query) {
+                $query->select('id', 'consultation_id', 'title', 'description', 'contract_path', 'lawyer_id');
+            }]) // Eager load the 'case' relationship with contract_path
             ->latest()
             ->paginate(10);
 

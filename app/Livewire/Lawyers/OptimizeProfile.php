@@ -20,6 +20,27 @@ class OptimizeProfile extends Component
     public $experience = '';
     public $achievements = '';
     public $languages = [];
+    public $newLanguage = '';
+    
+    public function addLanguage()
+    {
+        if (!empty($this->newLanguage)) {
+            $this->languages[] = trim($this->newLanguage);
+            $this->newLanguage = '';
+        }
+    }
+    
+    public function removeLanguage($index)
+    {
+        unset($this->languages[$index]);
+        $this->languages = array_values($this->languages);
+    }
+    
+    public function updatedCity()
+    {
+        // Reset barangay when city changes
+        $this->barangay = '';
+    }
     public $photo;
     public $existingPhoto;
     public $croppedPhoto;
@@ -29,6 +50,8 @@ class OptimizeProfile extends Component
     public $selectedServices = [];
     public $isLawFirmLawyer = false;
     public $office_address = '';
+    public $city = '';
+    public $barangay = '';
     public $lat = null;
     public $lng = null;
     public $show_office_address = false;
@@ -50,6 +73,8 @@ class OptimizeProfile extends Component
             $this->offersOnlineConsultation = $profile->offers_online_consultation ?? false;
             $this->offersInhouseConsultation = $profile->offers_inhouse_consultation ?? false;
             $this->office_address = $profile->office_address ?? '';
+            $this->city = $profile->city ?? '';
+            $this->barangay = $profile->barangay ?? '';
             $this->lat = $profile->lat;
             $this->lng = $profile->lng;
             $this->show_office_address = $profile->show_office_address ?? false;
@@ -80,6 +105,8 @@ class OptimizeProfile extends Component
             $this->offersOnlineConsultation = $profile->offers_online_consultation ?? false;
             $this->offersInhouseConsultation = $profile->offers_inhouse_consultation ?? false;
             $this->office_address = $profile->office_address ?? '';
+            $this->city = $profile->city ?? '';
+            $this->barangay = $profile->barangay ?? '';
             $this->lat = $profile->lat;
             $this->lng = $profile->lng;
             $this->show_office_address = $profile->show_office_address ?? false;
@@ -271,6 +298,8 @@ class OptimizeProfile extends Component
             'offers_inhouse_consultation' => $this->offersInhouseConsultation,
             'is_optimized' => true,
             'office_address' => $this->office_address,
+            'city' => $this->city,
+            'barangay' => $this->barangay,
             'lat' => $this->lat,
             'lng' => $this->lng,
             'show_office_address' => $this->show_office_address,

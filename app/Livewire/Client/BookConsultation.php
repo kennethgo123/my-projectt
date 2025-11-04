@@ -141,6 +141,84 @@ class BookConsultation extends Component
                 $this->reservationPaid = true;
             }
         }
+        
+        // Restore saved form data from session if it exists
+        $this->restoreFormDataFromSession();
+    }
+    
+    /**
+     * Save form data to session before payment redirect
+     */
+    private function saveFormDataToSession()
+    {
+        $formData = [
+            'consultation_type' => $this->consultation_type,
+            'description' => $this->description,
+            'preferred_dates' => $this->preferred_dates,
+            'selectedDay' => $this->selectedDay,
+            'selectedTimeSlot' => $this->selectedTimeSlot,
+            'selectedDate' => $this->selectedDate,
+            'useAvailability' => $this->useAvailability,
+            'selectedLawyerId' => $this->selectedLawyerId,
+            'currentCalendarMonth' => $this->currentCalendarMonth,
+        ];
+        
+        session(['consultation_form_data_' . $this->lawyer_id => $formData]);
+    }
+    
+    /**
+     * Restore form data from session after payment redirect
+     */
+    private function restoreFormDataFromSession()
+    {
+        $formData = session('consultation_form_data_' . $this->lawyer_id);
+        
+        if ($formData && is_array($formData)) {
+            // Restore basic form fields
+            $this->consultation_type = $formData['consultation_type'] ?? $this->consultation_type;
+            $this->description = $formData['description'] ?? $this->description;
+            $this->preferred_dates = $formData['preferred_dates'] ?? $this->preferred_dates;
+            $this->useAvailability = $formData['useAvailability'] ?? $this->useAvailability;
+            $this->currentCalendarMonth = $formData['currentCalendarMonth'] ?? $this->currentCalendarMonth;
+            
+            // Restore lawyer selection if it was changed
+            if (isset($formData['selectedLawyerId']) && $formData['selectedLawyerId'] !== $this->selectedLawyerId) {
+                $this->selectedLawyerId = $formData['selectedLawyerId'];
+                // Reload availability for the selected lawyer
+                if ($this->selectedLawyerId && 
+                    $this->selectedLawyerId !== self::SELECT_FIRM_DECIDE && 
+                    $this->selectedLawyerId !== self::SELECT_FIRM_ENTITY) {
+                    $this->loadAvailableDays($this->selectedLawyerId);
+                } else {
+                    $this->loadAvailableDays();
+                }
+            }
+            
+            // Restore date/time selections
+            $this->selectedDay = $formData['selectedDay'] ?? $this->selectedDay;
+            $this->selectedTimeSlot = $formData['selectedTimeSlot'] ?? $this->selectedTimeSlot;
+            $this->selectedDate = $formData['selectedDate'] ?? $this->selectedDate;
+            
+            // Regenerate calendar if needed
+            if ($this->currentCalendarMonth) {
+                $this->generateCalendarDays();
+            }
+            
+            // Reload time slots if a day/date was selected
+            if ($this->selectedDay) {
+                $this->loadTimeSlots();
+            } elseif ($this->selectedDate) {
+                $this->loadTimeSlotsForDate();
+            }
+        }
+    }
+    
+    /**
+     * Clear saved form data from session
+     */
+    private function clearFormDataFromSession()
+    {
+        session()->forget('consultation_form_data_' . $this->lawyer_id);
     }
     
     /**
@@ -654,13 +732,17 @@ class BookConsultation extends Component
         session()->flash('message', 'Consultation request sent successfully! The lawyer will be notified.');
         
         // Redirect to consultations page instead of cases
-        // Clear reservation paid session so next booking requires payment
+        // Clear reservation paid session and saved form data so next booking requires payment
         session()->forget(['reservation_paid_for_booking', 'reservation_invoice_id']);
+        $this->clearFormDataFromSession();
         return redirect()->route('client.consultations');
     }
 
     public function openPaymentModal()
     {
+        // Save form data to session when opening payment modal
+        // This ensures data is preserved even if user navigates away
+        $this->saveFormDataToSession();
         $this->showPaymentModal = true;
     }
 
@@ -672,6 +754,9 @@ class BookConsultation extends Component
     public function payWithGCash()
     {
         try {
+            // Save form data to session before redirecting to payment
+            $this->saveFormDataToSession();
+            
             $invoice = $this->getOrCreateReservationInvoice();
             $payMongo = new PayMongoService();
             $nextUrl = url('/client/book-consultation/' . $this->lawyer_id);
@@ -692,6 +777,9 @@ class BookConsultation extends Component
     public function payWithCard()
     {
         try {
+            // Save form data to session before redirecting to payment
+            $this->saveFormDataToSession();
+            
             $invoice = $this->getOrCreateReservationInvoice();
             $payMongo = new PayMongoService();
             $nextUrl = url('/client/book-consultation/' . $this->lawyer_id);

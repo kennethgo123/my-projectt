@@ -171,46 +171,41 @@
                         @error('achievements') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Languages -->
+                    <!-- Languages and Dialects -->
                     <div>
-                        <x-label for="languages" value="Languages" />
-                        <div class="mt-2 space-y-2">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_english" wire:model="languages" value="English" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_english" class="ml-2 text-sm text-gray-700">English</label>
+                        <x-label for="languages" value="Languages and Dialects" />
+                        <p class="text-sm text-gray-500 mb-2">Add languages or dialects you speak</p>
+                        <div class="mt-2 space-y-3">
+                            <!-- Display existing languages -->
+                            @if(count($languages) > 0)
+                                <div class="space-y-2">
+                                    @foreach($languages as $index => $language)
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm text-gray-700">
+                                                {{ $language }}
+                                            </div>
+                                            <button type="button" wire:click="removeLanguage({{ $index }})" 
+                                                class="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-300 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_filipino" wire:model="languages" value="Filipino (Tagalog)" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_filipino" class="ml-2 text-sm text-gray-700">Filipino (Tagalog)</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_cebuano" wire:model="languages" value="Cebuano" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_cebuano" class="ml-2 text-sm text-gray-700">Cebuano</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_ilocano" wire:model="languages" value="Ilocano" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_ilocano" class="ml-2 text-sm text-gray-700">Ilocano</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_waray" wire:model="languages" value="Waray" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_waray" class="ml-2 text-sm text-gray-700">Waray</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_kapampangan" wire:model="languages" value="Kapampangan" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_kapampangan" class="ml-2 text-sm text-gray-700">Kapampangan</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_pangasinan" wire:model="languages" value="Pangasinan" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_pangasinan" class="ml-2 text-sm text-gray-700">Pangasinan</label>
-                                </div>
+                            @endif
+                            
+                            <!-- Add new language input -->
+                            <div class="flex items-center gap-2">
+                                <input type="text" wire:model="newLanguage" 
+                                    placeholder="Enter language or dialect"
+                                    class="flex-1 shadow-sm block border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    wire:keydown.enter.prevent="addLanguage">
+                                <button type="button" wire:click="addLanguage" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    Add
+                                </button>
                             </div>
                         </div>
                         @error('languages') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -270,12 +265,75 @@
                     <div>
                         <x-label for="office_address" value="Office Address" />
                         <p class="text-sm text-gray-500 mb-2">This will be shown to clients when you accept their consultation request</p>
-                        <div class="mt-1">
-                            <textarea id="office_address" wire:model="office_address" rows="3" 
-                                class="shadow-sm block w-full border-gray-300 rounded-md"
-                                placeholder="Enter your complete office address including building name, street, city, etc."></textarea>
+                        
+                        <!-- City Dropdown -->
+                        <div class="mt-4">
+                            <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+                            <select id="city" wire:model.live="city" 
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">Select City</option>
+                                <option value="Bacoor City">Bacoor City</option>
+                                <option value="Cavite City">Cavite City</option>
+                                <option value="Dasmariñas City">Dasmariñas City</option>
+                                <option value="General Trias City">General Trias City</option>
+                                <option value="Imus City">Imus City</option>
+                                <option value="Tagaytay City">Tagaytay City</option>
+                                <option value="Trece Martires City">Trece Martires City</option>
+                            </select>
+                            @error('city') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
-                        @error('office_address') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        
+                        <!-- Barangay Dropdown -->
+                        @if($city)
+                        <div class="mt-4">
+                            <label for="barangay" class="block text-sm font-medium text-gray-700">Barangay</label>
+                            <select id="barangay" wire:model="barangay" 
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">Select Barangay</option>
+                                @if($city === 'Bacoor City')
+                                    @foreach(['Alima', 'Aniban I', 'Aniban II', 'Aniban III', 'Aniban IV', 'Aniban V', 'Bagong Sikat', 'Banalo', 'Bayanan', 'Campo Santo', 'Daang Bukid', 'Digman', 'Dulong Bayan', 'Habay I', 'Habay II', 'Kaingin', 'Ligas I', 'Ligas II', 'Ligas III', 'Mabolo I', 'Mabolo II', 'Mabolo III', 'Maliksi I', 'Maliksi II', 'Maliksi III', 'Mambog I', 'Mambog II', 'Mambog III', 'Mambog IV', 'Molino I', 'Molino II', 'Molino III', 'Molino IV', 'Molino V', 'Molino VI', 'Molino VII', 'Niog I', 'Niog II', 'Niog III', 'Panapaan I', 'Panapaan II', 'Panapaan III', 'Panapaan IV', 'Panapaan V', 'Panapaan VI', 'Panapaan VII', 'Panapaan VIII', 'Queens Row Central', 'Queens Row East', 'Queens Row West', 'Real I', 'Real II', 'Salinas I', 'Salinas II', 'Salinas III', 'Salinas IV', 'San Nicolas I', 'San Nicolas II', 'San Nicolas III', 'Springville', 'Tabing Dagat', 'Talaba I', 'Talaba II', 'Talaba III', 'Talaba IV', 'Talaba V', 'Talaba VI', 'Talaba VII', 'Zapote I', 'Zapote II', 'Zapote III', 'Zapote IV', 'Zapote V'] as $barangay)
+                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
+                                    @endforeach
+                                @elseif($city === 'Cavite City')
+                                    @foreach(range(1, 84) as $num)
+                                        <option value="Barangay {{ $num }}">Barangay {{ $num }}</option>
+                                    @endforeach
+                                    <option value="Barangay 2-A">Barangay 2-A</option>
+                                @elseif($city === 'Dasmariñas City')
+                                    @foreach(['Adobe', 'Amadeo', 'Bagong Bayan I', 'Bagong Bayan II', 'Burol I', 'Burol II', 'Burol III', 'Caapat', 'Calayo', 'Datu Esmael', 'Emmanuel Bergado I', 'Emmanuel Bergado II', 'Fatima I', 'Fatima II', 'Fatima III', 'H-2', 'Hercules', 'Langkaan I', 'Langkaan II', 'Luzviminda I', 'Luzviminda II', 'Malagasang I-A', 'Malagasang I-B', 'Malagasang I-C', 'Malagasang I-D', 'Malagasang I-E', 'Malagasang I-F', 'Malagasang I-G', 'Malagasang II-A', 'Malagasang II-B', 'Malagasang II-C', 'Malagasang II-D', 'Malagasang II-E', 'Malagasang II-F', 'Malagasang II-G', 'Malinta', 'Malibu I', 'Malibu II', 'Malibu III', 'Paliparan I', 'Paliparan II', 'Paliparan III', 'Palo-Alto', 'Sabang', 'Salawag', 'Salitran I', 'Salitran II', 'Salitran III', 'Salitran IV', 'Sampaloc I', 'Sampaloc II', 'Sampaloc III', 'Sampaloc IV', 'Sampaloc V', 'San Agustin I', 'San Agustin II', 'San Agustin III', 'San Andres I', 'San Andres II', 'San Antonio de Padua I', 'San Antonio de Padua II', 'San Dionisio', 'San Esteban', 'San Francisco I', 'San Francisco II', 'San Isidro Labrador I', 'San Isidro Labrador II', 'San Jose', 'San Juan I', 'San Juan II', 'San Lorenzo I', 'San Lorenzo II', 'San Luis I', 'San Luis II', 'San Manuel I', 'San Manuel II', 'San Mateo', 'San Miguel', 'San Miguel II', 'San Nicolas I', 'San Nicolas II', 'San Roque', 'San Simon', 'Santa Cristina I', 'Santa Cristina II', 'Santa Cruz I', 'Santa Cruz II', 'Santa Fe', 'Santa Lucia', 'Santa Maria', 'Santo Cristo', 'Santo Niño I', 'Santo Niño II', 'Santolan I', 'Santolan II', 'Victoria Reyes', 'Zone I-A', 'Zone I-B', 'Zone II-A', 'Zone II-B', 'Zone III', 'Zone IV-A', 'Zone IV-B'] as $barangay)
+                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
+                                    @endforeach
+                                @elseif($city === 'General Trias City')
+                                    @foreach(['Alingaro', 'Arnaldo Poblacion', 'Bacao I', 'Bacao II', 'Bagumbayan Poblacion', 'Biclatan', 'Buenavista I', 'Buenavista II', 'Buenavista III', 'Corregidor Poblacion', 'Dulong Bayan Poblacion', 'Gov. Ferrer Poblacion', 'Javalera', 'Manggahan', 'Navarro', 'Ninety Sixth Poblacion', 'Panungyanan', 'Pasong Camachile I', 'Pasong Camachile II', 'Pasong Kawayan I', 'Pasong Kawayan II', 'Pinagtipunan', 'Prinza Poblacion', 'Sampalucan Poblacion', 'San Francisco', 'San Gabriel Poblacion', 'San Juan I', 'San Juan II', 'Santa Clara', 'Santiago', 'Tapia', 'Tejero', 'Vibora Poblacion'] as $barangay)
+                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
+                                    @endforeach
+                                @elseif($city === 'Imus City')
+                                    @foreach(['Alapan I-A', 'Alapan I-B', 'Alapan I-C', 'Alapan II-A', 'Alapan II-B', 'Anabu I-A', 'Anabu I-B', 'Anabu I-C', 'Anabu I-D', 'Anabu I-E', 'Anabu I-F', 'Anabu I-G', 'Anabu II-A', 'Anabu II-B', 'Anabu II-C', 'Anabu II-D', 'Anabu II-E', 'Anabu II-F', 'Bagong Silang', 'Bayan Luma I', 'Bayan Luma II', 'Bayan Luma III', 'Bayan Luma IV', 'Bayan Luma V', 'Bayan Luma VI', 'Bayan Luma VII', 'Bayan Luma VIII', 'Bucandala I', 'Bucandala II', 'Bucandala III', 'Bucandala IV', 'Bucandala V', 'Buhay na Tubig', 'Carsadang Bago I', 'Carsadang Bago II', 'Lumang Bayan', 'Mabuhay', 'Maduya', 'Magdalo', 'Maharlika', 'Mahiwagang Dulang', 'Malagasang I-A', 'Malagasang I-B', 'Malagasang II-A', 'Malagasang II-B', 'Malhacan', 'Mariano Espeleta I', 'Mariano Espeleta II', 'Mariano Espeleta III', 'Medicion I-A', 'Medicion I-B', 'Medicion I-C', 'Medicion I-D', 'Medicion II-A', 'Medicion II-B', 'Medicion II-C', 'Medicion II-D', 'Medicion II-E', 'Medicion II-F', 'Pag-Asa I', 'Pag-Asa II', 'Pag-Asa III', 'Palico I', 'Palico II', 'Palico III', 'Palico IV', 'Pal-Palan I', 'Pal-Palan II', 'Pal-Palan III', 'Pasong Buaya I', 'Pasong Buaya II', 'Patindig Araw', 'Pinyahan', 'Poblacion I-A', 'Poblacion I-B', 'Poblacion I-C', 'Poblacion II-A', 'Poblacion II-B', 'Poblacion III-A', 'Poblacion III-B', 'Poblacion IV-A', 'Poblacion IV-B', 'Poblacion IV-C', 'Poblacion IV-D', 'Sapang I', 'Sapang II', 'Tabing Ilog', 'Tanzang Luma I', 'Tanzang Luma II', 'Tanzang Luma III', 'Tanzang Luma IV', 'Tanzang Luma V', 'Tanzang Luma VI', 'Tanzang Luma VII', 'Toclong I-A', 'Toclong I-B', 'Toclong I-C', 'Toclong II-A', 'Toclong II-B'] as $barangay)
+                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
+                                    @endforeach
+                                @elseif($city === 'Tagaytay City')
+                                    @foreach(['Asisan', 'Bagong Tubig', 'Calabuso', 'Dapdap East', 'Dapdap West', 'Francisco', 'Guinhawa North', 'Guinhawa South', 'Iruhin Central', 'Iruhin East', 'Iruhin South', 'Iruhin West', 'Kaybagal Central', 'Kaybagal North', 'Kaybagal South', 'Maharlika East', 'Maharlika West', 'Maitim 2nd Central', 'Maitim 2nd East', 'Maitim 2nd West', 'Mendez Crossing East', 'Mendez Crossing West', 'Neogan', 'Patutong Malaki North', 'Patutong Malaki South', 'Sambong', 'San Jose', 'Silang Crossing North', 'Silang Crossing South', 'Sungay East', 'Sungay West', 'Tolentino East', 'Tolentino West', 'Zambal'] as $barangay)
+                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
+                                    @endforeach
+                                @elseif($city === 'Trece Martires City')
+                                    @foreach(['Alulod', 'Cabezas (Luciano)', 'Cabuco', 'De Ocampo', 'Gregorio', 'Inocencio', 'Lapidario', 'Llavac', 'Osorio', 'Perez', 'Quintana (Barangay 5-A)', 'San Agustin (Poblacion)', 'Luciano'] as $barangay)
+                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            @error('barangay') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        @endif
+                        
+                        <div class="mt-4">
+                            <label for="office_address" class="block text-sm font-medium text-gray-700">Street Address (Building, Street, etc.)</label>
+                            <div class="mt-1">
+                                <textarea id="office_address" wire:model="office_address" rows="3" 
+                                    class="shadow-sm block w-full border-gray-300 rounded-md"
+                                    placeholder="Enter your complete street address including building name, street, etc."></textarea>
+                            </div>
+                            @error('office_address') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
                         <div class="mt-3 flex items-center">
                             <input type="checkbox" id="show_office_address" wire:model="show_office_address" 

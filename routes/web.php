@@ -213,6 +213,10 @@ Route::prefix('client')->middleware(['auth', 'verified', 'not.deactivated', 'pro
     Route::get('/cases/{case}', App\Livewire\Client\ViewCase::class)->name('client.cases.show');
     Route::get('/case/details/{case}', App\Livewire\Client\CaseDetails::class)->name('client.case.details');
     Route::get('/contract/review/{case}', App\Livewire\Client\ContractReview::class)->name('client.contract.review');
+    Route::get('/contract/download/{case}', [App\Http\Controllers\ContractController::class, 'download'])->name('client.contract.download');
+    Route::get('/terms-conditions', function () {
+        return view('client.terms-conditions');
+    })->name('client.terms.conditions');
     Route::get('/case/overview/{case}', App\Livewire\Client\CaseView::class)->name('client.case.overview');
     Route::get('/case/view/{case}', App\Livewire\Client\CaseView::class)->name('client.case.view');
     
@@ -260,6 +264,9 @@ Route::prefix('lawyer')->middleware([
     Route::get('/cases', App\Livewire\Lawyers\ManageCases::class)->name('lawyer.cases');
     Route::get('/cases/{case}', App\Livewire\Lawyer\CaseDetails::class)->name('lawyer.cases.show');
     Route::get('/case/setup/{case}', App\Livewire\Lawyer\CaseSetup::class)->name('lawyer.case.setup');
+    
+    // Contract viewing route for lawyers
+    Route::get('/contract/view/{case}', [App\Http\Controllers\ContractController::class, 'view'])->name('lawyer.contract.view');
     
     // Signature route
     Route::get('/signature/{caseId}', [App\Http\Controllers\SignatureController::class, 'showSignature'])->name('signature.show');

@@ -32,8 +32,8 @@
                     <div class="flex justify-between items-center mb-4">
                         <h4 class="text-lg font-medium text-gray-900">Review Contract</h4>
                         @if($case->contract_path)
-                            <a href="{{ Storage::url($case->contract_path) }}" 
-                               target="_blank"
+                            <a href="{{ route('client.contract.download', $case->id) }}" 
+                               download
                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -88,7 +88,7 @@
                     @if(in_array($case->status, [\App\Models\LegalCase::STATUS_CONTRACT_SENT, \App\Models\LegalCase::STATUS_CONTRACT_REVISED_SENT]))
                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                             <p class="text-sm text-yellow-800">
-                            By signing this contract, you acknowledge that you have read and agree to all terms and conditions outlined in the document. Your e-signature is secured through our encrypted platform and will be used exclusively for this specific contract. For your protection, all signature data is stored in compliance with industry-standard security protocols. Please note that your lawyer or law firm may require an in-person physical signature upon your initial meeting to complete the documentation process. This digital acknowledgment serves as your preliminary agreement to the terms contained herein.
+                            By signing this contract, you acknowledge that you have read and agree to all terms and conditions. Please review the <a href="{{ route('client.terms.conditions') }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline font-medium">Terms and Conditions</a> before proceeding.
                             </p>
                         </div>
                         
@@ -99,8 +99,10 @@
                                     <input id="agreement" wire:model.defer="agreementChecked" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
                                 </div>
                                 <div class="ml-3 text-sm">
-                                    <label for="agreement" class="font-medium text-gray-700">I agree to the terms and conditions</label>
-                                    <p class="text-gray-500">I have read and understood all terms outlined in this contract.</p>
+                                    <label for="agreement" class="font-medium text-gray-700">
+                                        I agree to the <a href="{{ route('client.terms.conditions') }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline">Terms and Conditions</a>
+                                    </label>
+                                    <p class="text-gray-500">I have read and understood all terms outlined in the Terms and Conditions.</p>
                                     @error('agreementChecked') 
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
