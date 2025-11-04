@@ -17,6 +17,10 @@ class OptimizeProfile extends Component
 
     public $about = '';
     public $education = '';
+    public $selectedUniversity = '';
+    public $customUniversity = '';
+    public $startYear = '';
+    public $endYear = '';
     public $experience = '';
     public $experiences = [];
     public $achievements = '';
@@ -207,10 +211,9 @@ class OptimizeProfile extends Component
         $profile = null;
         $photoPath = null;
 
-        // Require at least one consultation type
+        // Require at least one consultation type; preserve form data and scroll to top
         if (!$this->offersOnlineConsultation && !$this->offersInhouseConsultation) {
             session()->flash('error', 'Kindly select a consultation type');
-            // Scroll to top via existing JS listener
             $this->dispatch('profile-optimized-js', ['scrollToTop' => true]);
             return;
         }
@@ -328,6 +331,30 @@ class OptimizeProfile extends Component
         }
 
         // Prepare update data
+        // If structured education inputs are provided, build a unified education string
+        $universityName = '';
+        if (!empty($this->selectedUniversity)) {
+            if ($this->selectedUniversity === 'OTHER' && !empty($this->customUniversity)) {
+                $universityName = trim($this->customUniversity);
+            } elseif ($this->selectedUniversity !== 'OTHER') {
+                $universityName = trim($this->selectedUniversity);
+            }
+        } elseif (!empty($this->customUniversity)) {
+            $universityName = trim($this->customUniversity);
+        }
+
+        if (!empty($universityName)) {
+            $years = '';
+            if (!empty($this->startYear) && !empty($this->endYear)) {
+                $years = " ({$this->startYear}\u{2013}{$this->endYear})"; // en dash
+            } elseif (!empty($this->startYear)) {
+                $years = " (Started {$this->startYear})";
+            } elseif (!empty($this->endYear)) {
+                $years = " (Ended {$this->endYear})";
+            }
+            $this->education = $universityName . $years;
+        }
+
         $updateData = [
             'about' => $this->about,
             'education' => $this->education,

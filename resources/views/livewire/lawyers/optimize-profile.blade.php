@@ -38,12 +38,12 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Optimize Your Profile</h2>
 
                 @if (session()->has('message'))
-                    <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                    <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                         {{ session('message') }}
                     </div>
                 @endif
                 @if (session()->has('error'))
-                    <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                         {{ session('error') }}
                     </div>
                 @endif
@@ -145,11 +145,162 @@
 
                     <!-- Education -->
                     <div>
-                        <x-label for="education" value="Education" />
-                        <div class="mt-1">
-                            <textarea id="education" wire:model="education" rows="4" 
-                                class="shadow-sm block w-full border-gray-300 rounded-md"
-                                placeholder="List your educational background, including law school, degrees, and certifications"></textarea>
+                        <x-label value="Education" />
+
+                        <!-- University selection -->
+                        <div class="mt-2">
+                            <label for="selectedUniversity" class="block text-sm font-medium text-gray-700">Law School / University</label>
+                            <select id="selectedUniversity" wire:model="selectedUniversity" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">Select your law school</option>
+                                <optgroup label="METRO MANILA — Quezon City">
+                                    <option value="Ateneo de Manila University School of Law">Ateneo de Manila University School of Law</option>
+                                    <option value="University of the Philippines College of Law (Diliman)">University of the Philippines College of Law (Diliman)</option>
+                                    <option value="Far Eastern University Institute of Law">Far Eastern University Institute of Law</option>
+                                    <option value="University of Santo Tomas Faculty of Civil Law">University of Santo Tomas Faculty of Civil Law</option>
+                                    <option value="Arellano University School of Law">Arellano University School of Law</option>
+                                    <option value="National University College of Law">National University College of Law</option>
+                                    <option value="Philippine Christian University College of Law">Philippine Christian University College of Law</option>
+                                    <option value="Trinity University of Asia College of Law">Trinity University of Asia College of Law</option>
+                                </optgroup>
+                                <optgroup label="METRO MANILA — Manila">
+                                    <option value="De La Salle University College of Law (Taft Avenue)">De La Salle University College of Law (Taft Avenue)</option>
+                                    <option value="Adamson University College of Law">Adamson University College of Law</option>
+                                    <option value="Lyceum of the Philippines University College of Law">Lyceum of the Philippines University College of Law</option>
+                                    <option value="Pamantasan ng Lungsod ng Maynila College of Law">Pamantasan ng Lungsod ng Maynila College of Law</option>
+                                    <option value="San Beda University College of Law">San Beda University College of Law</option>
+                                    <option value="University of the East College of Law">University of the East College of Law</option>
+                                    <option value="Centro Escolar University School of Law and Jurisprudence">Centro Escolar University School of Law and Jurisprudence</option>
+                                    <option value="Philippine Law School">Philippine Law School</option>
+                                    <option value="Manuel L. Quezon University College of Law">Manuel L. Quezon University College of Law</option>
+                                </optgroup>
+                                <optgroup label="METRO MANILA — Makati City">
+                                    <option value="Ateneo de Manila University School of Law (Rockwell Campus)">Ateneo de Manila University School of Law (Rockwell Campus)</option>
+                                </optgroup>
+                                <optgroup label="METRO MANILA — Pasay City">
+                                    <option value="Lyceum of the Philippines University (Pasay Campus)">Lyceum of the Philippines University (Pasay Campus)</option>
+                                </optgroup>
+                                <optgroup label="METRO MANILA — Taguig City">
+                                    <option value="University of Makati College of Law">University of Makati College of Law</option>
+                                </optgroup>
+                                <optgroup label="METRO MANILA — Mandaluyong City">
+                                    <option value="San Beda University College of Law (San Beda-Mendiola moved here)">San Beda University College of Law (San Beda-Mendiola moved here)</option>
+                                </optgroup>
+                                <optgroup label="LUZON — Cavite">
+                                    <option value="De La Salle University College of Law (Dasmariñas)">De La Salle University College of Law (Dasmariñas)</option>
+                                    <option value="Cavite State University College of Law (Indang)">Cavite State University College of Law (Indang)</option>
+                                </optgroup>
+                                <optgroup label="LUZON — Laguna">
+                                    <option value="Laguna State Polytechnic University College of Law">Laguna State Polytechnic University College of Law</option>
+                                </optgroup>
+                                <optgroup label="LUZON — Batangas">
+                                    <option value="Lyceum of the Philippines University - Batangas">Lyceum of the Philippines University - Batangas</option>
+                                    <option value="University of Batangas College of Law">University of Batangas College of Law</option>
+                                </optgroup>
+                                <optgroup label="LUZON — Pampanga">
+                                    <option value="Holy Angel University School of Law">Holy Angel University School of Law</option>
+                                    <option value="Pampanga State Agricultural University College of Law">Pampanga State Agricultural University College of Law</option>
+                                </optgroup>
+                                <optgroup label="LUZON — Pangasinan">
+                                    <option value="Pangasinan State University College of Law">Pangasinan State University College of Law</option>
+                                    <option value="University of Luzon College of Law">University of Luzon College of Law</option>
+                                    <option value="Virgen Milagrosa University Foundation College of Law">Virgen Milagrosa University Foundation College of Law</option>
+                                </optgroup>
+                                <optgroup label="LUZON — La Union / Baguio City">
+                                    <option value="Saint Louis University School of Law (Baguio City)">Saint Louis University School of Law (Baguio City)</option>
+                                    <option value="University of Baguio College of Law">University of Baguio College of Law</option>
+                                    <option value="Saint Louis University School of Law">Saint Louis University School of Law</option>
+                                </optgroup>
+                                <optgroup label="LUZON — Ilocos Norte">
+                                    <option value="Mariano Marcos State University College of Law">Mariano Marcos State University College of Law</option>
+                                </optgroup>
+                                <optgroup label="LUZON — Cagayan / Isabela / Nueva Vizcaya">
+                                    <option value="Saint Paul University Philippines College of Law (Tuguegarao)">Saint Paul University Philippines College of Law (Tuguegarao)</option>
+                                    <option value="University of Cagayan Valley College of Law">University of Cagayan Valley College of Law</option>
+                                    <option value="Nueva Vizcaya State University College of Law">Nueva Vizcaya State University College of Law</option>
+                                    <option value="Isabela State University College of Law">Isabela State University College of Law</option>
+                                </optgroup>
+                                <optgroup label="LUZON — Albay / Camarines Sur / Sorsogon">
+                                    <option value="Aquinas University of Legazpi College of Law">Aquinas University of Legazpi College of Law</option>
+                                    <option value="Bicol University College of Law">Bicol University College of Law</option>
+                                    <option value="Ateneo de Naga University College of Law">Ateneo de Naga University College of Law</option>
+                                    <option value="Universidad de Santa Isabel College of Law">Universidad de Santa Isabel College of Law</option>
+                                    <option value="Divine Word College of Legazpi Law School">Divine Word College of Legazpi Law School</option>
+                                </optgroup>
+                                <optgroup label="VISAYAS — Cebu">
+                                    <option value="University of San Carlos School of Law and Governance">University of San Carlos School of Law and Governance</option>
+                                    <option value="University of the Visayas College of Law">University of the Visayas College of Law</option>
+                                    <option value="Southwestern University PHINMA School of Law">Southwestern University PHINMA School of Law</option>
+                                    <option value="University of Cebu College of Law">University of Cebu College of Law</option>
+                                    <option value="University of San Jose-Recoletos School of Law">University of San Jose-Recoletos School of Law</option>
+                                </optgroup>
+                                <optgroup label="VISAYAS — Iloilo / Bacolod / Dumaguete / Bohol / Leyte / Samar">
+                                    <option value="Central Philippine University College of Law">Central Philippine University College of Law</option>
+                                    <option value="University of San Agustin College of Law">University of San Agustin College of Law</option>
+                                    <option value="West Visayas State University College of Law">West Visayas State University College of Law</option>
+                                    <option value="Filamer Christian University College of Law">Filamer Christian University College of Law</option>
+                                    <option value="University of St. La Salle College of Law">University of St. La Salle College of Law</option>
+                                    <option value="University of Negros Occidental-Recoletos College of Law">University of Negros Occidental-Recoletos College of Law</option>
+                                    <option value="Silliman University College of Law">Silliman University College of Law</option>
+                                    <option value="Foundation University College of Law">Foundation University College of Law</option>
+                                    <option value="Holy Name University College of Law">Holy Name University College of Law</option>
+                                    <option value="Leyte State University College of Law">Leyte State University College of Law</option>
+                                    <option value="University of San Carlos - Tacloban College of Law">University of San Carlos - Tacloban College of Law</option>
+                                    <option value="Northwestern Samar State University College of Law">Northwestern Samar State University College of Law</option>
+                                </optgroup>
+                                <optgroup label="MINDANAO — Davao City / CDO / Zamboanga / GenSan / Cotabato / Iligan / Butuan / Surigao">
+                                    <option value="Ateneo de Davao University School of Law">Ateneo de Davao University School of Law</option>
+                                    <option value="University of Mindanao College of Law">University of Mindanao College of Law</option>
+                                    <option value="San Pedro College of Law">San Pedro College of Law</option>
+                                    <option value="Davao Doctors College">Davao Doctors College</option>
+                                    <option value="Xavier University College of Law">Xavier University College of Law</option>
+                                    <option value="Capitol University College of Law">Capitol University College of Law</option>
+                                    <option value="Liceo de Cagayan University College of Law">Liceo de Cagayan University College of Law</option>
+                                    <option value="Ateneo de Zamboanga University School of Law">Ateneo de Zamboanga University School of Law</option>
+                                    <option value="Western Mindanao State University College of Law">Western Mindanao State University College of Law</option>
+                                    <option value="Mindanao State University - General Santos College of Law">Mindanao State University - General Santos College of Law</option>
+                                    <option value="Notre Dame University College of Law">Notre Dame University College of Law</option>
+                                    <option value="Mindanao State University - Iligan Institute of Technology College of Law">Mindanao State University - Iligan Institute of Technology College of Law</option>
+                                    <option value="Father Saturnino Urios University School of Law">Father Saturnino Urios University School of Law</option>
+                                    <option value="Surigao State College of Technology College of Law">Surigao State College of Technology College of Law</option>
+                                </optgroup>
+                                <option value="OTHER">Other (type manually)</option>
+                            </select>
+                        </div>
+
+                        <!-- Custom university input -->
+                        @if($selectedUniversity === 'OTHER')
+                        <div class="mt-2">
+                            <label for="customUniversity" class="block text-sm font-medium text-gray-700">Enter your university</label>
+                            <input type="text" id="customUniversity" wire:model="customUniversity" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Type your university name">
+                        </div>
+                        @endif
+
+                        <!-- Start/End year -->
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="startYear" class="block text-sm font-medium text-gray-700">Start Year</label>
+                                <select id="startYear" wire:model="startYear" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <option value="">Select start year</option>
+                                    @for($y = 2021; $y >= 1960; $y--)
+                                        <option value="{{ $y }}">{{ $y }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <div>
+                                <label for="endYear" class="block text-sm font-medium text-gray-700">End Year</label>
+                                <select id="endYear" wire:model="endYear" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <option value="">Select end year</option>
+                                    @for($y = 2025; $y >= 1960; $y--)
+                                        <option value="{{ $y }}">{{ $y }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Additional details (optional) -->
+                        <div class="mt-4">
+                            <label for="education" class="block text-sm font-medium text-gray-700">Additional details (optional)</label>
+                            <textarea id="education" wire:model="education" rows="3" class="mt-1 shadow-sm block w-full border-gray-300 rounded-md" placeholder="Degrees, honors, bar review, certifications, etc."></textarea>
                         </div>
                         @error('education') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
