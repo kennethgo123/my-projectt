@@ -1,22 +1,17 @@
 <div class="relative" x-data="{ open: @entangle('isOpen') }">
-    <!-- Notification Bell Button -->
-    <button 
+    <button
         wire:click="toggleDropdown"
         class="relative p-1 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
     >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
-        
-        @if($unreadCount > 0)
-            <span class="absolute top-0 right-0 block h-3 w-3 rounded-full bg-red-500 ring-2 ring-white"></span>
-            <span class="notification-count hidden">{{ $unreadCount }}</span>
-        @else
-            <span class="notification-count hidden">0</span>
-        @endif
+        <span
+            class="notification-count absolute -top-1 -right-1 flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold text-white {{ $unreadCount > 0 ? '' : 'hidden' }}"
+        >
+            {{ $unreadCount }}
+        </span>
     </button>
-
-    <!-- Notification Dropdown -->
     <div
         x-show="open"
         x-transition:enter="transition ease-out duration-200"
@@ -33,7 +28,7 @@
             <div class="flex items-center justify-between">
                 <h3 class="text-base font-medium text-gray-900">Notifications</h3>
                 @if($notifications->count() > 0)
-                    <button 
+                    <button
                         wire:click="markAllAsRead"
                         class="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
                     >
@@ -42,12 +37,11 @@
                 @endif
             </div>
         </div>
-
         <div class="max-h-90 overflow-y-auto">
             @forelse($notifications as $notification)
-                <div 
-                    x-data="{ dismissing: false }" 
-                    x-show="!dismissing" 
+                <div
+                    x-data="{ dismissing: false }"
+                    x-show="!dismissing"
                     x-transition:leave="transition ease-in duration-300"
                     x-transition:leave-start="transform opacity-100 translate-x-0"
                     x-transition:leave-end="transform opacity-0 translate-x-full"
@@ -115,7 +109,7 @@
                         </div>
                         <div class="ml-4 w-0 flex-1">
                             <div class="flex justify-between items-start">
-                                <a 
+                                <a
                                     href="{{ $notification->data['action_url'] ?? '#' }}"
                                     wire:click.prevent="markAsRead('{{ $notification->id }}')"
                                     class="text-base font-medium text-gray-900 hover:text-indigo-600"
@@ -146,7 +140,6 @@
                 </div>
             @endforelse
         </div>
-
         @if($notifications->count() > 0)
             <div class="py-2 border-t border-gray-100">
                 <a href="{{ route('notifications.all') }}" class="block px-6 py-3 text-sm text-center font-medium text-indigo-600 hover:bg-gray-50">

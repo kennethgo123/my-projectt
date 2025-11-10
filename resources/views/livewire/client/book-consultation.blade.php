@@ -414,7 +414,7 @@
 
                     <!-- Document Upload -->
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-medium text-gray-900 mb-3 font-raleway">Relevant Documents (Complaint, Affidavit, Certificate to File Action, etc.)</h4>
+                            <h4 class="font-medium text-gray-900 mb-3 font-raleway">Relevant Documents (Complaint, Affidavit, Certificate to File Action, etc.) (Optional)</h4>
                             <p class="text-sm text-gray-500 mb-3 font-open-sans">
                                 Upload any documents that may be helpful for your consultation.
                             </p>
@@ -426,12 +426,12 @@
                                     <div class="flex text-sm text-gray-600 justify-center">
                                     <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 font-open-sans">
                                         <span>Upload files</span>
-                                        <input id="file-upload" type="file" class="sr-only" wire:model="documents" multiple>
+                                        <input id="file-upload" type="file" class="sr-only" wire:model="documents" multiple accept=".pdf,.jpg,.jpeg,.png">
                                     </label>
                                     <p class="pl-1 font-open-sans">or drag and drop</p>
                                 </div>
                                 <p class="text-xs text-gray-500 font-open-sans">
-                                    PDF, DOC, DOCX, PNG, JPG up to 10MB
+                                    PDF, JPG, PNG up to 10MB each
                                 </p>
                             </div>
                         </div>
@@ -448,14 +448,21 @@
                                     <h5 class="text-sm font-medium text-gray-700 mb-2 font-raleway">Selected Files:</h5>
                                     <div class="space-y-2">
                                         @foreach($documents as $index => $document)
+                                            @php
+                                                $fileName = is_string($document)
+                                                    ? basename($document)
+                                                    : (is_object($document) && method_exists($document, 'getClientOriginalName')
+                                                        ? $document->getClientOriginalName()
+                                                        : 'Document');
+                                            @endphp
                                             <div class="flex items-center justify-between py-2 px-3 bg-white border rounded-lg shadow-sm">
                                                 <div class="flex items-center">
                                                     <svg class="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                     </svg>
-                                                    <span class="text-sm text-gray-700 font-open-sans truncate max-w-xs">{{ $document->getClientOriginalName() }}</span>
+                                                    <span class="text-sm text-gray-700 font-open-sans truncate max-w-xs">{{ $fileName }}</span>
                                                 </div>
-                                                <button type="button" wire:click="$set('documents.{{ $index }}', null)" class="inline-flex items-center p-1.5 border border-transparent rounded-full text-red-600 hover:bg-red-50 focus:outline-none">
+                                                <button type="button" wire:click="removeDocument({{ $index }})" class="inline-flex items-center p-1.5 border border-transparent rounded-full text-red-600 hover:bg-red-50 focus:outline-none">
                                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
@@ -465,9 +472,7 @@
                                         
                                         @if(!empty($tempDocuments))
                                             @foreach($tempDocuments as $tempPath)
-                                                @php
-                                                    $fileName = basename($tempPath);
-                                                @endphp
+                                                @php $fileName = basename($tempPath); @endphp
                                                 <div class="flex items-center justify-between py-2 px-3 bg-green-50 border border-green-200 rounded-lg shadow-sm">
                                                     <div class="flex items-center">
                                                         <svg class="h-5 w-5 text-green-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -65,7 +65,7 @@ class BookConsultation extends Component
     protected $rules = [
         'consultation_type' => 'required|in:Online Consultation,In-House Consultation',
         'description' => 'required|min:10',
-        'documents.*' => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png'
+        'documents.*' => 'nullable|file|max:10240|mimes:pdf,jpg,jpeg,png',
     ];
 
     public function mount($lawyer_id)
@@ -148,6 +148,14 @@ class BookConsultation extends Component
         
         // Restore saved form data from draft consultation if it exists
         $this->restoreFormDataFromDraft();
+    }
+    
+    public function removeDocument(int $index): void
+    {
+        if (isset($this->documents[$index])) {
+            unset($this->documents[$index]);
+            $this->documents = array_values($this->documents);
+        }
     }
     
     /**
@@ -812,7 +820,7 @@ class BookConsultation extends Component
         $this->validate([
             'consultation_type' => 'required|in:Online Consultation,In-House Consultation',
             'description' => 'required|min:10',
-            'documents.*' => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png'
+            'documents.*' => 'nullable|file|max:10240|mimes:pdf,jpg,jpeg,png',
         ]);
         
         // Require reservation payment confirmation
@@ -972,6 +980,7 @@ class BookConsultation extends Component
         $this->validate([
             'consultation_type' => 'required|in:Online Consultation,In-House Consultation',
             'description' => 'required|min:10',
+            'documents.*' => 'nullable|file|max:10240|mimes:pdf,jpg,jpeg,png',
         ]);
         
         // Require both date and time slot selection when using availability system

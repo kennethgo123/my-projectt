@@ -192,6 +192,8 @@
                     @elseif(auth()->user()->role->name === 'lawyer')
                         {{-- Notification Dropdown for Lawyers --}}
                         @livewire('components.notification-dropdown')
+                    @elseif(auth()->user()->role->name === 'law_firm')
+                        @livewire('components.notification-dropdown')
                     @endif
                 
                     {{-- Teams Dropdown --}}

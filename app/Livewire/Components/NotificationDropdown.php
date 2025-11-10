@@ -11,12 +11,14 @@ use App\Extensions\DatabaseNotification;
 class NotificationDropdown extends Component
 {
     public $isOpen = false;
+    public $refreshToggle = false;
     
     // Realtime listener for new notifications
     #[On('notification-received')]
     public function refreshNotifications()
     {
         Log::info('Notification refresh triggered for user: ' . auth()->id());
+        $this->refreshToggle = ! $this->refreshToggle;
     }
     
     public function getListeners()
@@ -24,7 +26,7 @@ class NotificationDropdown extends Component
         if (auth()->check()) {
             return [
                 'echo-private:user.' . auth()->id() . ',notification.received' => 'refreshNotifications',
-                'notification-received' => 'refreshNotifications'
+                'notification-received' => 'refreshNotifications',
             ];
         }
         
@@ -33,7 +35,10 @@ class NotificationDropdown extends Component
     
     public function toggleDropdown()
     {
-        $this->isOpen = !$this->isOpen;
+        $this->isOpen = ! $this->isOpen;
+        if ($this->isOpen) {
+            $this->markAllAsRead();
+        }
     }
     
     public function markAsRead($notificationId)
@@ -49,16 +54,21 @@ class NotificationDropdown extends Component
             return redirect($notification->data['action_url']);
         }
         
+        $this->refreshToggle = ! $this->refreshToggle;
         return null;
     }
     
     public function markAllAsRead()
     {
+        if (!auth()->check()) {
+            return;
+        }
         $notifications = auth()->user()->unreadNotifications;
         
         foreach ($notifications as $notification) {
             $notification->markAsRead();
         }
+        $this->refreshToggle = ! $this->refreshToggle;
     }
     
     /**
@@ -73,6 +83,7 @@ class NotificationDropdown extends Component
         }
         
         // Return the count of remaining unread notifications
+        $this->refreshToggle = ! $this->refreshToggle;
         return auth()->user()->unreadNotifications()->count();
     }
     
@@ -88,7 +99,7 @@ class NotificationDropdown extends Component
         
         return view('livewire.components.notification-dropdown', [
             'notifications' => $notifications,
-            'unreadCount' => $unreadCount
+            'unreadCount' => $unreadCount,
         ]);
     }
 }

@@ -104,7 +104,7 @@
                             @endif
                             <div class="ml-3 flex items-center space-x-4">
                                 <!-- Notification Dropdown -->
-                                @if(auth()->user()->isClient() || auth()->user()->isLawyer())
+                                @if(auth()->user()->isClient() || auth()->user()->isLawyer() || auth()->user()->isLawFirm())
                                     <livewire:components.notification-dropdown />
                                 @endif
 

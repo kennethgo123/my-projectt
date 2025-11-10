@@ -47,12 +47,12 @@
                                 <input wire:model="password" id="password" type="password" required
                                     class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10">
                                 <button type="button" aria-label="Toggle password visibility" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700" onclick="toggleVisibility('password', this)">
-                                    <svg class="h-5 w-5 eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    <svg class="h-5 w-5 eye-open transition-opacity duration-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12c1.5-4.5 6-7.5 9.75-7.5S20.25 7.5 21.75 12c-1.5 4.5-6 7.5-9.75 7.5S3.75 16.5 2.25 12z" />
+                                        <circle cx="12" cy="12" r="3" stroke-width="2" />
                                     </svg>
-                                    <svg class="h-5 w-5 eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.05 10.05 0 012.142-3.442M6.219 6.219A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a10.05 10.05 0 01-4.042 5.132M15 12a3 3 0 00-3-3m0 0a3 3 0 013 3m-3-3L3 21" />
+                                    <svg class="h-5 w-5 eye-closed hidden transition-opacity duration-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M10.584 7.418A7.93 7.93 0 0112 7.5c3.75 0 8.25 3 9.75 7.5a13.16 13.16 0 01-3.18 4.59M6.34 6.34C4.3 7.67 2.87 9.56 2.25 12c.54 1.65 1.56 3.15 2.88 4.41M9.88 14.12A3 3 0 0012 15c1.657 0 3-1.343 3-3 0-.42-.084-.82-.236-1.184" />
                                     </svg>
                                 </button>
                             </div>
@@ -70,12 +70,12 @@
                                 <input wire:model="password_confirmation" id="password_confirmation" type="password" required
                                     class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10">
                                 <button type="button" aria-label="Toggle password visibility" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700" onclick="toggleVisibility('password_confirmation', this)">
-                                    <svg class="h-5 w-5 eye-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    <svg class="h-5 w-5 eye-open transition-opacity duration-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12c1.5-4.5 6-7.5 9.75-7.5S20.25 7.5 21.75 12c-1.5 4.5-6 7.5-9.75 7.5S3.75 16.5 2.25 12z" />
+                                        <circle cx="12" cy="12" r="3" stroke-width="2" />
                                     </svg>
-                                    <svg class="h-5 w-5 eye-closed hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.05 10.05 0 012.142-3.442M6.219 6.219A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a10.05 10.05 0 01-4.042 5.132M15 12a3 3 0 00-3-3m0 0a3 3 0 013 3m-3-3L3 21" />
+                                    <svg class="h-5 w-5 eye-closed hidden transition-opacity duration-150" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M10.584 7.418A7.93 7.93 0 0112 7.5c3.75 0 8.25 3 9.75 7.5a13.16 13.16 0 01-3.18 4.59M6.34 6.34C4.3 7.67 2.87 9.56 2.25 12c.54 1.65 1.56 3.15 2.88 4.41M9.88 14.12A3 3 0 0012 15c1.657 0 3-1.343 3-3 0-.42-.084-.82-.236-1.184" />
                                     </svg>
                                 </button>
                             </div>
@@ -111,12 +111,12 @@
         const closedIcon = btn.querySelector('.eye-closed');
         if (input.type === 'password') {
             input.type = 'text';
-            if (openIcon) openIcon.classList.add('hidden');
-            if (closedIcon) closedIcon.classList.remove('hidden');
+            if (openIcon) { openIcon.classList.add('hidden'); }
+            if (closedIcon) { closedIcon.classList.remove('hidden'); closedIcon.classList.add('opacity-0'); requestAnimationFrame(() => { closedIcon.classList.remove('opacity-0'); }); }
         } else {
             input.type = 'password';
-            if (openIcon) openIcon.classList.remove('hidden');
-            if (closedIcon) closedIcon.classList.add('hidden');
+            if (openIcon) { openIcon.classList.remove('hidden'); openIcon.classList.add('opacity-0'); requestAnimationFrame(() => { openIcon.classList.remove('opacity-0'); }); }
+            if (closedIcon) { closedIcon.classList.add('hidden'); }
         }
     }
     // Preserve cursor position on toggle in some browsers

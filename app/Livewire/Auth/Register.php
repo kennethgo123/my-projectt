@@ -26,25 +26,52 @@ class Register extends Component
     {
         return [
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            // Password: at least 12 chars, 1 uppercase, 1 number, 1 special char
+            // Base rules; complexity enforced manually for specific messages
             'password' => [
                 'required',
                 'string',
                 'min:12',
-                'regex:/[A-Z]/',          // at least 1 uppercase
-                'regex:/[0-9]/',          // at least 1 number
-                'regex:/[@$!%*#?&^()_+\\-={}\\[\\]:;"\'<>,.~`|\\\\\\/]/', // at least 1 special
-                'confirmed'
+                'confirmed',
             ],
             'selectedRole' => ['required', 'exists:roles,id'],
             'agreeTerms' => ['required', 'accepted'],
         ];
     }
 
+    private function validatePasswordComplexity(): bool
+    {
+        $this->resetErrorBag('password');
+        $pass = (string) $this->password;
+        if (!preg_match('/[A-Z]/', $pass)) {
+            $this->addError('password', 'Please enter at least 1 uppercase letter.');
+            return false;
+        }
+        if (!preg_match('/[0-9]/', $pass)) {
+            $this->addError('password', 'Please enter at least 1 number.');
+            return false;
+        }
+        if (!preg_match('/[^a-zA-Z0-9]/', $pass)) {
+            $this->addError('password', 'Please enter at least 1 special character.');
+            return false;
+        }
+        return true;
+    }
+
+    public function updatedPassword()
+    {
+        // Give immediate specific feedback while typing
+        if (strlen((string) $this->password) >= 1) {
+            $this->validateOnly('password');
+            $this->validatePasswordComplexity();
+        }
+    }
+
     public function register()
     {
         $this->validate();
-
+        if (!$this->validatePasswordComplexity()) {
+            return;
+        }
         $user = User::create([
             'name' => 'User', // Default name that will be updated during profile completion
             'email' => $this->email,
