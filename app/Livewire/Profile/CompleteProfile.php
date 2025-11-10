@@ -232,9 +232,26 @@ class CompleteProfile extends Component
         }
     }
 
+    /**
+     * Capitalize the first letter of each word in a string
+     */
+    private function capitalizeName($name)
+    {
+        if (empty($name)) {
+            return $name;
+        }
+        return ucwords(strtolower(trim($name)));
+    }
+
     public function submit()
     {
         Log::info('SUBMIT METHOD CALLED', ['user_id' => auth()->id(), 'role_id' => auth()->user()->role_id]);
+        
+        // Capitalize name fields before validation
+        $this->first_name = $this->capitalizeName($this->first_name);
+        $this->middle_name = $this->capitalizeName($this->middle_name);
+        $this->last_name = $this->capitalizeName($this->last_name);
+        $this->firm_name = $this->capitalizeName($this->firm_name);
         
         // Add Debug - Check if files are being uploaded properly
         if (request()->hasFile('valid_id_file')) {

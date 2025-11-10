@@ -56,19 +56,19 @@
                     <form wire:submit.prevent="submit" class="space-y-6">
                         <div>
                             <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
-                            <input type="text" wire:model="first_name" id="first_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <input type="text" wire:model="first_name" id="first_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm capitalize" style="text-transform: capitalize;">
                             @error('first_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label for="middle_name" class="block text-sm font-medium text-gray-700">Middle Name</label>
-                            <input type="text" wire:model="middle_name" id="middle_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <input type="text" wire:model="middle_name" id="middle_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm capitalize" style="text-transform: capitalize;">
                             @error('middle_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
                             <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
-                            <input type="text" wire:model="last_name" id="last_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <input type="text" wire:model="last_name" id="last_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm capitalize" style="text-transform: capitalize;">
                             @error('last_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
@@ -177,7 +177,8 @@
                                 type="file" 
                                 wire:model="valid_id_file" 
                                 id="valid_id_file" 
-                                wire:key="valid_id_file_client" 
+                                wire:key="valid_id_file_client"
+                                accept=".pdf,.jpg,.jpeg,.png"
                                 class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                             
                             <!-- Loading indicator (optional, can be added if needed) -->
@@ -207,8 +208,8 @@
                                         type="file" 
                                         wire:model="photo" 
                                         id="photo" 
-                                        wire:key="photo_client" 
-                                        accept="image/*"
+                                        wire:key="photo_client"
+                                        accept=".jpg,.jpeg,.png"
                                         class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                                     
                                     <div wire:loading wire:target="photo" class="text-xs text-gray-500 mt-1">Uploading...</div>
@@ -234,19 +235,19 @@
                             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <div>
                                     <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
-                                    <input type="text" wire:model="first_name" id="first_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <input type="text" wire:model="first_name" id="first_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm capitalize" style="text-transform: capitalize;">
                                     @error('first_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
                                     <label for="middle_name" class="block text-sm font-medium text-gray-700">Middle Name</label>
-                                    <input type="text" wire:model="middle_name" id="middle_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <input type="text" wire:model="middle_name" id="middle_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm capitalize" style="text-transform: capitalize;">
                                     @error('middle_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
                                     <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
-                                    <input type="text" wire:model="last_name" id="last_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <input type="text" wire:model="last_name" id="last_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm capitalize" style="text-transform: capitalize;">
                                     @error('last_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                 </div>
 
@@ -361,7 +362,8 @@
                                     type="file" 
                                     wire:model="valid_id_file" 
                                     id="valid_id_file" 
-                                    wire:key="valid_id_file_lawyer" 
+                                    wire:key="valid_id_file_lawyer"
+                                    accept=".pdf,.jpg,.jpeg,.png"
                                     class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                                 
                                 <!-- Loading indicator -->
@@ -387,7 +389,8 @@
                                     type="file" 
                                     wire:model="bar_admission_file" 
                                     id="bar_admission_file" 
-                                    wire:key="bar_admission_file_lawyer" 
+                                    wire:key="bar_admission_file_lawyer"
+                                    accept=".pdf,.jpg,.jpeg,.png"
                                     class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                                 
                                 <!-- Loading indicator -->
@@ -472,7 +475,7 @@
                             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 <div>
                                     <label for="firm_name" class="block text-sm font-medium text-gray-700">Firm Name</label>
-                                    <input type="text" wire:model.defer="firm_name" id="firm_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <input type="text" wire:model.defer="firm_name" id="firm_name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm capitalize" style="text-transform: capitalize;">
                                     @error('firm_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                 </div>
 
@@ -572,14 +575,15 @@
                                     type="file" 
                                     wire:model="registration_certificate_file" 
                                     id="registration_certificate_file" 
-                                    wire:key="registration_certificate_file_firm" 
+                                    wire:key="registration_certificate_file_firm"
+                                    accept=".pdf,.jpg,.jpeg,.png"
                                     class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                                 
                                 <!-- Loading indicator -->
                                 <div wire:loading wire:target="registration_certificate_file" class="text-xs text-gray-500 mt-1">Uploading...</div>
                                 
                                 @error('registration_certificate_file') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                                <p class="mt-1 text-xs text-gray-500">Accepted file types: PDF, JPG, PNG, DOCX. Max size: 8MB.</p>
+                                <p class="mt-1 text-xs text-gray-500">Accepted file types: PDF, JPG, PNG. Max size: 8MB.</p>
                             </div>
 
                             <div>
@@ -588,14 +592,15 @@
                                     type="file" 
                                     wire:model="bir_certificate_file" 
                                     id="bir_certificate_file" 
-                                    wire:key="bir_certificate_file_firm" 
+                                    wire:key="bir_certificate_file_firm"
+                                    accept=".pdf,.jpg,.jpeg,.png"
                                     class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                                 
                                 <!-- Loading indicator -->
                                 <div wire:loading wire:target="bir_certificate_file" class="text-xs text-gray-500 mt-1">Uploading...</div>
                                 
                                 @error('bir_certificate_file') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                                <p class="mt-1 text-xs text-gray-500">Accepted file types: PDF, JPG, PNG, DOCX. Max size: 8MB.</p>
+                                <p class="mt-1 text-xs text-gray-500">Accepted file types: PDF, JPG, PNG. Max size: 8MB.</p>
                             </div>
 
                             <!-- Professional Fee Range -->

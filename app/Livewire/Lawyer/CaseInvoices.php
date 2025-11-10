@@ -51,6 +51,13 @@ class CaseInvoices extends Component
     // View invoice modal
     public $showViewInvoiceModal = false;
     
+    // Error modal
+    public $showErrorModal = false;
+    public $validationErrors = [];
+    
+    // Success modal
+    public $showSuccessModal = false;
+    
     protected $listeners = [
         'refresh' => '$refresh'
     ];
@@ -336,8 +343,12 @@ class CaseInvoices extends Component
             $this->loadInvoices();
             $this->closeInvoiceModal();
             
-            $action = $this->editMode ? 'updated' : 'created';
-            $this->dispatch('show-message', message: "Invoice {$action} successfully!", type: 'success');
+            if ($this->editMode) {
+                $this->dispatch('show-message', message: "Invoice updated successfully!", type: 'success');
+            } else {
+                // Show success modal for new invoices
+                $this->showSuccessModal = true;
+            }
             
             // Notify client if not a draft
             if (!$this->editMode || $invoice->status !== Invoice::STATUS_DRAFT) {
@@ -353,6 +364,15 @@ class CaseInvoices extends Component
                     ]
                 );
             }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Capture validation errors and show them in the error modal
+            $this->validationErrors = [];
+            foreach ($e->validator->errors()->getMessages() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $this->validationErrors[] = $message;
+                }
+            }
+            $this->showErrorModal = true;
         } catch (\Exception $e) {
             \Log::error('Invoice creation error', [
                 'error' => $e->getMessage(),
@@ -364,9 +384,21 @@ class CaseInvoices extends Component
                 ]
             ]);
             
-            $this->dispatch('invoiceValidationError', error: $e->getMessage());
-            $this->dispatch('show-message', message: "Error creating invoice: " . $e->getMessage(), type: 'error');
+            // For other exceptions, show a generic error in the modal
+            $this->validationErrors = ['Error: ' . $e->getMessage()];
+            $this->showErrorModal = true;
         }
+    }
+    
+    public function closeErrorModal()
+    {
+        $this->showErrorModal = false;
+        $this->validationErrors = [];
+    }
+    
+    public function closeSuccessModal()
+    {
+        $this->showSuccessModal = false;
     }
     
     private function generateInvoiceNumber()

@@ -48,6 +48,13 @@ class InvoiceManagement extends Component
     public $showViewInvoiceModal = false;
     public $selectedInvoice = null;
     
+    // Error modal
+    public $showErrorModal = false;
+    public $validationErrors = [];
+    
+    // Success modal
+    public $showSuccessModal = false;
+    
     protected $listeners = [
         'refresh' => '$refresh'
     ];
@@ -458,12 +465,40 @@ class InvoiceManagement extends Component
                 );
             }
             
-            session()->flash('message', $this->editMode ? 'Invoice updated successfully.' : 'Invoice created successfully.');
+            if ($this->editMode) {
+                session()->flash('message', 'Invoice updated successfully.');
+            } else {
+                // Show success modal for new invoices
+                $this->showSuccessModal = true;
+            }
+            
             $this->resetInvoiceForm();
             
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Capture validation errors and show them in the error modal
+            $this->validationErrors = [];
+            foreach ($e->validator->errors()->getMessages() as $field => $messages) {
+                foreach ($messages as $message) {
+                    $this->validationErrors[] = $message;
+                }
+            }
+            $this->showErrorModal = true;
         } catch (\Exception $e) {
-            session()->flash('error', 'Error: ' . $e->getMessage());
+            // For other exceptions, show a generic error in the modal
+            $this->validationErrors = ['Error: ' . $e->getMessage()];
+            $this->showErrorModal = true;
         }
+    }
+    
+    public function closeErrorModal()
+    {
+        $this->showErrorModal = false;
+        $this->validationErrors = [];
+    }
+    
+    public function closeSuccessModal()
+    {
+        $this->showSuccessModal = false;
     }
     
     public function editInvoice($invoiceId)
