@@ -143,7 +143,7 @@
                                 </span>
                             @elseif($case->status === 'contract_sent')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    Contract Sent
+                                    Waiting for Client's Response
                                 </span>
                             @elseif($case->status === 'contract_signed')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
@@ -232,7 +232,17 @@
                                     </a>
                                 @endif
 
-                                @if(in_array($case->status, [LegalCase::STATUS_ACTIVE, LegalCase::STATUS_CONTRACT_SIGNED, LegalCase::STATUS_CONTRACT_SENT, LegalCase::STATUS_CONTRACT_REVISED_SENT]) && !($case->status === LegalCase::STATUS_CONTRACT_SENT && $case->lawyer_response_required))
+                                @if($case->status === LegalCase::STATUS_CONTRACT_SIGNED)
+                                    <a href="{{ route('lawyer.case.setup', $case->id) }}" 
+                                       class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        Setup Case
+                                    </a>
+                                @endif
+                                
+                                @if(in_array($case->status, [LegalCase::STATUS_ACTIVE, LegalCase::STATUS_CONTRACT_REVISED_SENT]) && !($case->status === LegalCase::STATUS_CONTRACT_SENT && $case->lawyer_response_required))
                                     <a href="{{ route('lawyer.case.setup', $case->id) }}" 
                                        class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

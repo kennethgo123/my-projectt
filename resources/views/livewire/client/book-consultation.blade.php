@@ -314,15 +314,25 @@
 
                                     <!-- Show selected date -->
                                     <div class="mb-4 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
-                                                    <div class="flex items-center">
-                                            <svg class="w-5 h-5 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                        </svg>
-                                            <span class="text-sm font-medium text-indigo-800 font-raleway">
-                                                {{ \Carbon\Carbon::parse($selectedDate)->format('l, F j, Y') }}
-                                                        </span>
-                                                    </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                <span class="text-sm font-medium text-indigo-800 font-raleway">
+                                                    {{ \Carbon\Carbon::parse($selectedDate)->format('l, F j, Y') }}
+                                                </span>
+                                            </div>
+                                            @if($selectedTimeSlot)
+                                                <div class="flex items-center text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    Time Selected
                                                 </div>
+                                            @endif
+                                        </div>
+                                    </div>
                                     
                                     @if(!empty($availableTimeSlots))
                                             
@@ -428,7 +438,12 @@
                             @error('documents.*') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
                         
                         <!-- File Preview -->
-                            @if(count($documents) > 0)
+                            @php
+                                $tempDocuments = session('consultation_temp_documents_' . $lawyer_id, []);
+                                $hasDocuments = count($documents) > 0 || !empty($tempDocuments);
+                            @endphp
+                            
+                            @if($hasDocuments)
                                 <div class="mt-4">
                                     <h5 class="text-sm font-medium text-gray-700 mb-2 font-raleway">Selected Files:</h5>
                                     <div class="space-y-2">
@@ -442,41 +457,68 @@
                                                 </div>
                                                 <button type="button" wire:click="$set('documents.{{ $index }}', null)" class="inline-flex items-center p-1.5 border border-transparent rounded-full text-red-600 hover:bg-red-50 focus:outline-none">
                                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        @endforeach
+                                        
+                                        @if(!empty($tempDocuments))
+                                            @foreach($tempDocuments as $tempPath)
+                                                @php
+                                                    $fileName = basename($tempPath);
+                                                @endphp
+                                                <div class="flex items-center justify-between py-2 px-3 bg-green-50 border border-green-200 rounded-lg shadow-sm">
+                                                    <div class="flex items-center">
+                                                        <svg class="h-5 w-5 text-green-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                        </svg>
+                                                        <span class="text-sm text-green-700 font-open-sans truncate max-w-xs">{{ $fileName }}</span>
+                                                        <span class="ml-2 text-xs text-green-600">(Saved)</span>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
-                                @endforeach
-                                    </div>
-                            </div>
-                        @endif
+                                </div>
+                            @endif
                     </div>
 
-                    <!-- Submit Button -->
-                        <div class="flex items-center justify-between mt-8">
-                            <!-- Reservation Payment (₱500) -->
-                            <div class="flex items-center space-x-3">
-                                <input id="reservationPaid" type="checkbox" wire:model.live="reservationPaid" class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500" disabled {{ $reservationPaid ? 'checked' : '' }}>
+                    <!-- Reservation Payment Section -->
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-8">
+                        <div class="flex items-start space-x-3">
+                            <input id="reservationPaid" type="checkbox" wire:model.live="reservationPaid" class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 mt-1" disabled {{ $reservationPaid ? 'checked' : '' }}>
+                            <div class="flex-1">
                                 <label for="reservationPaid" class="text-sm text-gray-700 font-raleway">
-                                A deposit of ₱500 is required to reserve this consultation. This amount will be deducted from your total consultation fee. If your lawyer declines or does not proceed with the consultation, it will be refunded to you.
+                                    A deposit of ₱500 is required to reserve this consultation. This amount will be deducted from your total consultation fee. If your lawyer declines or does not proceed with the consultation, it will be refunded to you.
                                 </label>
+                                <p class="mt-1 text-xs text-gray-500 font-open-sans">
+                                    By proceeding, you agree to our 
+                                    <a href="{{ route('client.terms.reservation') }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline">
+                                        Terms and Conditions for Legal Consultation Reservation
+                                    </a>.
+                                </p>
                                 @if(!$reservationPaid)
-                                    <button type="button" wire:click="openPaymentModal" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    <button type="button" wire:click="openPaymentModal" class="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                         Pay Now
                                     </button>
                                 @endif
                             </div>
+                        </div>
+                    </div>
 
-                            <button 
-                                type="submit"
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-raleway disabled:opacity-50"
-                                @disabled(!$reservationPaid)
-                            >
-                                Submit Consultation Request
-                                <svg class="ml-2 -mr-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
-                            </button>
+                    <!-- Submit Button Section -->
+                    <div class="mt-6 flex justify-end">
+                        <button 
+                            type="submit"
+                            class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-raleway disabled:opacity-50 disabled:cursor-not-allowed"
+                            @disabled(!$reservationPaid)
+                        >
+                            Submit Consultation Request
+                            <svg class="ml-2 -mr-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </button>
                     </div>
                 </form>
                 </div>

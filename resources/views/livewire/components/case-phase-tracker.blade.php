@@ -1,4 +1,35 @@
 <div>
+    <!-- Flash Messages -->
+    @if (session()->has('error'))
+        <div class="mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700">{{ session('error') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if (session()->has('success'))
+        <div class="mb-4 bg-green-50 border-l-4 border-green-400 p-4 rounded-md">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-700">{{ session('success') }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="bg-white shadow overflow-hidden sm:rounded-lg p-6">
         <!-- Case Progression Monitor -->
         <div class="flex justify-between items-center mb-4">
@@ -102,16 +133,33 @@
                                 
                                 <!-- Phase name -->
                                 <span class="mt-2 text-sm font-medium {{ $textClass }}">{{ $phase->name }}</span>
+                                <!-- Phase dates -->
+                                @if($phase->start_date)
+                                    <span class="mt-1 text-xs text-gray-500">
+                                        {{ \Carbon\Carbon::parse($phase->start_date)->format('M d') }} - {{ \Carbon\Carbon::parse($phase->end_date)->format('M d, Y') }}
+                                    </span>
+                                @endif
                                 
                                 @if($canManagePhases && !$readOnly)
-                                    <button 
-                                        type="button"
-                                        x-data="{}"
-                                        @click="$wire.prepareEditPhase({{ $phase->id }}); $nextTick(() => $dispatch('open-modal', 'edit-phase-modal'))"
-                                        class="mt-1 text-xs text-blue-600 hover:text-blue-800"
-                                    >
-                                        Edit
-                                    </button>
+                                    <div class="mt-1 flex items-center justify-center space-x-2">
+                                        <button 
+                                            type="button"
+                                            x-data="{}"
+                                            @click="$wire.prepareEditPhase({{ $phase->id }}); $nextTick(() => $dispatch('open-modal', 'edit-phase-modal'))"
+                                            class="text-xs text-blue-600 hover:text-blue-800"
+                                        >
+                                            Edit
+                                        </button>
+                                        <span class="text-gray-300">|</span>
+                                        <button 
+                                            type="button"
+                                            x-data="{}"
+                                            @click="$wire.prepareDeletePhase({{ $phase->id }}); $nextTick(() => $dispatch('open-modal', 'delete-phase-modal'))"
+                                            class="text-xs text-red-600 hover:text-red-800"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 @endif
                             </div>
                         @endforeach
@@ -244,6 +292,78 @@
     <!-- MODALS SECTION -->
     <!-- Each modal is defined once and references the associated Livewire method -->
 
+    <!-- Success Modal (must be rendered BEFORE other modals to ensure proper z-index stacking) -->
+    <div
+        x-data="{
+            show: @entangle('showSuccessModal').live,
+        }"
+        x-show="show"
+        x-cloak
+        style="display: none; position: fixed; inset: 0; z-index: 99999 !important;"
+        x-init="
+            $watch('show', show => {
+                if (show) {
+                    // Force z-index on show
+                    $el.style.setProperty('z-index', '99999', 'important');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            });
+        "
+        x-on:keydown.escape.window="show = false; $wire.closeSuccessModal()"
+    >
+        <!-- Backdrop -->
+        <div x-show="show" 
+             style="position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); z-index: 99998 !important;"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"></div>
+
+        <!-- Modal Content Container -->
+        <div style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 99999 !important; pointer-events: none;">
+            <div x-show="show" 
+                 style="pointer-events: auto;"
+                 class="bg-white rounded-lg overflow-hidden shadow-2xl transform transition-all w-full max-w-md mx-auto"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                <div class="p-6">
+                    <div class="flex justify-center items-center mb-4">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                            <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">
+                            Phase Added Successfully!
+                        </h3>
+                        <p class="text-sm text-gray-500 mb-6">
+                            The phase has been added to your case timeline.
+                        </p>
+                        <div class="flex justify-center">
+                            <button 
+                                type="button"
+                                wire:click="closeSuccessModal"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                Proceed
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Phase Modal -->
     <x-modal name="add-phase-modal" focusable>
         <div class="p-6">
@@ -257,17 +377,60 @@
                     </svg>
                 </button>
             </div>
+            
+            <!-- Error Message in Modal -->
+            @if (session()->has('error'))
+                <div class="mb-4 bg-red-50 border-l-4 border-red-400 p-3 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700 font-medium">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            
             <form wire:submit.prevent="addPhase">
                 <div class="space-y-4">
                     <div>
-                        <label for="newPhaseName" class="block text-sm font-medium text-gray-700">Phase Name</label>
-                        <input type="text" id="newPhaseName" wire:model.defer="newPhaseName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('newPhaseName') border-red-500 @enderror">
-                        @error('newPhaseName') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        <label for="selectedPhaseTemplate" class="block text-sm font-medium text-gray-700">Select Phase</label>
+                        <select id="selectedPhaseTemplate" wire:model.live="selectedPhaseTemplate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('selectedPhaseTemplate') border-red-500 @enderror">
+                            <option value="">-- Select a phase --</option>
+                            <option value="PRE_LITIGATION">Pre-Litigation</option>
+                            <option value="FILING_INITIATION">Filing/Initiation</option>
+                            <option value="PRELIMINARY_PROCEEDINGS">Preliminary Proceedings</option>
+                            <option value="PRE_TRIAL">Pre-Trial</option>
+                            <option value="TRIAL">Trial</option>
+                            <option value="POST_TRIAL">Post-Trial</option>
+                            <option value="POST_JUDGMENT_REMEDIES">Post-Judgment Remedies</option>
+                            <option value="ENFORCEMENT_EXECUTION">Enforcement/Execution</option>
+                            <option value="OTHER">Other (Type Manually)</option>
+                        </select>
+                        @error('selectedPhaseTemplate') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                     </div>
+
+                    @if($selectedPhaseTemplate === 'OTHER')
                     <div>
-                        <label for="newPhaseDescription" class="block text-sm font-medium text-gray-700">Description/Initial Update</label>
-                        <textarea id="newPhaseDescription" wire:model.defer="newPhaseDescription" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('newPhaseDescription') border-red-500 @enderror"></textarea>
+                        <label for="customPhaseName" class="block text-sm font-medium text-gray-700">Phase Name</label>
+                        <input type="text" id="customPhaseName" wire:model.defer="customPhaseName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('customPhaseName') border-red-500 @enderror" placeholder="Enter phase name">
+                        @error('customPhaseName') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
+                    @elseif($selectedPhaseTemplate && $selectedPhaseTemplate !== 'OTHER')
+                    <div>
+                        <label for="newPhaseName" class="block text-sm font-medium text-gray-700">Phase Name</label>
+                        <input type="text" id="newPhaseName" wire:model="newPhaseName" readonly class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-50 sm:text-sm" disabled>
+                    </div>
+                    @endif
+
+                    <div>
+                        <label for="newPhaseDescription" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="newPhaseDescription" wire:model.defer="newPhaseDescription" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('newPhaseDescription') border-red-500 @enderror" placeholder="Phase description will be auto-filled when you select a phase"></textarea>
                         @error('newPhaseDescription') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        <p class="mt-1 text-xs text-gray-500">You can modify the description if needed.</p>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -307,17 +470,60 @@
                     </svg>
                 </button>
             </div>
+            
+            <!-- Error Message in Modal -->
+            @if (session()->has('error'))
+                <div class="mb-4 bg-red-50 border-l-4 border-red-400 p-3 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700 font-medium">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            
             <form wire:submit.prevent="editPhase">
                 <div class="space-y-4">
                     <div>
-                        <label for="editPhaseName" class="block text-sm font-medium text-gray-700">Phase Name</label>
-                        <input type="text" id="editPhaseName" wire:model.defer="editPhaseName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('editPhaseName') border-red-500 @enderror">
-                        @error('editPhaseName') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        <label for="editSelectedPhaseTemplate" class="block text-sm font-medium text-gray-700">Select Phase</label>
+                        <select id="editSelectedPhaseTemplate" wire:model.live="editSelectedPhaseTemplate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('editSelectedPhaseTemplate') border-red-500 @enderror">
+                            <option value="">-- Select a phase --</option>
+                            <option value="PRE_LITIGATION">Pre-Litigation</option>
+                            <option value="FILING_INITIATION">Filing/Initiation</option>
+                            <option value="PRELIMINARY_PROCEEDINGS">Preliminary Proceedings</option>
+                            <option value="PRE_TRIAL">Pre-Trial</option>
+                            <option value="TRIAL">Trial</option>
+                            <option value="POST_TRIAL">Post-Trial</option>
+                            <option value="POST_JUDGMENT_REMEDIES">Post-Judgment Remedies</option>
+                            <option value="ENFORCEMENT_EXECUTION">Enforcement/Execution</option>
+                            <option value="OTHER">Other (Type Manually)</option>
+                        </select>
+                        @error('editSelectedPhaseTemplate') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
                     </div>
+
+                    @if($editSelectedPhaseTemplate === 'OTHER')
+                    <div>
+                        <label for="editCustomPhaseName" class="block text-sm font-medium text-gray-700">Phase Name</label>
+                        <input type="text" id="editCustomPhaseName" wire:model.defer="editCustomPhaseName" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('editCustomPhaseName') border-red-500 @enderror" placeholder="Enter phase name">
+                        @error('editCustomPhaseName') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                    </div>
+                    @elseif($editSelectedPhaseTemplate && $editSelectedPhaseTemplate !== 'OTHER')
+                    <div>
+                        <label for="editPhaseName" class="block text-sm font-medium text-gray-700">Phase Name</label>
+                        <input type="text" id="editPhaseName" wire:model="editPhaseName" readonly class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-50 sm:text-sm" disabled>
+                    </div>
+                    @endif
+
                     <div>
                         <label for="editPhaseDescription" class="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea id="editPhaseDescription" wire:model.defer="editPhaseDescription" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('editPhaseDescription') border-red-500 @enderror"></textarea>
+                        <textarea id="editPhaseDescription" wire:model.defer="editPhaseDescription" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('editPhaseDescription') border-red-500 @enderror" placeholder="Phase description will be auto-filled when you select a phase"></textarea>
                         @error('editPhaseDescription') <p class="mt-1 text-xs text-red-500">{{ $message }}</p> @enderror
+                        <p class="mt-1 text-xs text-gray-500">You can modify the description if needed.</p>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -373,6 +579,35 @@
                     </x-primary-button>
                 </div>
             </form>
+        </div>
+    </x-modal>
+
+    <!-- Delete Phase Modal -->
+    <x-modal name="delete-phase-modal" focusable>
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-medium text-gray-900">
+                    Delete Phase
+                </h2>
+                <button type="button" @click="$dispatch('close'); $wire.resetDeleteForm()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <p class="mb-4 text-sm text-gray-600">
+                Are you sure you want to delete the phase <strong>"{{ $deletePhaseName }}"</strong>? This action cannot be undone and will remove all associated data.
+            </p>
+            
+            <div class="mt-6 flex justify-end">
+                <x-secondary-button type="button" @click="$dispatch('close'); $wire.resetDeleteForm()" class="mr-3">
+                    Cancel
+                </x-secondary-button>
+                <x-danger-button wire:click="confirmDeletePhase">
+                    Delete Phase
+                </x-danger-button>
+            </div>
         </div>
     </x-modal>
 

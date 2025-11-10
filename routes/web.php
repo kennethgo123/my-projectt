@@ -217,6 +217,9 @@ Route::prefix('client')->middleware(['auth', 'verified', 'not.deactivated', 'pro
     Route::get('/terms-conditions', function () {
         return view('client.terms-conditions');
     })->name('client.terms.conditions');
+    Route::get('/terms/reservation', function () {
+        return view('client.terms-reservation');
+    })->name('client.terms.reservation');
     Route::get('/case/overview/{case}', App\Livewire\Client\CaseView::class)->name('client.case.overview');
     Route::get('/case/view/{case}', App\Livewire\Client\CaseView::class)->name('client.case.view');
     

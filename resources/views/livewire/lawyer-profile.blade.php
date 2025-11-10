@@ -263,7 +263,19 @@
                     PROFESSIONAL EXPERIENCE
                 </h4>
                 <div class="prose max-w-none text-gray-700 font-open-sans leading-relaxed">
-                    {!! $lawyer->experience ?: 'No professional experience information available.' !!}
+                    @php
+                        $expArray = is_array($lawyer->experience) ? $lawyer->experience : (is_string($lawyer->experience) ? json_decode($lawyer->experience, true) : []);
+                        $expArray = $expArray ?: [];
+                    @endphp
+                    @if(count($expArray) > 0)
+                        <ul class="list-disc pl-5 space-y-1">
+                            @foreach($expArray as $item)
+                                <li>{{ $item }}</li>
+                            @endforeach
+                        </ul>
+                    @else
+                        {!! is_string($lawyer->experience) ? $lawyer->experience : 'No professional experience information available.' !!}
+                    @endif
                 </div>
             </div>
             

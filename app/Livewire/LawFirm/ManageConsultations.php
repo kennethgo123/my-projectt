@@ -112,16 +112,32 @@ class ManageConsultations extends Component
             return;
         }
 
-        if (!$this->selectedDate) {
-            session()->flash('error', 'Please select a consultation time.');
-            return;
-        }
-
         // Get a fresh instance of the consultation to prevent stale data
         $consultation = Consultation::findOrFail($this->consultationDetails->id);
         
-        // Parse the selected date to get start and end times
-        $startDateTime = \Carbon\Carbon::parse($this->selectedDate);
+        // Since clients can only select one time frame, automatically use the requested date/time
+        // Priority: start_time > first preferred date > selected_date
+        $requestedDate = null;
+        if ($consultation->start_time) {
+            $requestedDate = $consultation->start_time;
+        } else {
+            $preferredDates = json_decode($consultation->preferred_dates, true);
+            if (!empty($preferredDates) && is_array($preferredDates)) {
+                $requestedDate = $preferredDates[0];
+            } elseif (!empty($preferredDates) && is_string($preferredDates)) {
+                $requestedDate = $preferredDates;
+            } elseif ($consultation->selected_date) {
+                $requestedDate = $consultation->selected_date;
+            }
+        }
+        
+        if (!$requestedDate) {
+            session()->flash('error', 'No requested date/time available. Cannot assign lawyer.');
+            return;
+        }
+        
+        // Parse the requested date to get start and end times
+        $startDateTime = \Carbon\Carbon::parse($requestedDate);
         $endDateTime = $startDateTime->copy()->addHour(); // Default 1-hour consultation
         
         // If consultation already has specific start/end times, use those
@@ -143,7 +159,7 @@ class ManageConsultations extends Component
             
             $updated = $consultation->update([
                 'specific_lawyer_id' => null,
-                'selected_date' => $this->selectedDate,
+                'selected_date' => $requestedDate,
                 'start_time' => $startDateTime,
                 'end_time' => $endDateTime,
                 'assign_as_entity' => true,
@@ -161,7 +177,7 @@ class ManageConsultations extends Component
             
             $updated = $consultation->update([
                 'specific_lawyer_id' => $this->assignedLawyerId,
-                'selected_date' => $this->selectedDate,
+                'selected_date' => $requestedDate,
                 'start_time' => $startDateTime,
                 'end_time' => $endDateTime,
                 'assign_as_entity' => false,
@@ -298,18 +314,22 @@ class ManageConsultations extends Component
             return;
         }
 
-        // Check if there is a selected date for this consultation
-        if (empty($this->selectedDate)) {
-            // Try to get the first preferred date as a fallback
-            $preferredDates = json_decode($consultation->preferred_dates);
-            if (!empty($preferredDates)) {
+        // Since clients can only select one time frame, automatically use the requested date/time
+        // Priority: start_time > first preferred date > selected_date
+        if ($consultation->start_time) {
+            $selectedDate = $consultation->start_time;
+        } else {
+            $preferredDates = json_decode($consultation->preferred_dates, true);
+            if (!empty($preferredDates) && is_array($preferredDates)) {
                 $selectedDate = $preferredDates[0];
+            } elseif (!empty($preferredDates) && is_string($preferredDates)) {
+                $selectedDate = $preferredDates;
+            } elseif ($consultation->selected_date) {
+                $selectedDate = $consultation->selected_date;
             } else {
-                session()->flash('error', 'No preferred dates available. Cannot accept consultation.');
+                session()->flash('error', 'No requested date/time available. Cannot accept consultation.');
                 return;
             }
-        } else {
-            $selectedDate = $this->selectedDate;
         }
 
         // First, accept with a default or custom meeting link

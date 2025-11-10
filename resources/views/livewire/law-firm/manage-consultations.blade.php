@@ -392,15 +392,31 @@
                                 </div>
 
                                 <div class="md:col-span-2">
-                                    <h4 class="text-sm font-medium text-gray-900 font-raleway">Preferred Dates</h4>
+                                    <h4 class="text-sm font-medium text-gray-900 font-raleway">Requested Date and Time</h4>
                                     <div class="mt-1 space-y-1">
-                                        @foreach(json_decode($consultationDetails->preferred_dates) as $date)
+                                        @php
+                                            $preferredDates = json_decode($consultationDetails->preferred_dates, true);
+                                            $displayDate = null;
+                                            
+                                            // Use start_time if available, otherwise use first preferred date
+                                            if ($consultationDetails->start_time) {
+                                                $displayDate = $consultationDetails->start_time;
+                                            } elseif (!empty($preferredDates) && is_array($preferredDates)) {
+                                                $displayDate = $preferredDates[0];
+                                            } elseif (!empty($preferredDates) && is_string($preferredDates)) {
+                                                $displayDate = $preferredDates;
+                                            }
+                                        @endphp
+                                        
+                                        @if($displayDate)
                                             <div class="flex items-center space-x-2">
-                                                <span class="text-sm text-gray-500 font-open-sans">
-                                                    {{ \Carbon\Carbon::parse($date)->format('M d, Y g:i A') }}
+                                                <span class="text-sm text-gray-700 font-medium font-open-sans">
+                                                    {{ \Carbon\Carbon::parse($displayDate)->format('l, F j, Y g:i A') }}
                                                 </span>
                                             </div>
-                                        @endforeach
+                                        @else
+                                            <span class="text-xs text-gray-500">No date/time specified</span>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -461,21 +477,31 @@
                                     </div>
                                     
                                     <div class="mt-4">
-                                        <h5 class="text-sm font-medium text-gray-700">Select Consultation Time</h5>
-                                        <div class="mt-2 space-y-3">
-                                            @foreach(json_decode($consultationDetails->preferred_dates) as $index => $date)
-                                                <div class="flex items-center">
-                                                    <input id="preferred-date-{{ $index }}"
-                                                           name="selectedDate" 
-                                                           type="radio"
-                                                           value="{{ $date }}" 
-                                                           wire:model="selectedDate"
-                                                           class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                                    <label for="preferred-date-{{ $index }}" class="ml-3 text-sm text-gray-600 font-open-sans">
-                                                        {{ \Carbon\Carbon::parse($date)->format('M d, Y g:i A') }}
-                                                    </label>
+                                        <h5 class="text-sm font-medium text-gray-700">Requested Consultation Time</h5>
+                                        <div class="mt-2">
+                                            @php
+                                                $preferredDates = json_decode($consultationDetails->preferred_dates, true);
+                                                $displayDate = null;
+                                                
+                                                // Use start_time if available, otherwise use first preferred date
+                                                if ($consultationDetails->start_time) {
+                                                    $displayDate = $consultationDetails->start_time;
+                                                } elseif (!empty($preferredDates) && is_array($preferredDates)) {
+                                                    $displayDate = $preferredDates[0];
+                                                } elseif (!empty($preferredDates) && is_string($preferredDates)) {
+                                                    $displayDate = $preferredDates;
+                                                }
+                                            @endphp
+                                            
+                                            @if($displayDate)
+                                                <div class="p-3 bg-gray-50 rounded-md border border-gray-200">
+                                                    <span class="text-sm text-gray-700 font-medium font-open-sans">
+                                                        {{ \Carbon\Carbon::parse($displayDate)->format('l, F j, Y g:i A') }}
+                                                    </span>
                                                 </div>
-                                            @endforeach
+                                            @else
+                                                <span class="text-sm text-gray-500">No date/time specified</span>
+                                            @endif
                                         </div>
                                     </div>
                                 

@@ -158,7 +158,7 @@ class ManageCases extends Component
             
         $statuses = [
             LegalCase::STATUS_PENDING => 'Pending',
-            LegalCase::STATUS_CONTRACT_SENT => 'Contract Sent',
+            LegalCase::STATUS_CONTRACT_SENT => 'Waiting for Client\'s Response',
             LegalCase::STATUS_CONTRACT_REJECTED_BY_CLIENT => 'Contract Rejected by Client',
             LegalCase::STATUS_CHANGES_REQUESTED_BY_CLIENT => 'Changes Requested by Client',
             LegalCase::STATUS_CONTRACT_REVISED_SENT => 'Contract Revised by Lawyer',

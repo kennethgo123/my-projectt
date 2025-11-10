@@ -33,6 +33,9 @@ class CasePhaseTracker extends Component
     public $newPhaseStartDate = '';
     public $newPhaseEndDate = '';
     public $newPhaseUpdate = '';
+    public $selectedPhaseTemplate = '';
+    public $customPhaseName = '';
+    public $showSuccessModal = false;
     
     // For existing phase updates
     public $selectedPhaseId = null;
@@ -44,6 +47,12 @@ class CasePhaseTracker extends Component
     public $editPhaseDescription = '';
     public $editPhaseStartDate = '';
     public $editPhaseEndDate = '';
+    public $editSelectedPhaseTemplate = '';
+    public $editCustomPhaseName = '';
+    
+    // For deleting phases
+    public $deletePhaseId = null;
+    public $deletePhaseName = '';
     
     // Navigation controls
     public $hasNextPhase = false;
@@ -60,6 +69,10 @@ class CasePhaseTracker extends Component
         'editPhaseStartDate' => 'required|date',
         'editPhaseEndDate' => 'required|date|after_or_equal:editPhaseStartDate',
         'caseCloseNote' => 'required|string|min:10',
+        'selectedPhaseTemplate' => 'nullable|string',
+        'customPhaseName' => 'required_if:selectedPhaseTemplate,OTHER|string|max:100',
+        'editSelectedPhaseTemplate' => 'nullable|string',
+        'editCustomPhaseName' => 'required_if:editSelectedPhaseTemplate,OTHER|string|max:100',
     ];
     
     protected function getListeners()
@@ -98,8 +111,11 @@ class CasePhaseTracker extends Component
     
     public function loadPhases()
     {
+        // Always load phases ordered by start date (ascending), then by creation date for consistency
+        // This matches the reorderPhasesByStartDate method
         $this->phases = CasePhase::where('legal_case_id', $this->case->id)
-            ->orderBy('order')
+            ->orderBy('start_date', 'asc')
+            ->orderBy('created_at', 'asc')
             ->get();
             
         $this->currentPhase = $this->phases->firstWhere('is_current', true);
@@ -116,6 +132,26 @@ class CasePhaseTracker extends Component
                 ->get();
         }
         $this->selectedPhaseId = null;
+    }
+    
+    /**
+     * Reorder all phases based on their start dates
+     * This ensures phases are always in chronological order
+     * If start dates are the same, order by creation date (older first)
+     */
+    private function reorderPhasesByStartDate()
+    {
+        $phases = CasePhase::where('legal_case_id', $this->case->id)
+            ->orderBy('start_date', 'asc')
+            ->orderBy('created_at', 'asc') // If same start date, use creation order
+            ->get();
+        
+        // Update order for each phase based on its position
+        foreach ($phases as $index => $phase) {
+            if ($phase->order != $index) {
+                $phase->update(['order' => $index]);
+            }
+        }
     }
     
     public function loadUpcomingEvents()
@@ -175,18 +211,88 @@ class CasePhaseTracker extends Component
         $this->editPhaseDescription = $phase->description;
         $this->editPhaseStartDate = $phase->start_date ? Carbon::parse($phase->start_date)->format('Y-m-d') : null;
         $this->editPhaseEndDate = $phase->end_date ? Carbon::parse($phase->end_date)->format('Y-m-d') : null;
+        
+        // Try to match the phase name with a template
+        $templates = $this->getPhaseTemplates();
+        $matchedTemplate = null;
+        foreach ($templates as $key => $template) {
+            if ($template['name'] === $phase->name) {
+                $matchedTemplate = $key;
+                break;
+            }
+        }
+        
+        if ($matchedTemplate) {
+            $this->editSelectedPhaseTemplate = $matchedTemplate;
+            $this->editCustomPhaseName = '';
+        } else {
+            $this->editSelectedPhaseTemplate = 'OTHER';
+            $this->editCustomPhaseName = $phase->name;
+        }
+    }
+    
+    public function updatedEditSelectedPhaseTemplate($value)
+    {
+        if ($value && $value !== 'OTHER') {
+            $templates = $this->getPhaseTemplates();
+            if (isset($templates[$value])) {
+                $this->editPhaseName = $templates[$value]['name'];
+                $this->editPhaseDescription = $templates[$value]['description'];
+            }
+        } elseif ($value === 'OTHER') {
+            // Keep the current custom name if switching to OTHER
+            if (empty($this->editCustomPhaseName)) {
+                $this->editPhaseName = '';
+            } else {
+                $this->editPhaseName = $this->editCustomPhaseName;
+            }
+            $this->editPhaseDescription = '';
+        }
     }
     
     public function editPhase()
     {
         if (!$this->canManagePhases) return;
         
+        // Determine phase name and description based on selection
+        if ($this->editSelectedPhaseTemplate === 'OTHER') {
+            $phaseName = $this->editCustomPhaseName;
+            $phaseDescription = $this->editPhaseDescription;
+        } elseif (!empty($this->editSelectedPhaseTemplate)) {
+            $templates = $this->getPhaseTemplates();
+            if (isset($templates[$this->editSelectedPhaseTemplate])) {
+                $phaseName = $templates[$this->editSelectedPhaseTemplate]['name'];
+                $phaseDescription = $this->editPhaseDescription ?: $templates[$this->editSelectedPhaseTemplate]['description'];
+            } else {
+                session()->flash('error', 'Invalid phase template selected.');
+                return;
+            }
+        } else {
+            // Fallback to manual entry
+            $phaseName = $this->editPhaseName;
+            $phaseDescription = $this->editPhaseDescription;
+        }
+        
         $this->validate([
-            'editPhaseName' => 'required|string|max:100',
-            'editPhaseDescription' => 'required|string',
             'editPhaseStartDate' => 'required|date',
             'editPhaseEndDate' => 'required|date|after_or_equal:editPhaseStartDate',
+        ], [
+            'editPhaseStartDate.required' => 'Start date is required.',
+            'editPhaseEndDate.required' => 'End date is required.',
+            'editPhaseEndDate.after_or_equal' => 'End date must be after or equal to start date.',
         ]);
+        
+        // Validate phase name
+        if (empty($phaseName)) {
+            session()->flash('error', 'Phase name is required.');
+            return;
+        }
+        
+        // Validate phase description
+        if (empty($phaseDescription)) {
+            session()->flash('error', 'Phase description is required.');
+            return;
+        }
         
         $phase = CasePhase::where('id', $this->editPhaseId)->where('legal_case_id', $this->case->id)->first();
         if (!$phase) {
@@ -194,12 +300,33 @@ class CasePhaseTracker extends Component
              return;
         }
         
+        // Check for date overlaps with OTHER phases (excluding the current phase being edited)
+        $overlappingPhases = CasePhase::where('legal_case_id', $this->case->id)
+            ->where('id', '!=', $this->editPhaseId)
+            ->where(function($query) {
+                $query->whereDate('start_date', '<=', $this->editPhaseEndDate)
+                      ->whereDate('end_date', '>=', $this->editPhaseStartDate);
+            })
+            ->get();
+        
+        if ($overlappingPhases->isNotEmpty()) {
+            $overlappingDates = $overlappingPhases->map(function($p) {
+                return $p->name . ' (' . Carbon::parse($p->start_date)->format('M d, Y') . ' - ' . Carbon::parse($p->end_date)->format('M d, Y') . ')';
+            })->join(', ');
+            
+            session()->flash('error', 'The phase dates overlap with existing phase(s): ' . $overlappingDates . '. Please adjust the dates to avoid overlaps.');
+            return;
+        }
+        
         $phase->update([
-            'name' => $this->editPhaseName,
-            'description' => $this->editPhaseDescription,
+            'name' => $phaseName,
+            'description' => $phaseDescription,
             'start_date' => $this->editPhaseStartDate,
             'end_date' => $this->editPhaseEndDate,
         ]);
+        
+        // Reorder phases after editing dates
+        $this->reorderPhasesByStartDate();
         
         // TODO: Notify client
         
@@ -211,6 +338,88 @@ class CasePhaseTracker extends Component
         session()->flash('success', 'Phase updated successfully!');
     }
     
+    public function prepareDeletePhase($phaseId)
+    {
+        if (!$this->canManagePhases) {
+            session()->flash('error', 'You do not have permission to delete phases.');
+            return;
+        }
+        
+        $phase = CasePhase::where('id', $phaseId)->where('legal_case_id', $this->case->id)->first();
+        if (!$phase) {
+            session()->flash('error', 'Phase not found.');
+            return;
+        }
+        
+        $this->deletePhaseId = $phase->id;
+        $this->deletePhaseName = $phase->name;
+    }
+    
+    public function confirmDeletePhase()
+    {
+        if (!$this->canManagePhases) {
+            session()->flash('error', 'You do not have permission to delete phases.');
+            return;
+        }
+        
+        if (!$this->deletePhaseId) {
+            session()->flash('error', 'No phase selected for deletion.');
+            return;
+        }
+        
+        $phase = CasePhase::where('id', $this->deletePhaseId)->where('legal_case_id', $this->case->id)->first();
+        if (!$phase) {
+            session()->flash('error', 'Phase not found.');
+            $this->resetDeleteForm();
+            return;
+        }
+        
+        try {
+            DB::beginTransaction();
+            
+            $phaseName = $phase->name;
+            $wasCurrent = $phase->is_current;
+            
+            // Delete the phase
+            $phase->delete();
+            
+            // Reorder remaining phases
+            $this->reorderPhasesByStartDate();
+            
+            // If the deleted phase was current, set the first phase as current
+            if ($wasCurrent) {
+                $firstPhase = CasePhase::where('legal_case_id', $this->case->id)
+                    ->orderBy('start_date', 'asc')
+                    ->orderBy('created_at', 'asc')
+                    ->first();
+                
+                if ($firstPhase) {
+                    $this->setCurrentPhase($firstPhase->id);
+                }
+            }
+            
+            DB::commit();
+            
+            $this->resetDeleteForm();
+            $this->loadPhases();
+            $this->checkNavigationAvailability();
+            $this->checkIfLastPhase();
+            
+            $this->dispatch('close-modal', 'delete-phase-modal');
+            session()->flash('success', 'Phase "' . $phaseName . '" has been deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting phase: ' . $e->getMessage());
+            session()->flash('error', 'Failed to delete phase. Please try again.');
+        }
+    }
+    
+    public function resetDeleteForm()
+    {
+        $this->deletePhaseId = null;
+        $this->deletePhaseName = '';
+    }
+    
     private function resetEditForm()
     {
         $this->editPhaseId = null;
@@ -218,39 +427,147 @@ class CasePhaseTracker extends Component
         $this->editPhaseDescription = '';
         $this->editPhaseStartDate = '';
         $this->editPhaseEndDate = '';
+        $this->editSelectedPhaseTemplate = '';
+        $this->editCustomPhaseName = '';
     }
     
+    public function getPhaseTemplates()
+    {
+        return [
+            'PRE_LITIGATION' => [
+                'name' => 'Pre-Litigation',
+                'description' => 'Demand letters, negotiation, ADR, settlement efforts'
+            ],
+            'FILING_INITIATION' => [
+                'name' => 'Filing/Initiation',
+                'description' => 'Drafting and filing of complaint/petition, payment of fees'
+            ],
+            'PRELIMINARY_PROCEEDINGS' => [
+                'name' => 'Preliminary Proceedings',
+                'description' => 'Service of summons, answer, preliminary hearings'
+            ],
+            'PRE_TRIAL' => [
+                'name' => 'Pre-Trial',
+                'description' => 'Pre-trial conference, stipulations, marking of evidence'
+            ],
+            'TRIAL' => [
+                'name' => 'Trial',
+                'description' => 'Presentation of evidence, witness examination, trial proper'
+            ],
+            'POST_TRIAL' => [
+                'name' => 'Post-Trial',
+                'description' => 'Submission of memoranda, judgment/decision'
+            ],
+            'POST_JUDGMENT_REMEDIES' => [
+                'name' => 'Post-Judgment Remedies',
+                'description' => 'Motions for reconsideration, appeal, or execution'
+            ],
+            'ENFORCEMENT_EXECUTION' => [
+                'name' => 'Enforcement/Execution',
+                'description' => 'Enforcement of judgment, writs, collection, or delivery of property'
+            ],
+        ];
+    }
+    
+    public function updatedSelectedPhaseTemplate($value)
+    {
+        if ($value && $value !== 'OTHER') {
+            $templates = $this->getPhaseTemplates();
+            if (isset($templates[$value])) {
+                $this->newPhaseName = $templates[$value]['name'];
+                $this->newPhaseDescription = $templates[$value]['description'];
+            }
+        } else {
+            // Reset when "OTHER" is selected or empty
+            $this->newPhaseName = '';
+            $this->newPhaseDescription = '';
+        }
+    }
+
     public function addPhase()
     {
         if (!$this->canManagePhases) return;
         
+        // Determine phase name and description based on selection
+        if ($this->selectedPhaseTemplate === 'OTHER') {
+            // Use custom phase name when "Other" is selected
+            $phaseName = $this->customPhaseName;
+            $phaseDescription = $this->newPhaseDescription;
+        } elseif (!empty($this->selectedPhaseTemplate)) {
+            // Use template
+            $templates = $this->getPhaseTemplates();
+            if (isset($templates[$this->selectedPhaseTemplate])) {
+                $phaseName = $templates[$this->selectedPhaseTemplate]['name'];
+                $phaseDescription = $this->newPhaseDescription ?: $templates[$this->selectedPhaseTemplate]['description'];
+            } else {
+                session()->flash('error', 'Invalid phase template selected.');
+                return;
+            }
+        } else {
+            // Fallback to manual entry (existing behavior)
+            $phaseName = $this->newPhaseName;
+            $phaseDescription = $this->newPhaseDescription;
+        }
+        
         $this->validate([
-            'newPhaseName' => 'required|string|max:100',
-            'newPhaseDescription' => 'required|string',
             'newPhaseStartDate' => 'required|date',
             'newPhaseEndDate' => 'required|date|after_or_equal:newPhaseStartDate',
+        ], [
+            'newPhaseStartDate.required' => 'Start date is required.',
+            'newPhaseEndDate.required' => 'End date is required.',
+            'newPhaseEndDate.after_or_equal' => 'End date must be after or equal to start date.',
         ]);
         
-        $isFirstPhase = $this->phases->isEmpty();
-        $maxOrder = $isFirstPhase ? 0 : (CasePhase::where('legal_case_id', $this->case->id)->max('order') ?? 0);
+        // Validate phase name
+        if (empty($phaseName)) {
+            session()->flash('error', 'Phase name is required.');
+            return;
+        }
+        
+        // Validate phase description
+        if (empty($phaseDescription)) {
+            session()->flash('error', 'Phase description is required.');
+            return;
+        }
+        
+        // Check for date overlaps with existing phases and get overlapping phase details
+        // Two date ranges overlap if: newStart <= existingEnd AND newEnd >= existingStart
+        $overlappingPhases = CasePhase::where('legal_case_id', $this->case->id)
+            ->where(function($query) {
+                $query->whereDate('start_date', '<=', $this->newPhaseEndDate)
+                      ->whereDate('end_date', '>=', $this->newPhaseStartDate);
+            })
+            ->get();
+        
+        if ($overlappingPhases->isNotEmpty()) {
+            $overlappingNames = $overlappingPhases->pluck('name')->join(', ');
+            $overlappingDates = $overlappingPhases->map(function($phase) {
+                return $phase->name . ' (' . Carbon::parse($phase->start_date)->format('M d, Y') . ' - ' . Carbon::parse($phase->end_date)->format('M d, Y') . ')';
+            })->join(', ');
             
+            session()->flash('error', 'The phase dates overlap with existing phase(s): ' . $overlappingDates . '. Please adjust the dates to avoid overlaps.');
+            return;
+        }
+        
+        $isFirstPhase = $this->phases->isEmpty();
+        
+        // Create the phase - we'll reorder all phases after creation
+        // Use a high temporary order value so it doesn't interfere
+        $maxOrder = CasePhase::where('legal_case_id', $this->case->id)->max('order') ?? -1;
+        
         $phase = CasePhase::create([
             'legal_case_id' => $this->case->id,
-            'name' => $this->newPhaseName,
-            'description' => $this->newPhaseDescription,
+            'name' => $phaseName,
+            'description' => $phaseDescription,
             'start_date' => $this->newPhaseStartDate,
             'end_date' => $this->newPhaseEndDate,
             'is_current' => $isFirstPhase, // First phase is current
             'is_completed' => false,
-            'order' => $maxOrder + 1,
+            'order' => $maxOrder + 100, // Temporary high order value
         ]);
-        
-        // TODO: Add initial update/note if provided
-        // if (!empty($this->newPhaseUpdate)) {
-        //     CaseUpdate::create([...]);
-        // }
 
-        // TODO: Notify client
+        // Reorder all phases based on start date - this will place the new phase in the correct position
+        $this->reorderPhasesByStartDate();
 
         $this->resetNewPhaseForm();
         $this->loadPhases();
@@ -262,8 +579,17 @@ class CasePhaseTracker extends Component
              $this->setCurrentPhase($phase->id);
         }
         
+        // Show success modal - it will appear on top of the add-phase-modal
+        $this->showSuccessModal = true;
+    }
+    
+    public function closeSuccessModal()
+    {
+        // Close both modals
+        $this->showSuccessModal = false;
+        $this->dispatch('close-modal', 'phase-success-modal');
         $this->dispatch('close-modal', 'add-phase-modal');
-        session()->flash('success', 'New phase added successfully!');
+        session()->flash('success', 'Phase added successfully!');
     }
     
     private function resetNewPhaseForm()
@@ -273,6 +599,9 @@ class CasePhaseTracker extends Component
         $this->newPhaseStartDate = '';
         $this->newPhaseEndDate = '';
         $this->newPhaseUpdate = '';
+        $this->selectedPhaseTemplate = '';
+        $this->customPhaseName = '';
+        $this->showSuccessModal = false;
     }
 
     public function setCurrentPhase($phaseId)

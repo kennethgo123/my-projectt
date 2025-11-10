@@ -12,6 +12,7 @@ use App\Services\PayMongoService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -53,6 +54,9 @@ class BookConsultation extends Component
     
     // Add a property to store the reservation invoice id
     public $reservationInvoiceId = null;
+    
+    // Add a property to store the draft consultation id
+    public $draftConsultationId = null;
     
     // Constants for lawyer selection
     const SELECT_FIRM_DECIDE = "__default__"; // Let the firm decide
@@ -142,49 +146,153 @@ class BookConsultation extends Component
             }
         }
         
-        // Restore saved form data from session if it exists
-        $this->restoreFormDataFromSession();
+        // Restore saved form data from draft consultation if it exists
+        $this->restoreFormDataFromDraft();
     }
     
     /**
-     * Save form data to session before payment redirect
+     * Save form data to draft consultation in database before payment redirect
      */
-    private function saveFormDataToSession()
+    private function saveFormDataToDraft()
     {
-        $formData = [
-            'consultation_type' => $this->consultation_type,
-            'description' => $this->description,
-            'preferred_dates' => $this->preferred_dates,
-            'selectedDay' => $this->selectedDay,
-            'selectedTimeSlot' => $this->selectedTimeSlot,
-            'selectedDate' => $this->selectedDate,
-            'useAvailability' => $this->useAvailability,
-            'selectedLawyerId' => $this->selectedLawyerId,
-            'currentCalendarMonth' => $this->currentCalendarMonth,
-        ];
+        // Store uploaded documents temporarily before payment
+        $documentPaths = [];
+        foreach ($this->documents as $document) {
+            if ($document) {
+                $path = $document->store('temp-consultation-documents', 'public');
+                $documentPaths[] = $path;
+            }
+        }
         
-        session(['consultation_form_data_' . $this->lawyer_id => $formData]);
+        // Prepare consultation data
+        $preferredDates = [];
+        $selectedStartTime = null;
+        $selectedEndTime = null;
+        
+        // If using lawyer availability and a time slot is selected
+        if ($this->useAvailability && $this->selectedTimeSlot) {
+            foreach ($this->availableTimeSlots as $slot) {
+                if (isset($slot['datetime']) && $slot['datetime'] === $this->selectedTimeSlot) {
+                    $preferredDates = [$slot['datetime']];
+                    $selectedStartTime = $slot['datetime'];
+                    $selectedEndTime = $slot['end_datetime'];
+                    break;
+                }
+            }
+        }
+        
+        // Determine which lawyer ID to use
+        $targetLawyerId = $this->lawyer_id;
+        $specificLawyer = null;
+        $assignAsEntity = false;
+        
+        if ($this->isLawFirm && $this->selectedLawyerId === self::SELECT_FIRM_ENTITY) {
+            $assignAsEntity = true;
+        } else if ($this->isLawFirm && $this->selectedLawyerId !== self::SELECT_FIRM_DECIDE && $this->selectedLawyerId !== self::SELECT_FIRM_ENTITY) {
+            $specificLawyer = (int) $this->selectedLawyerId;
+        }
+        
+        // Find or create draft consultation
+        $draft = Consultation::where('client_id', Auth::id())
+            ->where('lawyer_id', $targetLawyerId)
+            ->where('status', 'draft')
+            ->latest()
+            ->first();
+        
+        if ($draft) {
+            // Update existing draft
+            $draft->update([
+                'consultation_type' => $this->consultation_type,
+                'description' => $this->description,
+                'preferred_dates' => json_encode($preferredDates),
+                'start_time' => $selectedStartTime,
+                'end_time' => $selectedEndTime,
+                'documents' => json_encode($documentPaths),
+                'specific_lawyer_id' => $specificLawyer,
+                'assign_as_entity' => $assignAsEntity,
+                'selected_date' => $this->selectedDate ? Carbon::parse($this->selectedDate) : null,
+            ]);
+            $this->draftConsultationId = $draft->id;
+        } else {
+            // Create new draft
+            $draft = Consultation::create([
+                'client_id' => Auth::id(),
+                'lawyer_id' => $targetLawyerId,
+                'status' => 'draft',
+                'consultation_type' => $this->consultation_type,
+                'description' => $this->description,
+                'preferred_dates' => json_encode($preferredDates),
+                'start_time' => $selectedStartTime,
+                'end_time' => $selectedEndTime,
+                'documents' => json_encode($documentPaths),
+                'specific_lawyer_id' => $specificLawyer,
+                'assign_as_entity' => $assignAsEntity,
+                'selected_date' => $this->selectedDate ? Carbon::parse($this->selectedDate) : null,
+            ]);
+            $this->draftConsultationId = $draft->id;
+        }
+        
+        // Store draft ID and form metadata in session for easy retrieval
+        session([
+            'consultation_draft_id_' . $this->lawyer_id => $this->draftConsultationId,
+            'consultation_form_metadata_' . $this->lawyer_id => [
+                'selectedDay' => $this->selectedDay,
+                'selectedTimeSlot' => $this->selectedTimeSlot,
+                'selectedDate' => $this->selectedDate,
+                'useAvailability' => $this->useAvailability,
+                'selectedLawyerId' => $this->selectedLawyerId,
+                'currentCalendarMonth' => $this->currentCalendarMonth,
+            ]
+        ]);
     }
     
     /**
-     * Restore form data from session after payment redirect
+     * Restore form data from draft consultation after payment redirect
      */
-    private function restoreFormDataFromSession()
+    private function restoreFormDataFromDraft()
     {
-        $formData = session('consultation_form_data_' . $this->lawyer_id);
+        // Try to get draft ID from session first
+        $draftId = session('consultation_draft_id_' . $this->lawyer_id);
         
-        if ($formData && is_array($formData)) {
-            // Restore basic form fields
-            $this->consultation_type = $formData['consultation_type'] ?? $this->consultation_type;
-            $this->description = $formData['description'] ?? $this->description;
-            $this->preferred_dates = $formData['preferred_dates'] ?? $this->preferred_dates;
-            $this->useAvailability = $formData['useAvailability'] ?? $this->useAvailability;
-            $this->currentCalendarMonth = $formData['currentCalendarMonth'] ?? $this->currentCalendarMonth;
+        // If not in session, try to find the most recent draft for this client/lawyer
+        if (!$draftId) {
+            $draft = Consultation::where('client_id', Auth::id())
+                ->where('lawyer_id', $this->lawyer_id)
+                ->where('status', 'draft')
+                ->latest()
+                ->first();
+            
+            if ($draft) {
+                $draftId = $draft->id;
+                $this->draftConsultationId = $draftId;
+            }
+        } else {
+            $draft = Consultation::find($draftId);
+        }
+        
+        if ($draft && $draft->status === 'draft') {
+            // Restore basic form fields from draft
+            $this->consultation_type = $draft->consultation_type ?? $this->consultation_type;
+            $this->description = $draft->description ?? $this->description;
+            
+            // Restore metadata from session first (this has the UI state)
+            $metadata = session('consultation_form_metadata_' . $this->lawyer_id, []);
+            if ($metadata) {
+                $this->selectedDay = $metadata['selectedDay'] ?? $this->selectedDay;
+                $this->selectedDate = $metadata['selectedDate'] ?? $this->selectedDate;
+                $this->useAvailability = $metadata['useAvailability'] ?? $this->useAvailability;
+                $this->selectedLawyerId = $metadata['selectedLawyerId'] ?? $this->selectedLawyerId;
+                $this->currentCalendarMonth = $metadata['currentCalendarMonth'] ?? $this->currentCalendarMonth;
+            }
+            
+            // Restore date from draft if not in metadata
+            if (!$this->selectedDate && $draft->selected_date) {
+                $this->selectedDate = Carbon::parse($draft->selected_date)->format('Y-m-d');
+            }
             
             // Restore lawyer selection if it was changed
-            if (isset($formData['selectedLawyerId']) && $formData['selectedLawyerId'] !== $this->selectedLawyerId) {
-                $this->selectedLawyerId = $formData['selectedLawyerId'];
-                // Reload availability for the selected lawyer
+            if (isset($metadata['selectedLawyerId']) && $metadata['selectedLawyerId'] !== $this->selectedLawyerId) {
+                $this->selectedLawyerId = $metadata['selectedLawyerId'];
                 if ($this->selectedLawyerId && 
                     $this->selectedLawyerId !== self::SELECT_FIRM_DECIDE && 
                     $this->selectedLawyerId !== self::SELECT_FIRM_ENTITY) {
@@ -194,31 +302,90 @@ class BookConsultation extends Component
                 }
             }
             
-            // Restore date/time selections
-            $this->selectedDay = $formData['selectedDay'] ?? $this->selectedDay;
-            $this->selectedTimeSlot = $formData['selectedTimeSlot'] ?? $this->selectedTimeSlot;
-            $this->selectedDate = $formData['selectedDate'] ?? $this->selectedDate;
-            
             // Regenerate calendar if needed
             if ($this->currentCalendarMonth) {
                 $this->generateCalendarDays();
             }
             
-            // Reload time slots if a day/date was selected
+            // Reload time slots if a day/date was selected (MUST happen before restoring selectedTimeSlot)
             if ($this->selectedDay) {
                 $this->loadTimeSlots();
             } elseif ($this->selectedDate) {
                 $this->loadTimeSlotsForDate();
             }
+            
+            // Now restore the selected time slot AFTER time slots are loaded
+            if ($metadata && isset($metadata['selectedTimeSlot'])) {
+                $savedTimeSlot = $metadata['selectedTimeSlot'];
+                // Try to find matching slot in available slots
+                foreach ($this->availableTimeSlots as $slot) {
+                    if (isset($slot['datetime']) && $slot['datetime'] === $savedTimeSlot) {
+                        $this->selectedTimeSlot = $slot['datetime'];
+                        break;
+                    }
+                }
+                // If not found, set it anyway (might be a different format)
+                if (!$this->selectedTimeSlot) {
+                    $this->selectedTimeSlot = $savedTimeSlot;
+                }
+            } elseif ($draft->start_time) {
+                // Try to match the start_time from draft with available slots
+                $draftStartTime = is_string($draft->start_time) ? $draft->start_time : Carbon::parse($draft->start_time)->format('Y-m-d H:i:s');
+                foreach ($this->availableTimeSlots as $slot) {
+                    if (isset($slot['datetime'])) {
+                        $slotTime = is_string($slot['datetime']) ? $slot['datetime'] : Carbon::parse($slot['datetime'])->format('Y-m-d H:i:s');
+                        if ($slotTime === $draftStartTime || $slot['datetime'] === $draftStartTime) {
+                            $this->selectedTimeSlot = $slot['datetime'];
+                            break;
+                        }
+                    }
+                }
+                // If not found in available slots, set from draft anyway
+                if (!$this->selectedTimeSlot) {
+                    $this->selectedTimeSlot = $draftStartTime;
+                }
+            }
+            
+            // Store document paths from draft for later retrieval
+            if ($draft->documents) {
+                $docPaths = is_array($draft->documents) ? $draft->documents : json_decode($draft->documents, true);
+                if ($docPaths) {
+                    session(['consultation_temp_documents_' . $this->lawyer_id => $docPaths]);
+                }
+            }
         }
     }
     
     /**
-     * Clear saved form data from session
+     * Clear saved form data from session and delete draft
      */
     private function clearFormDataFromSession()
     {
-        session()->forget('consultation_form_data_' . $this->lawyer_id);
+        session()->forget([
+            'consultation_form_data_' . $this->lawyer_id,
+            'consultation_draft_id_' . $this->lawyer_id,
+            'consultation_form_metadata_' . $this->lawyer_id,
+            'consultation_temp_documents_' . $this->lawyer_id
+        ]);
+        
+        // Delete draft consultation if it exists
+        if ($this->draftConsultationId) {
+            $draft = Consultation::find($this->draftConsultationId);
+            if ($draft && $draft->status === 'draft') {
+                // Delete associated temp documents
+                if ($draft->documents) {
+                    $docPaths = is_array($draft->documents) ? $draft->documents : json_decode($draft->documents, true);
+                    if ($docPaths) {
+                        foreach ($docPaths as $path) {
+                            if (Storage::disk('public')->exists($path)) {
+                                Storage::disk('public')->delete($path);
+                            }
+                        }
+                    }
+                }
+                $draft->delete();
+            }
+        }
     }
     
     /**
@@ -686,11 +853,56 @@ class BookConsultation extends Component
             return;
         }
 
+        // Check if we have a draft consultation to update
+        $draft = null;
+        if ($this->draftConsultationId) {
+            $draft = Consultation::find($this->draftConsultationId);
+        }
+        
+        // If no draft, try to find one from session
+        if (!$draft) {
+            $draftId = session('consultation_draft_id_' . $this->lawyer_id);
+            if ($draftId) {
+                $draft = Consultation::find($draftId);
+            }
+        }
+        
         // Store documents if any
         $documentPaths = [];
+        
+        // First, check if there are documents from draft (after payment)
+        if ($draft && $draft->documents) {
+            $tempDocumentPaths = is_array($draft->documents) ? $draft->documents : json_decode($draft->documents, true);
+            if ($tempDocumentPaths) {
+                // Move temp documents to final location
+                foreach ($tempDocumentPaths as $tempPath) {
+                    $finalPath = str_replace('temp-consultation-documents/', 'consultation-documents/', $tempPath);
+                    if (Storage::disk('public')->exists($tempPath)) {
+                        Storage::disk('public')->move($tempPath, $finalPath);
+                        $documentPaths[] = $finalPath;
+                    }
+                }
+            }
+        }
+        
+        // Also check session for temp documents (fallback)
+        $tempDocumentPaths = session('consultation_temp_documents_' . $this->lawyer_id, []);
+        if (!empty($tempDocumentPaths)) {
+            foreach ($tempDocumentPaths as $tempPath) {
+                $finalPath = str_replace('temp-consultation-documents/', 'consultation-documents/', $tempPath);
+                if (Storage::disk('public')->exists($tempPath)) {
+                    Storage::disk('public')->move($tempPath, $finalPath);
+                    $documentPaths[] = $finalPath;
+                }
+            }
+        }
+        
+        // Also handle any newly uploaded documents
         foreach ($this->documents as $document) {
-            $path = $document->store('consultation-documents', 'public');
-            $documentPaths[] = $path;
+            if ($document) {
+                $path = $document->store('consultation-documents', 'public');
+                $documentPaths[] = $path;
+            }
         }
 
         // Determine which lawyer ID to use
@@ -708,20 +920,36 @@ class BookConsultation extends Component
             $specificLawyer = (int) $this->selectedLawyerId;
         }
 
-        // Create consultation
-        $consultation = Consultation::create([
-            'client_id' => Auth::id(),
-            'lawyer_id' => $targetLawyerId,
-            'status' => 'pending',
-            'consultation_type' => $this->consultation_type,
-            'description' => $this->description,
-            'preferred_dates' => json_encode($preferredDates),
-            'start_time' => $selectedStartTime,
-            'end_time' => $selectedEndTime,
-            'documents' => json_encode($documentPaths),
-            'specific_lawyer_id' => $specificLawyer, // Store the specific lawyer ID if selected
-            'assign_as_entity' => $assignAsEntity, // New field to indicate if the firm should be assigned as an entity
-        ]);
+        // Update draft to pending status or create new consultation
+        if ($draft && $draft->status === 'draft') {
+            $consultation = $draft;
+            $consultation->update([
+                'status' => 'pending',
+                'consultation_type' => $this->consultation_type,
+                'description' => $this->description,
+                'preferred_dates' => json_encode($preferredDates),
+                'start_time' => $selectedStartTime,
+                'end_time' => $selectedEndTime,
+                'documents' => json_encode($documentPaths),
+                'specific_lawyer_id' => $specificLawyer,
+                'assign_as_entity' => $assignAsEntity,
+            ]);
+        } else {
+            // Create new consultation
+            $consultation = Consultation::create([
+                'client_id' => Auth::id(),
+                'lawyer_id' => $targetLawyerId,
+                'status' => 'pending',
+                'consultation_type' => $this->consultation_type,
+                'description' => $this->description,
+                'preferred_dates' => json_encode($preferredDates),
+                'start_time' => $selectedStartTime,
+                'end_time' => $selectedEndTime,
+                'documents' => json_encode($documentPaths),
+                'specific_lawyer_id' => $specificLawyer,
+                'assign_as_entity' => $assignAsEntity,
+            ]);
+        }
 
         // Send notification to the lawyer
         NotificationService::newConsultationRequest($consultation);
@@ -740,9 +968,26 @@ class BookConsultation extends Component
 
     public function openPaymentModal()
     {
-        // Save form data to session when opening payment modal
+        // Validate required fields before saving draft
+        $this->validate([
+            'consultation_type' => 'required|in:Online Consultation,In-House Consultation',
+            'description' => 'required|min:10',
+        ]);
+        
+        // Require both date and time slot selection when using availability system
+        if ($this->useAvailability && !$this->selectedDate) {
+            session()->flash('error', 'Please select a date for your consultation.');
+            return;
+        }
+        
+        if ($this->useAvailability && !$this->selectedTimeSlot) {
+            session()->flash('error', 'Please select a time slot for your consultation.');
+            return;
+        }
+        
+        // Save form data to draft consultation in database
         // This ensures data is preserved even if user navigates away
-        $this->saveFormDataToSession();
+        $this->saveFormDataToDraft();
         $this->showPaymentModal = true;
     }
 
@@ -754,10 +999,23 @@ class BookConsultation extends Component
     public function payWithGCash()
     {
         try {
-            // Save form data to session before redirecting to payment
-            $this->saveFormDataToSession();
+            // Ensure draft is saved before redirecting to payment
+            if (!$this->draftConsultationId) {
+                $this->saveFormDataToDraft();
+            }
             
             $invoice = $this->getOrCreateReservationInvoice();
+            
+            // Link draft to invoice
+            if ($this->draftConsultationId) {
+                $draft = Consultation::find($this->draftConsultationId);
+                if ($draft) {
+                    // Store invoice ID in a custom field or use a pivot table
+                    // For now, we'll use session to link them
+                    session(['draft_consultation_for_invoice_' . $invoice->id => $this->draftConsultationId]);
+                }
+            }
+            
             $payMongo = new PayMongoService();
             $nextUrl = url('/client/book-consultation/' . $this->lawyer_id);
             $successUrl = route('payment.success', ['invoice' => $invoice->id]) . '?next=' . urlencode($nextUrl);
@@ -777,10 +1035,18 @@ class BookConsultation extends Component
     public function payWithCard()
     {
         try {
-            // Save form data to session before redirecting to payment
-            $this->saveFormDataToSession();
+            // Ensure draft is saved before redirecting to payment
+            if (!$this->draftConsultationId) {
+                $this->saveFormDataToDraft();
+            }
             
             $invoice = $this->getOrCreateReservationInvoice();
+            
+            // Link draft to invoice
+            if ($this->draftConsultationId) {
+                session(['draft_consultation_for_invoice_' . $invoice->id => $this->draftConsultationId]);
+            }
+            
             $payMongo = new PayMongoService();
             $nextUrl = url('/client/book-consultation/' . $this->lawyer_id);
             // Pass next param to card payment page

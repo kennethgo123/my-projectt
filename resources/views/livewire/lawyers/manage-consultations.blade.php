@@ -161,25 +161,36 @@
                                 <p class="text-sm text-gray-700 line-clamp-3">{{ $consultation->description }}</p>
                                     </div>
 
-                            <!-- Preferred Dates -->
+                            <!-- Requested Date and Time -->
                             @if($consultation->status === 'pending')
                                 <div class="mb-3">
-                                    <p class="text-sm font-medium text-gray-900 mb-2">Preferred Dates:</p>
+                                    <p class="text-sm font-medium text-gray-900 mb-2">Requested Date and Time:</p>
                                     <div class="space-y-1">
-                                            @foreach(json_decode($consultation->preferred_dates) as $date)
-                                                <div class="flex items-center space-x-2">
-                                                        <input type="radio" 
-                                                            name="selected_date_{{ $consultation->id }}" 
-                                                            value="{{ $date }}"
-                                                            wire:model="selectedDates.{{ $consultation->id }}"
-                                                    class="text-indigo-600 focus:ring-indigo-500 h-3 w-3 border-gray-300">
-                                                <span class="text-xs text-gray-600">
-                                                        {{ \Carbon\Carbon::parse($date)->format('M d, Y g:i A') }}
-                                                    </span>
-                                                </div>
-                                            @endforeach
-                                        </div>
+                                        @php
+                                            $preferredDates = json_decode($consultation->preferred_dates, true);
+                                            $displayDate = null;
+                                            
+                                            // Use start_time if available, otherwise use first preferred date
+                                            if ($consultation->start_time) {
+                                                $displayDate = $consultation->start_time;
+                                            } elseif (!empty($preferredDates) && is_array($preferredDates)) {
+                                                $displayDate = $preferredDates[0];
+                                            } elseif (!empty($preferredDates) && is_string($preferredDates)) {
+                                                $displayDate = $preferredDates;
+                                            }
+                                        @endphp
+                                        
+                                        @if($displayDate)
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-sm text-gray-700 font-medium">
+                                                    {{ \Carbon\Carbon::parse($displayDate)->format('l, F j, Y g:i A') }}
+                                                </span>
+                                            </div>
+                                        @else
+                                            <span class="text-xs text-gray-500">No date/time specified</span>
+                                        @endif
                                     </div>
+                                </div>
                             @elseif($consultation->selected_date)
                                 <div class="mb-3">
                                     <p class="text-sm font-medium text-gray-900">Scheduled:</p>
@@ -501,6 +512,21 @@
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500">Create a new case from this completed consultation and upload the initial contract.</p>
                                 <div class="mt-4 space-y-4">
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700">Select from templates (optional)</label>
+                                                        <select wire:model.live="selectedCaseTitleTemplate" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md">
+                                                            <option value="">-- Choose a law or template --</option>
+                                                            @foreach($caseTitleTemplates as $groupKey => $group)
+                                                                <optgroup label="{{ $group['label'] }}">
+                                                                    @foreach($group['options'] as $opt)
+                                                                        <option value="{{ $opt['value'] }}">{{ $opt['text'] }}</option>
+                                                                    @endforeach
+                                                                </optgroup>
+                                                            @endforeach
+                                                            <option value="__other__">Other (Type Manually)</option>
+                                                        </select>
+                                                        <p class="mt-1 text-xs text-gray-500">Choosing a template auto-fills the title below. You can edit it anytime.</p>
+                                                    </div>
                                     <div>
                                         <label for="caseTitle" class="block text-sm font-medium text-gray-700">Case Title</label>
                                         <input type="text" id="caseTitle" wire:model="caseTitle" 

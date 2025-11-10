@@ -57,6 +57,7 @@ class LawFirmProfile extends Model
         'offers_inhouse_consultation' => 'boolean',
         'show_office_address' => 'boolean',
         'languages' => 'array',
+        'experience' => 'array',
         'allow_lawyer_availability' => 'boolean',
     ];
 

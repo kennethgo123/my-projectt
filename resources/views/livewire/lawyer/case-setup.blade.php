@@ -113,7 +113,7 @@
                 @endif
                 
                 <!-- Finish Setup Button - Only visible when contract is signed but case is not active yet -->
-                @if(!$isReadOnly && $case->contract_status === 'signed' && $case->status !== 'active')
+                @if(!$isReadOnly && ($case->status === \App\Models\LegalCase::STATUS_CONTRACT_SIGNED || ($case->contract_status === 'signed' && $case->status !== 'active')))
                 <button 
                     type="button"
                     wire:click="markSetupComplete"

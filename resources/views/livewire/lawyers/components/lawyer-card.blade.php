@@ -147,8 +147,6 @@
                         No detailed description available.
                     @endif
                 </p>
-
-                
                 
                 @if($lawyer->services->count() > 0)
                     <div class="mt-4 flex flex-wrap gap-2 min-h-[2rem]">

@@ -244,16 +244,24 @@
             </svg>
             PROFESSIONAL EXPERIENCE
         </h4>
-        <div class="prose max-w-none text-gray-700 font-open-sans leading-relaxed">
-            <template x-if="getExperiences().length > 0">
-                <ul class="list-disc list-inside space-y-1">
-                    <template x-for="(exp, idx) in getExperiences()" :key="idx">
-                        <li x-text="exp"></li>
+        <div class="prose max-w-none text-gray-700 font-open-sans leading-relaxed"
+             x-data="{ expArr: [] }"
+             x-init="
+                expArr = Array.isArray(lawyerDetail.experience) 
+                    ? lawyerDetail.experience 
+                    : (typeof lawyerDetail.experience === 'string' 
+                        ? (function(){ try { return JSON.parse(lawyerDetail.experience || '[]') } catch(e){ return [] } })() 
+                        : []);
+             ">
+            <template x-if="expArr.length > 0">
+                <ul class="list-disc pl-5 space-y-1">
+                    <template x-for="(item, idx) in expArr" :key="idx">
+                        <li x-text="item"></li>
                     </template>
                 </ul>
             </template>
-            <template x-if="getExperiences().length === 0">
-                <div>No professional experience information available.</div>
+            <template x-if="expArr.length === 0">
+                <div x-html="(lawyerDetail.experience && typeof lawyerDetail.experience === 'string') ? lawyerDetail.experience : 'No professional experience information available.'"></div>
             </template>
         </div>
     </div>
@@ -274,26 +282,6 @@
             </template>
             <template x-if="!lawyerDetail.services || lawyerDetail.services.length === 0">
                 <p class="text-gray-600 font-open-sans">No services listed.</p>
-            </template>
-        </div>
-    </div>
-
-    <!-- Languages and Dialects section -->
-    <div class="bg-white rounded-xl shadow-sm p-6 border border-emerald-200 hover:shadow-md transition-all duration-300">
-        <h4 class="text-lg font-semibold text-emerald-800 mb-4 font-raleway flex items-center">
-            <svg class="w-5 h-5 mr-2 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 5a2 2 0 012-2h6a2 2 0 012 2H2zM2 9h10a2 2 0 012 2H2a2 2 0 01-2-2zM2 15h14a2 2 0 012 2H2a2 2 0 01-2-2z" />
-            </svg>
-            LANGUAGES AND DIALECTS
-        </h4>
-        <div class="flex flex-wrap gap-2">
-            <template x-if="getLanguages().length > 0">
-                <template x-for="(lang, idx) in getLanguages()" :key="idx">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200" x-text="lang"></span>
-                </template>
-            </template>
-            <template x-if="getLanguages().length === 0">
-                <p class="text-gray-600 font-open-sans">No languages specified.</p>
             </template>
         </div>
     </div>
