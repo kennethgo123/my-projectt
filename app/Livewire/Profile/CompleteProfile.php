@@ -51,11 +51,9 @@ class CompleteProfile extends Component
     public $barangays = [];
     public $firm_barangay;
     public $firm_barangays = [];
-    public $phone;
     public $law_firm_name;
     public $law_firm_description;
     public $law_firm_services = [];
-    public $agreed = false;
 
     protected function rules()
     {
@@ -76,8 +74,6 @@ class CompleteProfile extends Component
                 'valid_id_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
                 'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
                 'barangay' => 'required|string|max:255',
-                'phone' => 'required|string|max:30',
-                'agreed' => 'accepted',
             ];
         } 
         // Lawyer role_id = 3
@@ -100,8 +96,6 @@ class CompleteProfile extends Component
                 'pricing_description' => 'nullable|string|max:1000',
                 'selectedServices' => 'required|array|min:1',
                 'barangay' => 'required|string|max:255',
-                'phone' => 'required|string|max:30',
-                'agreed' => 'accepted',
             ];
         } 
         // Law Firm role_id = 4
@@ -110,7 +104,7 @@ class CompleteProfile extends Component
                 'firm_name' => 'required|string|max:255',
                 'firm_contact_number' => ['required', 'string', 'regex:/^9\d{9}$/'],
                 'firm_address' => 'required|string|max:255',
-                'firm_city' => 'required|string|in:Bacoor,Cavite City,Dasmarinas,General Trias,Imus,Tagaytay,Trece Martires',
+                'firm_city' => 'required|string|max:255',
                 'registration_type' => 'required|string|in:SEC Registration Certificate,DTI Registration Certificate',
                 // Law firms: strictly allow only PDF/JPG/PNG up to 8 MB
                 'registration_certificate_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
@@ -120,8 +114,6 @@ class CompleteProfile extends Component
                 'pricing_description' => 'nullable|string|max:1000',
                 'selectedServices' => 'required|array|min:1',
                 'firm_barangay' => 'required|string|max:255',
-                'law_firm_name' => 'required|string|max:255',
-                'law_firm_description' => 'nullable|string',
             ];
         }
 
@@ -161,7 +153,6 @@ class CompleteProfile extends Component
         'firm_contact_number.regex' => 'The firm contact number must start with 9 and be 10 digits long (e.g., 9171234567).',
         'firm_address.required' => 'The law firm address is required.',
         'firm_city.required' => 'The law firm city is required.',
-        'firm_city.in' => 'Please select a valid city within Cavite.',
         'registration_type.required' => 'Please select a registration type.',
         'registration_type.in' => 'Please select a valid registration type.',
         'registration_certificate_file.required' => 'Please upload your registration certificate.',
@@ -173,9 +164,21 @@ class CompleteProfile extends Component
         'bir_certificate_file.mimes' => 'The BIR certificate must be a PDF, JPG, or PNG file.',
         'bir_certificate_file.max' => 'The BIR certificate may not be greater than 8MB.',
         'barangay.required' => 'Please select a barangay.',
-        'phone.required' => 'Please enter your phone number.',
-        'agreed.accepted' => 'You must agree to the terms and conditions.',
     ];
+
+    public function updatedCity()
+    {
+        Log::info('updatedCity called', ['city' => $this->city]);
+        $this->barangay = '';
+        $this->barangays = $this->getBarangaysByCity($this->city);
+    }
+
+    public function updatedFirmCity()
+    {
+        Log::info('updatedFirmCity called', ['firm_city' => $this->firm_city]);
+        $this->firm_barangay = '';
+        $this->firm_barangays = $this->getBarangaysByCity($this->firm_city);
+    }
 
     public function mount()
     {
@@ -201,7 +204,6 @@ class CompleteProfile extends Component
             $this->pricing_description = $user->profile->pricing_description;
             $this->selectedServices = $user->profile->services->pluck('id')->toArray();
             $this->barangay = $user->profile->barangay;
-            $this->phone = $user->profile->phone;
         }
         if ($user->role_id === 4 && $user->lawFirm) {
             $this->firm_name = $user->lawFirm->name;
@@ -218,6 +220,15 @@ class CompleteProfile extends Component
             $this->firm_barangay = $user->lawFirm->barangay;
             $this->law_firm_name = $user->lawFirm->name;
             $this->law_firm_description = $user->lawFirm->description;
+            // Load barangays if city is already set
+            if ($this->firm_city) {
+                $this->firm_barangays = $this->getBarangaysByCity($this->firm_city);
+            }
+        }
+        
+        // Load barangays if city is already set for clients/lawyers
+        if (($user->role_id == 2 || $user->role_id == 3) && $this->city) {
+            $this->barangays = $this->getBarangaysByCity($this->city);
         }
     }
 
@@ -341,7 +352,6 @@ class CompleteProfile extends Component
                     'valid_id_file' => $validIdFileName,
                     'photo_path' => $photoPath,
                     'barangay' => $this->barangay,
-                    'phone' => $this->phone,
                 ]);
                 Log::info('Client profile created');
 
@@ -438,7 +448,6 @@ class CompleteProfile extends Component
                         'max_budget' => $this->max_budget,
                         'pricing_description' => $this->pricing_description,
                         'barangay' => $this->barangay,
-                        'phone' => $this->phone,
                     ]);
                     Log::info('Lawyer profile created', ['profile_id' => $lawyerProfile->id]);
 
@@ -467,6 +476,14 @@ class CompleteProfile extends Component
                 Log::info('Processing law firm profile');
                 
                 try {
+                    // Set law_firm_name and law_firm_description from firm_name if not set
+                    if (empty($this->law_firm_name)) {
+                        $this->law_firm_name = $this->firm_name;
+                    }
+                    if (empty($this->law_firm_description)) {
+                        $this->law_firm_description = null;
+                    }
+                    
                     $registrationCertificatePath = $this->registration_certificate_file->store('firm_registrations', 'public');
                     $birCertificatePath = $this->bir_certificate_file->store('firm_bir_certificates', 'public');
                     Log::info('Law firm files stored', ['registration' => $registrationCertificatePath, 'bir' => $birCertificatePath]);
@@ -572,21 +589,11 @@ class CompleteProfile extends Component
                 // keep error
             }
         }
-        
-        if ($propertyName === 'city') {
-            Log::info('updated hook: city changed', ['city' => $this->city]);
-            $this->barangay = '';
-            $this->barangays = $this->getBarangaysByCity($this->city);
-        }
 
-        if ($propertyName === 'firm_city') {
-            Log::info('updated hook: firm_city changed', ['firm_city' => $this->firm_city]);
-            $this->firm_barangay = '';
-            $this->firm_barangays = $this->getBarangaysByCity($this->firm_city);
+        if ($propertyName === 'firm_name') {
+            // Sync law_firm_name with firm_name
+            $this->law_firm_name = $this->firm_name;
         }
-        
-        // Optional: Run validation on specific field update (can be noisy)
-        // $this->validateOnly($propertyName);
     }
 
     /**

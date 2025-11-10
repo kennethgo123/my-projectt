@@ -93,7 +93,7 @@
 
                         <div>
                             <label for="city" class="block text-sm font-medium text-gray-700">City</label>
-                            <select wire:model="city" id="city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <select wire:model.live="city" id="city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <option value="">Select City/Municipality</option>
                                 <optgroup label="First District">
                                     <option value="Cavite City">Cavite City</option>
@@ -272,7 +272,7 @@
 
                             <div>
                                 <label for="city" class="block text-sm font-medium text-gray-700">City</label>
-                                <select wire:model="city" id="city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <select wire:model.live="city" id="city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                     <option value="">Select City/Municipality</option>
                                     <optgroup label="First District">
                                         <option value="Cavite City">Cavite City</option>
@@ -498,7 +498,7 @@
 
                             <div>
                                 <label for="firm_city" class="block text-sm font-medium text-gray-700">City</label>
-                                <select wire:model="firm_city" id="firm_city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <select wire:model.live="firm_city" id="firm_city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                     <option value="">Select City/Municipality</option>
                                     <optgroup label="First District">
                                         <option value="Cavite City">Cavite City</option>
