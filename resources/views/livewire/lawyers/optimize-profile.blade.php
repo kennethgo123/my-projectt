@@ -481,14 +481,46 @@
                             <label for="city" class="block text-sm font-medium text-gray-700">City</label>
                             <select id="city" wire:model.live="city" 
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <option value="">Select City</option>
-                                <option value="Bacoor City">Bacoor City</option>
-                                <option value="Cavite City">Cavite City</option>
-                                <option value="Dasmariñas City">Dasmariñas City</option>
-                                <option value="General Trias City">General Trias City</option>
-                                <option value="Imus City">Imus City</option>
-                                <option value="Tagaytay City">Tagaytay City</option>
-                                <option value="Trece Martires City">Trece Martires City</option>
+                                <option value="">Select City/Municipality</option>
+                                <optgroup label="First District">
+                                    <option value="Cavite City">Cavite City</option>
+                                    <option value="Kawit">Kawit</option>
+                                    <option value="Noveleta">Noveleta</option>
+                                    <option value="Rosario">Rosario</option>
+                                </optgroup>
+                                <optgroup label="Second District">
+                                    <option value="City of Bacoor">City of Bacoor</option>
+                                </optgroup>
+                                <optgroup label="Third District">
+                                    <option value="City of Imus">City of Imus</option>
+                                </optgroup>
+                                <optgroup label="Fourth District">
+                                    <option value="City of Dasmariñas">City of Dasmariñas</option>
+                                </optgroup>
+                                <optgroup label="Fifth District">
+                                    <option value="City of Carmona">City of Carmona</option>
+                                    <option value="Silang">Silang</option>
+                                    <option value="General Mariano Alvarez">General Mariano Alvarez</option>
+                                </optgroup>
+                                <optgroup label="Sixth District">
+                                    <option value="City of General Trias">City of General Trias</option>
+                                </optgroup>
+                                <optgroup label="Seventh District">
+                                    <option value="Amadeo">Amadeo</option>
+                                    <option value="Indang">Indang</option>
+                                    <option value="Tanza">Tanza</option>
+                                    <option value="Trece Martires City">Trece Martires City</option>
+                                </optgroup>
+                                <optgroup label="Eighth District">
+                                    <option value="Tagaytay City">Tagaytay City</option>
+                                    <option value="Alfonso">Alfonso</option>
+                                    <option value="General Emilio Aguinaldo">General Emilio Aguinaldo</option>
+                                    <option value="Magallanes">Magallanes</option>
+                                    <option value="Maragondon">Maragondon</option>
+                                    <option value="Mendez">Mendez</option>
+                                    <option value="Naic">Naic</option>
+                                    <option value="Ternate">Ternate</option>
+                                </optgroup>
                             </select>
                             @error('city') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>

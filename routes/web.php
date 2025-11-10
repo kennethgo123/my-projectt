@@ -64,6 +64,10 @@ Route::get('/register', Register::class)->name('register');
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile/complete', CompleteProfile::class)->name('profile.complete');
     Route::get('/profile/pending', function () {
+        // If user is now approved, send them to the dashboard immediately on refresh
+        if (auth()->user() && auth()->user()->status === 'approved') {
+            return redirect()->route('dashboard');
+        }
         return view('profile.pending');
     })->name('profile.pending');
     Route::get('/account/deactivated', function () {
@@ -187,7 +191,7 @@ Route::middleware(['auth', 'verified', 'not.deactivated'])->group(function () {
 
     Route::get('/law-firm/dashboard', function () {
         return view('dashboards.law-firm');
-    })->name('law-firm.dashboard');
+    })->middleware(['profile.completed'])->name('law-firm.dashboard');
 });
 
 // Profile Routes

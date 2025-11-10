@@ -59,7 +59,8 @@ class CompleteProfile extends Component
                 'address' => 'required|string|max:255',
                 'city' => 'required|string|max:255',
                 'valid_id_type' => 'required|string|max:255',
-                'valid_id_file' => 'required|file|mimes:pdf,jpg,jpeg,png,docx|max:8192',
+                // Clients: strictly allow only PDF/JPG/PNG up to 8 MB
+                'valid_id_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
                 'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             ];
         } 
@@ -73,9 +74,11 @@ class CompleteProfile extends Component
                 'address' => 'required|string|max:255',
                 'city' => 'required|string|max:255',
                 'valid_id_type' => 'required|string|max:255',
-                'valid_id_file' => 'required|file|mimes:pdf,jpg,jpeg,png,docx|max:8192',
+                // Lawyers: strictly allow only PDF/JPG/PNG up to 8 MB
+                'valid_id_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
                 'bar_admission_type' => 'required|string|max:255',
-                'bar_admission_file' => 'required|file|mimes:pdf,jpg,jpeg,png,docx|max:8192',
+                // Lawyers: strictly allow only PDF/JPG/PNG up to 8 MB
+                'bar_admission_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
                 'min_budget' => 'required|numeric|min:0',
                 'max_budget' => 'required|numeric|gt:min_budget',
                 'pricing_description' => 'nullable|string|max:1000',
@@ -90,8 +93,9 @@ class CompleteProfile extends Component
                 'firm_address' => 'required|string|max:255',
                 'firm_city' => 'required|string|in:Bacoor,Cavite City,Dasmarinas,General Trias,Imus,Tagaytay,Trece Martires',
                 'registration_type' => 'required|string|in:SEC Registration Certificate,DTI Registration Certificate',
-                'registration_certificate_file' => 'required|file|mimes:pdf,jpg,jpeg,png,docx|max:8192',
-                'bir_certificate_file' => 'required|file|mimes:pdf,jpg,jpeg,png,docx|max:8192',
+                // Law firms: strictly allow only PDF/JPG/PNG up to 8 MB
+                'registration_certificate_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
+                'bir_certificate_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
                 'min_budget' => 'required|numeric|min:0',
                 'max_budget' => 'required|numeric|gt:min_budget',
                 'pricing_description' => 'nullable|string|max:1000',
@@ -112,7 +116,7 @@ class CompleteProfile extends Component
         'valid_id_type.required' => 'Please select a valid ID type.',
         'valid_id_file.required' => 'Please upload a file for your valid ID.',
         'valid_id_file.file' => 'The valid ID must be a file.',
-        'valid_id_file.mimes' => 'The valid ID must be a file of type: pdf, jpg, jpeg, png, docx.',
+        'valid_id_file.mimes' => 'The valid ID must be a PDF, JPG, or PNG file.',
         'valid_id_file.max' => 'The valid ID file may not be greater than 8MB.',
         'photo.image' => 'The profile photo must be an image.',
         'photo.mimes' => 'The profile photo must be a file of type: jpg, jpeg, png.',
@@ -120,7 +124,7 @@ class CompleteProfile extends Component
         'bar_admission_type.required' => 'Please select a bar admission type.',
         'bar_admission_file.required' => 'Please upload your bar admission file.',
         'bar_admission_file.file' => 'The bar admission document must be a file.',
-        'bar_admission_file.mimes' => 'The bar admission file must be of type: pdf, jpg, jpeg, png, docx.',
+        'bar_admission_file.mimes' => 'The bar admission file must be a PDF, JPG, or PNG file.',
         'bar_admission_file.max' => 'The bar admission file may not be greater than 8MB.',
         'min_budget.required' => 'Minimum budget is required.',
         'min_budget.numeric' => 'Minimum budget must be a number.',
@@ -140,11 +144,11 @@ class CompleteProfile extends Component
         'registration_type.in' => 'Please select a valid registration type.',
         'registration_certificate_file.required' => 'Please upload your registration certificate.',
         'registration_certificate_file.file' => 'The registration certificate must be a file.',
-        'registration_certificate_file.mimes' => 'The registration certificate must be of type: pdf, jpg, jpeg, png, docx.',
+        'registration_certificate_file.mimes' => 'The registration certificate must be a PDF, JPG, or PNG file.',
         'registration_certificate_file.max' => 'The registration certificate may not be greater than 8MB.',
         'bir_certificate_file.required' => 'Please upload your BIR certificate.',
         'bir_certificate_file.file' => 'The BIR certificate must be a file.',
-        'bir_certificate_file.mimes' => 'The BIR certificate must be of type: pdf, jpg, jpeg, png, docx.',
+        'bir_certificate_file.mimes' => 'The BIR certificate must be a PDF, JPG, or PNG file.',
         'bir_certificate_file.max' => 'The BIR certificate may not be greater than 8MB.',
     ];
 
@@ -450,7 +454,7 @@ class CompleteProfile extends Component
     {
         return view('livewire.profile.complete-profile', [
             'services' => LegalService::where('status', 'active')->get()
-        ])->layout('layouts.guest');
+        ])->layout('layouts.app');
     }
 
     /**
@@ -461,22 +465,43 @@ class CompleteProfile extends Component
         // Handle file uploads explicitly to ensure properties are set
         if ($propertyName === 'valid_id_file') {
             Log::info('updated hook: valid_id_file changed', ['has_file' => !is_null($this->valid_id_file)]);
-            // No action needed beyond logging, Livewire handles the temp file
+            // Clear upload_error if the new file passes validation
+            try {
+                $this->validateOnly('valid_id_file', $this->rules());
+                session()->forget('upload_error');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                // keep error
+            }
         }
         
         if ($propertyName === 'bar_admission_file') {
             Log::info('updated hook: bar_admission_file changed', ['has_file' => !is_null($this->bar_admission_file)]);
-            // No action needed beyond logging
+            try {
+                $this->validateOnly('bar_admission_file', $this->rules());
+                session()->forget('upload_error');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                // keep error
+            }
         }
         
         if ($propertyName === 'registration_certificate_file') {
             Log::info('updated hook: registration_certificate_file changed', ['has_file' => !is_null($this->registration_certificate_file)]);
-            // No action needed beyond logging
+            try {
+                $this->validateOnly('registration_certificate_file', $this->rules());
+                session()->forget('upload_error');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                // keep error
+            }
         }
         
         if ($propertyName === 'bir_certificate_file') {
             Log::info('updated hook: bir_certificate_file changed', ['has_file' => !is_null($this->bir_certificate_file)]);
-            // No action needed beyond logging
+            try {
+                $this->validateOnly('bir_certificate_file', $this->rules());
+                session()->forget('upload_error');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                // keep error
+            }
         }
         
         // Optional: Run validation on specific field update (can be noisy)

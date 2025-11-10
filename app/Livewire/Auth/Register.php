@@ -26,7 +26,16 @@ class Register extends Component
     {
         return [
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            // Password: at least 12 chars, 1 uppercase, 1 number, 1 special char
+            'password' => [
+                'required',
+                'string',
+                'min:12',
+                'regex:/[A-Z]/',          // at least 1 uppercase
+                'regex:/[0-9]/',          // at least 1 number
+                'regex:/[@$!%*#?&^()_+\\-={}\\[\\]:;"\'<>,.~`|\\\\\\/]/', // at least 1 special
+                'confirmed'
+            ],
             'selectedRole' => ['required', 'exists:roles,id'],
             'agreeTerms' => ['required', 'accepted'],
         ];

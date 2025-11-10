@@ -69,6 +69,7 @@ class OptimizeProfile extends Component
     {
         // Reset barangay when city changes
         $this->barangay = '';
+        $this->barangays = $this->getBarangaysByCity($this->city);
     }
 
     public function addExperience()
@@ -95,6 +96,7 @@ class OptimizeProfile extends Component
     public $office_address = '';
     public $city = '';
     public $barangay = '';
+    public $barangays = [];
     public $lat = null;
     public $lng = null;
     public $show_office_address = false;
@@ -126,6 +128,7 @@ class OptimizeProfile extends Component
             $this->office_address = $profile->office_address ?? '';
             $this->city = $profile->city ?? '';
             $this->barangay = $profile->barangay ?? '';
+            $this->barangays = $this->getBarangaysByCity($this->city);
             $this->lat = $profile->lat;
             $this->lng = $profile->lng;
             $this->show_office_address = $profile->show_office_address ?? false;
@@ -166,6 +169,7 @@ class OptimizeProfile extends Component
             $this->office_address = $profile->office_address ?? '';
             $this->city = $profile->city ?? '';
             $this->barangay = $profile->barangay ?? '';
+            $this->barangays = $this->getBarangaysByCity($this->city);
             $this->lat = $profile->lat;
             $this->lng = $profile->lng;
             $this->show_office_address = $profile->show_office_address ?? false;
@@ -455,5 +459,23 @@ class OptimizeProfile extends Component
     {
         return view('livewire.lawyers.optimize-profile')
             ->layout('layouts.app');
+    }
+
+    private function getBarangaysByCity(string $city): array
+    {
+        // Delegate to the LawFirm OptimizeProfile mapping
+        $lawFirmOptimize = new \App\Livewire\LawFirm\OptimizeProfile();
+        // Use reflection to access private method if necessary
+        try {
+            $ref = new \ReflectionClass($lawFirmOptimize);
+            if ($ref->hasMethod('getBarangaysByCity')) {
+                $method = $ref->getMethod('getBarangaysByCity');
+                $method->setAccessible(true);
+                return $method->invoke($lawFirmOptimize, $city);
+            }
+        } catch (\Throwable $e) {
+            // Fallback to empty
+        }
+        return [];
     }
 } 

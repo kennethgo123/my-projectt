@@ -158,46 +158,71 @@
                         @error('achievements') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Languages -->
+                    <!-- Languages (mirrors lawyers optimize profile) -->
                     <div>
-                        <x-label for="languages" value="Languages" />
-                        <div class="mt-2 space-y-2">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_english" wire:model="languages" value="English" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_english" class="ml-2 text-sm text-gray-700">English</label>
+                        <x-label for="languages" value="Languages and Dialects" />
+                        <p class="text-sm text-gray-500 mb-2">Select all that apply, or add your own</p>
+                        <div class="mt-2 space-y-3">
+                            <!-- Default selectable languages as toggle buttons -->
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($defaultLanguages as $lang)
+                                    @php $isSelected = in_array($lang, $languages ?? [], true); @endphp
+                                    <button type="button"
+                                            wire:click="toggleLanguage('{{ $lang }}')"
+                                            class="px-3 py-1.5 text-sm rounded-full border transition
+                                                   {{ $isSelected ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}">
+                                        {{ $lang }}
+                                        @if($isSelected)
+                                            <svg class="inline w-4 h-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                            </svg>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+
+                            <!-- Selected list with remove -->
+                            @if(!empty($languages))
+                                <div class="pt-2 space-y-2">
+                                    @foreach($languages as $index => $language)
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm text-gray-700">
+                                                {{ $language }}
+                                            </div>
+                                            <button type="button" wire:click="removeLanguage({{ $index }})" 
+                                                class="px-3 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-300 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_filipino" wire:model="languages" value="Filipino (Tagalog)" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_filipino" class="ml-2 text-sm text-gray-700">Filipino (Tagalog)</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_cebuano" wire:model="languages" value="Cebuano" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_cebuano" class="ml-2 text-sm text-gray-700">Cebuano</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_ilocano" wire:model="languages" value="Ilocano" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_ilocano" class="ml-2 text-sm text-gray-700">Ilocano</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_waray" wire:model="languages" value="Waray" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_waray" class="ml-2 text-sm text-gray-700">Waray</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_kapampangan" wire:model="languages" value="Kapampangan" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_kapampangan" class="ml-2 text-sm text-gray-700">Kapampangan</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="lang_pangasinan" wire:model="languages" value="Pangasinan" 
-                                        class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                    <label for="lang_pangasinan" class="ml-2 text-sm text-gray-700">Pangasinan</label>
-                                </div>
+                            @endif
+                            
+                            <!-- Add custom language -->
+                            <div class="mt-2">
+                                @if(!$showAddLanguageInput)
+                                    <button type="button"
+                                            wire:click="$set('showAddLanguageInput', true)"
+                                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                        + Add another language/dialect
+                                    </button>
+                                @else
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" wire:model.live="newLanguage" 
+                                            placeholder="Enter language or dialect"
+                                            class="flex-1 shadow-sm block border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            autofocus
+                                            wire:keydown.enter.prevent="addLanguage">
+                                        <button type="button" wire:click="addLanguage" 
+                                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            Add
+                                        </button>
+                                        <button type="button" wire:click="$set('showAddLanguageInput', false)" 
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         @error('languages') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -222,7 +247,7 @@
                         </div>
                     </div>
 
-                    <!-- Office Address Section -->
+                    <!-- Office Address & Location -->
                     <div>
                         <x-label for="office_address" value="Office Address" />
                         <p class="text-sm text-gray-500 mb-2">This will be shown to clients when you accept their consultation request</p>
@@ -232,6 +257,70 @@
                                 placeholder="Enter your complete office address including building name, street, city, etc."></textarea>
                         </div>
                         @error('office_address') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+
+                        <!-- City / Municipality -->
+                        <div class="mt-4">
+                            <label for="city" class="block text-sm font-medium text-gray-700">City / Municipality</label>
+                            <select id="city" wire:model.live="city" 
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">Select City/Municipality</option>
+                                <optgroup label="First District">
+                                    <option value="Cavite City">Cavite City</option>
+                                    <option value="Kawit">Kawit</option>
+                                    <option value="Noveleta">Noveleta</option>
+                                    <option value="Rosario">Rosario</option>
+                                </optgroup>
+                                <optgroup label="Second District">
+                                    <option value="City of Bacoor">City of Bacoor</option>
+                                </optgroup>
+                                <optgroup label="Third District">
+                                    <option value="City of Imus">City of Imus</option>
+                                </optgroup>
+                                <optgroup label="Fourth District">
+                                    <option value="City of Dasmariñas">City of Dasmariñas</option>
+                                </optgroup>
+                                <optgroup label="Fifth District">
+                                    <option value="City of Carmona">City of Carmona</option>
+                                    <option value="Silang">Silang</option>
+                                    <option value="General Mariano Alvarez">General Mariano Alvarez</option>
+                                </optgroup>
+                                <optgroup label="Sixth District">
+                                    <option value="City of General Trias">City of General Trias</option>
+                                </optgroup>
+                                <optgroup label="Seventh District">
+                                    <option value="Amadeo">Amadeo</option>
+                                    <option value="Indang">Indang</option>
+                                    <option value="Tanza">Tanza</option>
+                                    <option value="Trece Martires City">Trece Martires City</option>
+                                </optgroup>
+                                <optgroup label="Eighth District">
+                                    <option value="Tagaytay City">Tagaytay City</option>
+                                    <option value="Alfonso">Alfonso</option>
+                                    <option value="General Emilio Aguinaldo">General Emilio Aguinaldo</option>
+                                    <option value="Magallanes">Magallanes</option>
+                                    <option value="Maragondon">Maragondon</option>
+                                    <option value="Mendez">Mendez</option>
+                                    <option value="Naic">Naic</option>
+                                    <option value="Ternate">Ternate</option>
+                                </optgroup>
+                            </select>
+                            @error('city') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <!-- Barangay -->
+                        @if($city)
+                        <div class="mt-4">
+                            <label for="barangay" class="block text-sm font-medium text-gray-700">Barangay</label>
+                            <select id="barangay" wire:model="barangay" 
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">Select Barangay</option>
+                                @foreach($barangays as $brgy)
+                                    <option value="{{ $brgy }}">{{ $brgy }}</option>
+                                @endforeach
+                            </select>
+                            @error('barangay') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        @endif
 
                         <div class="mt-3 flex items-center">
                             <input type="checkbox" id="show_office_address" wire:model="show_office_address" 
