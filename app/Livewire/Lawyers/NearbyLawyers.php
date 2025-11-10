@@ -219,7 +219,15 @@ class NearbyLawyers extends Component
         
         // Apply language filter
         if (!empty($this->selectedLanguage)) {
-            $lawyersQuery->whereJsonContains('languages', $this->selectedLanguage);
+            $lang = $this->selectedLanguage;
+            $lawyersQuery->where(function($q) use ($lang) {
+                // Primary: JSON contains exact value
+                $q->whereJsonContains('languages', $lang)
+                  // Fallback: string column containing the value in JSON text
+                  ->orWhere('languages', 'like', '%"'.$lang.'"%')
+                  // Extra fallback: plain LIKE (handles edge cases)
+                  ->orWhere('languages', 'like', '%'.$lang.'%');
+            });
         }
         
         // Apply rating filter for lawyers
@@ -281,7 +289,12 @@ class NearbyLawyers extends Component
         
         // Apply language filter
         if (!empty($this->selectedLanguage)) {
-            $lawFirmsQuery->whereJsonContains('languages', $this->selectedLanguage);
+            $lang = $this->selectedLanguage;
+            $lawFirmsQuery->where(function($q) use ($lang) {
+                $q->whereJsonContains('languages', $lang)
+                  ->orWhere('languages', 'like', '%"'.$lang.'"%')
+                  ->orWhere('languages', 'like', '%'.$lang.'%');
+            });
         }
         
         // Apply rating filter for law firms
@@ -340,7 +353,12 @@ class NearbyLawyers extends Component
 
         // Apply language filter
         if (!empty($this->selectedLanguage)) {
-            $lawFirmLawyersQuery->whereJsonContains('languages', $this->selectedLanguage);
+            $lang = $this->selectedLanguage;
+            $lawFirmLawyersQuery->where(function($q) use ($lang) {
+                $q->whereJsonContains('languages', $lang)
+                  ->orWhere('languages', 'like', '%"'.$lang.'"%')
+                  ->orWhere('languages', 'like', '%'.$lang.'%');
+            });
         }
 
         // Apply service filter

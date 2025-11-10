@@ -26,6 +26,16 @@ class OptimizeProfile extends Component
     public $achievements = '';
     public $languages = [];
     public $newLanguage = '';
+    public $showAddLanguageInput = false;
+    public $defaultLanguages = [
+        'English',
+        'Filipino (Tagalog)',
+        'Cebuano',
+        'Ilocano',
+        'Waray',
+        'Kapampangan',
+        'Pangasinan',
+    ];
     public $newExperience = '';
     
     public function addLanguage()
@@ -33,6 +43,7 @@ class OptimizeProfile extends Component
         if (!empty($this->newLanguage)) {
             $this->languages[] = trim($this->newLanguage);
             $this->newLanguage = '';
+            $this->showAddLanguageInput = false;
         }
     }
     
@@ -40,6 +51,18 @@ class OptimizeProfile extends Component
     {
         unset($this->languages[$index]);
         $this->languages = array_values($this->languages);
+    }
+    
+    public function toggleLanguage($language)
+    {
+        $language = trim($language);
+        $index = array_search($language, $this->languages, true);
+        if ($index === false) {
+            $this->languages[] = $language;
+        } else {
+            unset($this->languages[$index]);
+            $this->languages = array_values($this->languages);
+        }
     }
     
     public function updatedCity()

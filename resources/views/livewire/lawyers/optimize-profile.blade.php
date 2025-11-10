@@ -8,7 +8,6 @@
     .leaflet-control-geosearch { 
         margin-top: 70px !important;
     }
-    .search-control { display: none; }
 </style>
 @endpush
 
@@ -150,7 +149,7 @@
                         <!-- University selection -->
                         <div class="mt-2">
                             <label for="selectedUniversity" class="block text-sm font-medium text-gray-700">Law School / University</label>
-                            <select id="selectedUniversity" wire:model="selectedUniversity" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <select id="selectedUniversity" wire:model.live="selectedUniversity" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <option value="">Select your law school</option>
                                 <optgroup label="METRO MANILA — Quezon City">
                                     <option value="Ateneo de Manila University School of Law">Ateneo de Manila University School of Law</option>
@@ -267,11 +266,11 @@
                             </select>
                         </div>
 
-                        <!-- Custom university input -->
+                        <!-- Custom university input (appears immediately when selecting OTHER) -->
                         @if($selectedUniversity === 'OTHER')
                         <div class="mt-2">
                             <label for="customUniversity" class="block text-sm font-medium text-gray-700">Enter your university</label>
-                            <input type="text" id="customUniversity" wire:model="customUniversity" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Type your university name">
+                            <input type="text" id="customUniversity" wire:model.live="customUniversity" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Type your university name" autofocus>
                         </div>
                         @endif
 
@@ -355,11 +354,29 @@
                     <!-- Languages and Dialects -->
                     <div>
                         <x-label for="languages" value="Languages and Dialects" />
-                        <p class="text-sm text-gray-500 mb-2">Add languages or dialects you speak</p>
+                        <p class="text-sm text-gray-500 mb-2">Select all that apply, or add your own</p>
                         <div class="mt-2 space-y-3">
-                            <!-- Display existing languages -->
+                            <!-- Default selectable languages (radio-styled multi-select buttons) -->
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($defaultLanguages as $lang)
+                                    @php $isSelected = in_array($lang, $languages, true); @endphp
+                                    <button type="button"
+                                            wire:click="toggleLanguage('{{ $lang }}')"
+                                            class="px-3 py-1.5 text-sm rounded-full border transition
+                                                   {{ $isSelected ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50' }}">
+                                        {{ $lang }}
+                                        @if($isSelected)
+                                            <svg class="inline w-4 h-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                            </svg>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+
+                            <!-- Show currently selected (including custom) with remove -->
                             @if(count($languages) > 0)
-                                <div class="space-y-2">
+                                <div class="pt-2 space-y-2">
                                     @foreach($languages as $index => $language)
                                         <div class="flex items-center gap-2">
                                             <div class="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm text-gray-700">
@@ -374,19 +391,31 @@
                                 </div>
                             @endif
                             
-                            <!-- Add new language input -->
-                            <div class="flex items-center gap-2">
-                                <input type="text" wire:model="newLanguage" 
-                                    placeholder="Enter language or dialect"
-                                    class="flex-1 shadow-sm block border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                    wire:keydown.enter.prevent="addLanguage">
-                                <button type="button" wire:click="addLanguage" 
-                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                    Add
-                                </button>
+                            <!-- Add custom language -->
+                            <div class="mt-2">
+                                @if(!$showAddLanguageInput)
+                                    <button type="button"
+                                            wire:click="$set('showAddLanguageInput', true)"
+                                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                        + Add another language/dialect
+                                    </button>
+                                @else
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" wire:model.live="newLanguage" 
+                                            placeholder="Enter language or dialect"
+                                            class="flex-1 shadow-sm block border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            autofocus
+                                            wire:keydown.enter.prevent="addLanguage">
+                                        <button type="button" wire:click="addLanguage" 
+                                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            Add
+                                        </button>
+                                        <button type="button" wire:click="$set('showAddLanguageInput', false)" 
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         @error('languages') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -545,19 +574,6 @@
                         <input type="hidden" id="lat" wire:model="lat">
                         <input type="hidden" id="lng" wire:model="lng">
                         
-                        <!-- Search box -->
-                        <div class="mb-4">
-                            <div class="flex">
-                                <input type="text" id="map-search" 
-                                    class="shadow-sm block w-full border-gray-300 rounded-l-md focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Search for your location...">
-                                <button type="button" id="search-button"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-r-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    Search
-                                </button>
-                            </div>
-                        </div>
-                        
                         <!-- Map container -->
                         <div id="map-container" class="h-96 rounded-md overflow-hidden shadow-md border border-gray-300 relative"></div>
                         
@@ -602,8 +618,6 @@
     // Function to initialize interactive location map
     function initializeLocationMap() {
         const mapContainer = document.getElementById('map-container');
-        const searchInput = document.getElementById('map-search');
-        const searchButton = document.getElementById('search-button');
         const latInput = document.getElementById('lat');
         const lngInput = document.getElementById('lng');
         const coordinatesDisplay = document.getElementById('coordinates-display');
@@ -641,10 +655,7 @@
             retainZoomLevel: false,
             animateZoom: true,
             autoComplete: true,
-            autoCompleteDelay: 250,
-            classNames: {
-                container: 'search-control'
-            }
+            autoCompleteDelay: 250
         });
         
         map.addControl(searchControl);
@@ -751,53 +762,13 @@
         // Handle initial accuracy indicator
         updateAccuracyIndicator(map.getZoom());
         
-        // Handle search button clicks
-        searchButton.addEventListener('click', function() {
-            const searchTerm = searchInput.value.trim();
-            if (searchTerm) {
-                // Call the provider directly
-                provider.search({ query: searchTerm }).then(results => {
-                    if (results && results.length > 0) {
-                        const result = results[0];
-                        const searchLat = result.y;
-                        const searchLng = result.x;
-                        
-                        // Center map on result
-                        map.setView([searchLat, searchLng], 18);
-                        
-                        // If marker already exists, move it
-                        if (marker) {
-                            marker.setLatLng([searchLat, searchLng]);
-                        } else {
-                            // Otherwise create new marker
-                            marker = L.marker([searchLat, searchLng], {
-                                draggable: true
-                            }).addTo(map);
-                            
-                            // Setup marker events
-                            setupMarkerEvents();
-                        }
-                        
-                        // Update display
-                        updateCoordinatesDisplay(searchLat, searchLng);
-                    } else {
-                        alert('No results found for your search. Please try a different search term.');
-                    }
-                });
-            }
-        });
-        
-        // Handle Enter key in search input
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                searchButton.click();
-            }
-        });
+        // External search removed; using built-in map search control
     }
 
     // Profile Photo Handling and Cropping
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map reliably once DOM is ready
+        setTimeout(initializeLocationMap, 0);
         const photoUpload = document.getElementById('photo-upload');
         const previewImage = document.getElementById('preview-image');
         const cropperModal = document.getElementById('cropper-modal');
@@ -968,6 +939,8 @@
         // 1. Livewire v3 style event listener
         document.addEventListener('livewire:initialized', () => {
             console.log('Livewire initialized, setting up event listeners');
+            // Re-init map after Livewire initializes (helps when component is re-rendered)
+            setTimeout(initializeLocationMap, 0);
             
             Livewire.on('photo-selected', (event) => {
                 console.log('Received photo-selected event:', event);
