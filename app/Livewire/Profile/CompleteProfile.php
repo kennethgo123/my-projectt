@@ -11,6 +11,8 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class CompleteProfile extends Component
 {
@@ -44,6 +46,17 @@ class CompleteProfile extends Component
     public $registration_certificate_file;
     public $bir_certificate_file;
 
+    // New fields for dynamic barangay support
+    public $barangay;
+    public $barangays = [];
+    public $firm_barangay;
+    public $firm_barangays = [];
+    public $phone;
+    public $law_firm_name;
+    public $law_firm_description;
+    public $law_firm_services = [];
+    public $agreed = false;
+
     protected function rules()
     {
         $rules = [];
@@ -62,6 +75,9 @@ class CompleteProfile extends Component
                 // Clients: strictly allow only PDF/JPG/PNG up to 8 MB
                 'valid_id_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:8192',
                 'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'barangay' => 'required|string|max:255',
+                'phone' => 'required|string|max:30',
+                'agreed' => 'accepted',
             ];
         } 
         // Lawyer role_id = 3
@@ -83,6 +99,9 @@ class CompleteProfile extends Component
                 'max_budget' => 'required|numeric|gt:min_budget',
                 'pricing_description' => 'nullable|string|max:1000',
                 'selectedServices' => 'required|array|min:1',
+                'barangay' => 'required|string|max:255',
+                'phone' => 'required|string|max:30',
+                'agreed' => 'accepted',
             ];
         } 
         // Law Firm role_id = 4
@@ -100,6 +119,9 @@ class CompleteProfile extends Component
                 'max_budget' => 'required|numeric|gt:min_budget',
                 'pricing_description' => 'nullable|string|max:1000',
                 'selectedServices' => 'required|array|min:1',
+                'firm_barangay' => 'required|string|max:255',
+                'law_firm_name' => 'required|string|max:255',
+                'law_firm_description' => 'nullable|string',
             ];
         }
 
@@ -150,6 +172,9 @@ class CompleteProfile extends Component
         'bir_certificate_file.file' => 'The BIR certificate must be a file.',
         'bir_certificate_file.mimes' => 'The BIR certificate must be a PDF, JPG, or PNG file.',
         'bir_certificate_file.max' => 'The BIR certificate may not be greater than 8MB.',
+        'barangay.required' => 'Please select a barangay.',
+        'phone.required' => 'Please enter your phone number.',
+        'agreed.accepted' => 'You must agree to the terms and conditions.',
     ];
 
     public function mount()
@@ -158,6 +183,42 @@ class CompleteProfile extends Component
             return redirect()->route('dashboard');
         }
         $this->services = LegalService::where('status', 'active')->get();
+
+        $user = Auth::user();
+        if ($user->profile) {
+            $this->first_name = $user->profile->first_name;
+            $this->middle_name = $user->profile->middle_name;
+            $this->last_name = $user->profile->last_name;
+            $this->contact_number = $user->profile->contact_number;
+            $this->address = $user->profile->address;
+            $this->city = $user->profile->city;
+            $this->valid_id_type = $user->profile->valid_id_type;
+            $this->valid_id_file = $user->profile->valid_id_file;
+            $this->bar_admission_type = $user->profile->bar_admission_type;
+            $this->bar_admission_file = $user->profile->bar_admission_file;
+            $this->min_budget = $user->profile->min_budget;
+            $this->max_budget = $user->profile->max_budget;
+            $this->pricing_description = $user->profile->pricing_description;
+            $this->selectedServices = $user->profile->services->pluck('id')->toArray();
+            $this->barangay = $user->profile->barangay;
+            $this->phone = $user->profile->phone;
+        }
+        if ($user->role_id === 4 && $user->lawFirm) {
+            $this->firm_name = $user->lawFirm->name;
+            $this->firm_contact_number = $user->lawFirm->contact_number;
+            $this->firm_address = $user->lawFirm->address;
+            $this->firm_city = $user->lawFirm->city;
+            $this->registration_type = $user->lawFirm->registration_type;
+            $this->registration_certificate_file = $user->lawFirm->registration_certificate_file;
+            $this->bir_certificate_file = $user->lawFirm->bir_certificate_file;
+            $this->min_budget = $user->lawFirm->min_budget;
+            $this->max_budget = $user->lawFirm->max_budget;
+            $this->pricing_description = $user->lawFirm->pricing_description;
+            $this->selectedServices = $user->lawFirm->services->pluck('id')->toArray();
+            $this->firm_barangay = $user->lawFirm->barangay;
+            $this->law_firm_name = $user->lawFirm->name;
+            $this->law_firm_description = $user->lawFirm->description;
+        }
     }
 
     public function submit()
@@ -279,6 +340,8 @@ class CompleteProfile extends Component
                     'valid_id_type' => $this->valid_id_type,
                     'valid_id_file' => $validIdFileName,
                     'photo_path' => $photoPath,
+                    'barangay' => $this->barangay,
+                    'phone' => $this->phone,
                 ]);
                 Log::info('Client profile created');
 
@@ -374,6 +437,8 @@ class CompleteProfile extends Component
                         'min_budget' => $this->min_budget,
                         'max_budget' => $this->max_budget,
                         'pricing_description' => $this->pricing_description,
+                        'barangay' => $this->barangay,
+                        'phone' => $this->phone,
                     ]);
                     Log::info('Lawyer profile created', ['profile_id' => $lawyerProfile->id]);
 
@@ -417,6 +482,10 @@ class CompleteProfile extends Component
                         'bir_certificate_file' => $birCertificatePath,
                         'min_budget' => $this->min_budget,
                         'max_budget' => $this->max_budget,
+                        'pricing_description' => $this->pricing_description,
+                        'barangay' => $this->firm_barangay,
+                        'name' => $this->law_firm_name,
+                        'description' => $this->law_firm_description,
                     ]);
                     Log::info('Law firm profile created', ['profile_id' => $lawFirmProfile->id]);
 
@@ -504,6 +573,18 @@ class CompleteProfile extends Component
             }
         }
         
+        if ($propertyName === 'city') {
+            Log::info('updated hook: city changed', ['city' => $this->city]);
+            $this->barangay = '';
+            $this->barangays = $this->getBarangaysByCity($this->city);
+        }
+
+        if ($propertyName === 'firm_city') {
+            Log::info('updated hook: firm_city changed', ['firm_city' => $this->firm_city]);
+            $this->firm_barangay = '';
+            $this->firm_barangays = $this->getBarangaysByCity($this->firm_city);
+        }
+        
         // Optional: Run validation on specific field update (can be noisy)
         // $this->validateOnly($propertyName);
     }
@@ -543,5 +624,12 @@ class CompleteProfile extends Component
             session()->flash('upload_error', 'There was a problem uploading your file: ' . $fileException->getMessage());
             throw $fileException;
         }
+    }
+
+    private function getBarangaysByCity(?string $city): array
+    {
+        if (!$city) return [];
+        $lf = new \App\Livewire\LawFirm\OptimizeProfile();
+        return $lf->getBarangaysByCity($city) ?? [];
     }
 } 

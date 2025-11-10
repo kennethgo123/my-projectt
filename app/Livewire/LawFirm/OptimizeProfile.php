@@ -102,10 +102,9 @@ class OptimizeProfile extends Component
         $this->languages = array_values($this->languages);
     }
 
-    private function getBarangaysByCity(string $city): array
+    public function getBarangaysByCity(string $city): array
     {
         $map = [
-            // Alfonso
             'Alfonso' => [
                 'Amuyong','Barangay I','Barangay II','Barangay III','Barangay IV','Barangay V','Bilog','Buck Estate',
                 'Esperanza Ibaba','Esperanza Ilaya','Kaysuyo','Kaytitinga I','Kaytitinga II','Kaytitinga III',
@@ -113,15 +112,13 @@ class OptimizeProfile extends Component
                 'Pajo','Palumlum','Santa Teresa','Sikat','Sinaliw Malaki','Sinaliw na Munti','Sulsugin',
                 'Taywanak Ibaba','Taywanak Ilaya','Upli',
             ],
-            // Amadeo
             'Amadeo' => [
                 'Banaybanay','Barangay I','Barangay II','Barangay III','Barangay IV','Barangay IX','Barangay V',
                 'Barangay VI','Barangay VII','Barangay VIII','Barangay X','Barangay XI','Barangay XII','Bucal','Buho',
                 'Dagatan','Halang','Loma','Maitim I','Maymangga','Minantok Kanluran','Minantok Silangan','Pangil',
                 'Salaban','Talon','Tamacan',
             ],
-            // Bacoor (City of Bacoor)
-            'City of Bacoor' => [
+            'Bacoor' => [
                 'Alima','Aniban I','Aniban II','Aniban III','Aniban IV','Aniban V','Banalo','Bayanan','Campo Santo',
                 'Daang Bukid','Digman','Dulong Bayan','Habay I','Habay II','Kaingin','Ligas I','Ligas II','Ligas III',
                 'Mabolo I','Mabolo II','Mabolo III','Maliksi I','Maliksi II','Maliksi III','Mambog I','Mambog II',
@@ -133,12 +130,10 @@ class OptimizeProfile extends Component
                 'Sineguelasan','Tabing Dagat','Talaba I','Talaba II','Talaba III','Talaba IV','Talaba V','Talaba VI',
                 'Talaba VII','Zapote I','Zapote II','Zapote III','Zapote IV','Zapote V',
             ],
-            // City of Carmona
-            'City of Carmona' => [
+            'Carmona' => [
                 'Bancal','Barangay 1','Barangay 2','Barangay 3','Barangay 4','Barangay 5','Barangay 6','Barangay 7',
                 'Barangay 8','Cabilang Baybay','Lantic','Mabuhay','Maduya','Milagrosa',
             ],
-            // Cavite City
             'Cavite City' => [
                 'Barangay 1','Barangay 10','Barangay 10-A','Barangay 10-B','Barangay 11','Barangay 12','Barangay 13',
                 'Barangay 14','Barangay 15','Barangay 16','Barangay 17','Barangay 18','Barangay 19','Barangay 2',
@@ -154,8 +149,7 @@ class OptimizeProfile extends Component
                 'Barangay 61','Barangay 61-A','Barangay 62','Barangay 62-A','Barangay 62-B','Barangay 7','Barangay 8',
                 'Barangay 9',
             ],
-            // City of Dasmariñas
-            'City of Dasmariñas' => [
+            'Dasmariñas' => [
                 'Burol','Burol I','Burol II','Burol III','Datu Esmael','Emmanuel Bergado I','Emmanuel Bergado II',
                 'Fatima I','Fatima II','Fatima III','H-2','Langkaan I','Langkaan II','Luzviminda I','Luzviminda II',
                 'Paliparan I','Paliparan II','Paliparan III','Sabang','Saint Peter I','Saint Peter II','Salawag',
@@ -169,12 +163,10 @@ class OptimizeProfile extends Component
                 'Santa Lucia','Santa Maria','Santo Cristo','Santo Niño I','Santo Niño II','Victoria Reyes',
                 'Zone I','Zone I-B','Zone II','Zone III','Zone IV',
             ],
-            // General Emilio Aguinaldo
             'General Emilio Aguinaldo' => [
                 'A. Dalusag','Batas Dao','Castaños Cerca','Castaños Lejos','Kabulusan','Kaymisas','Kaypaaba','Lumipa',
                 'Narvaez','Poblacion I','Poblacion II','Poblacion III','Poblacion IV','Tabora',
             ],
-            // General Mariano Alvarez
             'General Mariano Alvarez' => [
                 'Aldiano Olaes','Barangay 1 Poblacion','Barangay 2 Poblacion','Barangay 3 Poblacion',
                 'Barangay 4 Poblacion','Barangay 5 Poblacion','Benjamin Tirona','Bernardo Pulido','Epifanio Malia',
@@ -183,8 +175,7 @@ class OptimizeProfile extends Component
                 'Marcelino Memije','Nicolasa Virata','Pantaleon Granados','Ramon Cruz','San Gabriel','San Jose',
                 'Severino de Las Alas','Tiniente Tiago',
             ],
-            // City of General Trias
-            'City of General Trias' => [
+            'General Trias' => [
                 'Alingaro','Arnaldo Poblacion','Bacao I','Bacao II','Bagumbayan Poblacion','Biclatan',
                 'Buenavista I','Buenavista II','Buenavista III','Corregidor Poblacion','Dulong Bayan Poblacion',
                 'Gov. Ferrer Poblacion','Javalera','Manggahan','Navarro','Ninety Sixth Poblacion','Panungyanan',
@@ -192,8 +183,7 @@ class OptimizeProfile extends Component
                 'Prinza Poblacion','Sampalucan Poblacion','San Francisco','San Gabriel Poblacion','San Juan I',
                 'San Juan II','Santa Clara','Santiago','Tapia','Tejero','Vibora Poblacion',
             ],
-            // City of Imus
-            'City of Imus' => [
+            'Imus' => [
                 'Alapan I-A','Alapan I-B','Alapan I-C','Alapan II-A','Alapan II-B','Anabu I-A','Anabu I-B',
                 'Anabu I-C','Anabu I-D','Anabu I-E','Anabu I-F','Anabu I-G','Anabu II-A','Anabu II-B','Anabu II-C',
                 'Anabu II-D','Anabu II-E','Anabu II-F','Anabu II-G','Bagong Silang','Bayan Luma I','Bayan Luma II',
@@ -210,7 +200,6 @@ class OptimizeProfile extends Component
                 'Tanzang Luma III','Tanzang Luma IV','Tanzang Luma V','Tanzang Luma VI','Tanzang Luma VII',
                 'Toclong I-A','Toclong I-B','Toclong I-C','Toclong II-A','Toclong II-B',
             ],
-            // Indang
             'Indang' => [
                 'Agus-us','Alulod','Banaba Cerca','Banaba Lejos','Bancod','Barangay 1','Barangay 2','Barangay 3',
                 'Barangay 4','Buna Cerca','Buna Lejos I','Buna Lejos II','Calumpang Cerca','Calumpang Lejos I',
@@ -219,19 +208,16 @@ class OptimizeProfile extends Component
                 'Mahabangkahoy Cerca','Mahabangkahoy Lejos','Mataas na Lupa','Pulo','Tambo Balagbag','Tambo Ilaya',
                 'Tambo Kulit','Tambo Malaki',
             ],
-            // Kawit
             'Kawit' => [
                 'Balsahan-Bisita','Batong Dalig','Binakayan-Aplaya','Binakayan-Kanluran','Congbalay-Legaspi','Gahak',
                 'Kaingen','Magdalo','Manggahan-Lawin','Marulas','Panamitan','Poblacion','Pulvorista','Samala-Marquez',
                 'San Sebastian','Santa Isabel','Tabon I','Tabon II','Tabon III','Toclong','Tramo-Bantayan',
                 'Wakas I','Wakas II',
             ],
-            // Magallanes
             'Magallanes' => [
                 'Baliwag','Barangay 1','Barangay 2','Barangay 3','Barangay 4','Barangay 5','Bendita I','Bendita II',
                 'Caluangan','Kabulusan','Medina','Pacheco','Ramirez','San Agustin','Tua','Urdaneta',
             ],
-            // Maragondon
             'Maragondon' => [
                 'Bucal I','Bucal II','Bucal III A','Bucal III B','Bucal IV A','Bucal IV B','Caingin Poblacion',
                 'Garita I A','Garita I B','Layong Mabilog','Mabato','Pantihan I','Pantihan II','Pantihan III',
@@ -239,33 +225,28 @@ class OptimizeProfile extends Component
                 'Poblacion II A','Poblacion II B','San Miguel I A','San Miguel I B','Talipusngo','Tulay Kanluran',
                 'Tulay Silangan',
             ],
-            // Mendez
             'Mendez' => [
                 'Anuling Cerca I','Anuling Cerca II','Anuling Lejos I','Anuling Lejos II','Asis I','Asis II','Asis III',
                 'Banayad','Bukal','Galicia I','Galicia II','Galicia III','Miguel Mojica','Palocpoc I','Palocpoc II',
                 'Panungyan I','Panungyan II','Poblacion I','Poblacion II','Poblacion III','Poblacion IV','Poblacion V',
                 'Poblacion VI','Poblacion VII',
             ],
-            // Naic
             'Naic' => [
                 'Bagong Karsada','Balsahan','Bancaan','Bucana Malaki','Bucana Sasahan','Calubcob','Capt. C. Nazareno',
                 'Gomez-Zamora','Halang','Humbac','Ibayo Estacion','Ibayo Silangan','Kanluran','Labac','Latoria',
                 'Mabolo','Makina','Malainen Bago','Malainen Luma','Molino','Munting Mapino','Muzon','Palangue 1',
                 'Palangue 2 & 3','Sabang','San Roque','Santulan','Sapa','Timalan Balsahan','Timalan Concepcion',
             ],
-            // Noveleta
             'Noveleta' => [
                 'Magdiwang','Poblacion','Salcedo I','Salcedo II','San Antonio I','San Antonio II','San Jose I',
                 'San Jose II','San Juan I','San Juan II','San Rafael I','San Rafael II','San Rafael III','San Rafael IV',
                 'Santa Rosa I','Santa Rosa II',
             ],
-            // Rosario
             'Rosario' => [
                 'Bagbag I','Bagbag II','Kanluran','Ligtong I','Ligtong II','Ligtong III','Ligtong IV','Muzon I',
                 'Muzon II','Poblacion','Sapa I','Sapa II','Sapa III','Sapa IV','Silangan I','Silangan II',
                 'Tejeros Convention','Wawa I','Wawa II','Wawa III',
             ],
-            // Silang
             'Silang' => [
                 'Acacia','Adlas','Anahaw I','Anahaw II','Balite I','Balite II','Balubad','Banaba','Barangay I',
                 'Barangay II','Barangay III','Barangay IV','Barangay V','Batas','Biga I','Biga II','Biluso','Bucal',
@@ -276,8 +257,7 @@ class OptimizeProfile extends Component
                 'San Vicente I','San Vicente II','Santol','Tartaria','Tibig','Toledo','Tubuan I','Tubuan II',
                 'Tubuan III','Ulat','Yakal',
             ],
-            // Tagaytay City
-            'Tagaytay City' => [
+            'Tagaytay' => [
                 'Asisan','Bagong Tubig','Calabuso','Dapdap East','Dapdap West','Francisco','Guinhawa North',
                 'Guinhawa South','Iruhin East','Iruhin South','Iruhin West','Kaybagal East','Kaybagal North',
                 'Kaybagal South','Mag-Asawang Ilat','Maharlika East','Maharlika West','Maitim 2nd Central',
@@ -285,7 +265,6 @@ class OptimizeProfile extends Component
                 'Patutong Malaki North','Patutong Malaki South','Sambong','San Jose','Silang Junction North',
                 'Silang Junction South','Sungay North','Sungay South','Tolentino East','Tolentino West','Zambal',
             ],
-            // Tanza
             'Tanza' => [
                 'Amaya I','Amaya II','Amaya III','Amaya IV','Amaya V','Amaya VI','Amaya VII','Bagtas',
                 'Barangay I','Barangay II','Barangay III','Barangay IV','Biga','Biwas','Bucal','Bunga','Calibuyo',
@@ -294,13 +273,11 @@ class OptimizeProfile extends Component
                 'Paradahan I','Paradahan II','Punta I','Punta II','Sahud Ulan','Sanja Mayor','Santol','Tanauan',
                 'Tres Cruses',
             ],
-            // Ternate
             'Ternate' => [
                 'Bucana','Poblacion I','Poblacion I A','Poblacion II','Poblacion III','San Jose','San Juan I',
                 'San Juan II','Sapang I','Sapang II',
             ],
-            // Trece Martires City
-            'Trece Martires City' => [
+            'Trece Martires' => [
                 'Aguado','Cabezas','Cabuco','Conchu','De Ocampo','Gregorio','Inocencio','Lallana','Lapidario','Luciano',
                 'Osorio','Perez','San Agustin',
             ],

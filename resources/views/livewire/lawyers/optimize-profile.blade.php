@@ -489,30 +489,30 @@
                                     <option value="Rosario">Rosario</option>
                                 </optgroup>
                                 <optgroup label="Second District">
-                                    <option value="City of Bacoor">City of Bacoor</option>
+                                    <option value="Bacoor">Bacoor</option>
                                 </optgroup>
                                 <optgroup label="Third District">
-                                    <option value="City of Imus">City of Imus</option>
+                                    <option value="Imus">Imus</option>
                                 </optgroup>
                                 <optgroup label="Fourth District">
-                                    <option value="City of Dasmariñas">City of Dasmariñas</option>
+                                    <option value="Dasmariñas">Dasmariñas</option>
                                 </optgroup>
                                 <optgroup label="Fifth District">
-                                    <option value="City of Carmona">City of Carmona</option>
+                                    <option value="Carmona">Carmona</option>
                                     <option value="Silang">Silang</option>
                                     <option value="General Mariano Alvarez">General Mariano Alvarez</option>
                                 </optgroup>
                                 <optgroup label="Sixth District">
-                                    <option value="City of General Trias">City of General Trias</option>
+                                    <option value="General Trias">General Trias</option>
                                 </optgroup>
                                 <optgroup label="Seventh District">
                                     <option value="Amadeo">Amadeo</option>
                                     <option value="Indang">Indang</option>
                                     <option value="Tanza">Tanza</option>
-                                    <option value="Trece Martires City">Trece Martires City</option>
+                                    <option value="Trece Martires">Trece Martires</option>
                                 </optgroup>
                                 <optgroup label="Eighth District">
-                                    <option value="Tagaytay City">Tagaytay City</option>
+                                    <option value="Tagaytay">Tagaytay</option>
                                     <option value="Alfonso">Alfonso</option>
                                     <option value="General Emilio Aguinaldo">General Emilio Aguinaldo</option>
                                     <option value="Magallanes">Magallanes</option>
@@ -532,36 +532,9 @@
                             <select id="barangay" wire:model="barangay" 
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                 <option value="">Select Barangay</option>
-                                @if($city === 'Bacoor City')
-                                    @foreach(['Alima', 'Aniban I', 'Aniban II', 'Aniban III', 'Aniban IV', 'Aniban V', 'Bagong Sikat', 'Banalo', 'Bayanan', 'Campo Santo', 'Daang Bukid', 'Digman', 'Dulong Bayan', 'Habay I', 'Habay II', 'Kaingin', 'Ligas I', 'Ligas II', 'Ligas III', 'Mabolo I', 'Mabolo II', 'Mabolo III', 'Maliksi I', 'Maliksi II', 'Maliksi III', 'Mambog I', 'Mambog II', 'Mambog III', 'Mambog IV', 'Molino I', 'Molino II', 'Molino III', 'Molino IV', 'Molino V', 'Molino VI', 'Molino VII', 'Niog I', 'Niog II', 'Niog III', 'Panapaan I', 'Panapaan II', 'Panapaan III', 'Panapaan IV', 'Panapaan V', 'Panapaan VI', 'Panapaan VII', 'Panapaan VIII', 'Queens Row Central', 'Queens Row East', 'Queens Row West', 'Real I', 'Real II', 'Salinas I', 'Salinas II', 'Salinas III', 'Salinas IV', 'San Nicolas I', 'San Nicolas II', 'San Nicolas III', 'Springville', 'Tabing Dagat', 'Talaba I', 'Talaba II', 'Talaba III', 'Talaba IV', 'Talaba V', 'Talaba VI', 'Talaba VII', 'Zapote I', 'Zapote II', 'Zapote III', 'Zapote IV', 'Zapote V'] as $barangay)
-                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
-                                    @endforeach
-                                @elseif($city === 'Cavite City')
-                                    @foreach(range(1, 84) as $num)
-                                        <option value="Barangay {{ $num }}">Barangay {{ $num }}</option>
-                                    @endforeach
-                                    <option value="Barangay 2-A">Barangay 2-A</option>
-                                @elseif($city === 'Dasmariñas City')
-                                    @foreach(['Adobe', 'Amadeo', 'Bagong Bayan I', 'Bagong Bayan II', 'Burol I', 'Burol II', 'Burol III', 'Caapat', 'Calayo', 'Datu Esmael', 'Emmanuel Bergado I', 'Emmanuel Bergado II', 'Fatima I', 'Fatima II', 'Fatima III', 'H-2', 'Hercules', 'Langkaan I', 'Langkaan II', 'Luzviminda I', 'Luzviminda II', 'Malagasang I-A', 'Malagasang I-B', 'Malagasang I-C', 'Malagasang I-D', 'Malagasang I-E', 'Malagasang I-F', 'Malagasang I-G', 'Malagasang II-A', 'Malagasang II-B', 'Malagasang II-C', 'Malagasang II-D', 'Malagasang II-E', 'Malagasang II-F', 'Malagasang II-G', 'Malinta', 'Malibu I', 'Malibu II', 'Malibu III', 'Paliparan I', 'Paliparan II', 'Paliparan III', 'Palo-Alto', 'Sabang', 'Salawag', 'Salitran I', 'Salitran II', 'Salitran III', 'Salitran IV', 'Sampaloc I', 'Sampaloc II', 'Sampaloc III', 'Sampaloc IV', 'Sampaloc V', 'San Agustin I', 'San Agustin II', 'San Agustin III', 'San Andres I', 'San Andres II', 'San Antonio de Padua I', 'San Antonio de Padua II', 'San Dionisio', 'San Esteban', 'San Francisco I', 'San Francisco II', 'San Isidro Labrador I', 'San Isidro Labrador II', 'San Jose', 'San Juan I', 'San Juan II', 'San Lorenzo I', 'San Lorenzo II', 'San Luis I', 'San Luis II', 'San Manuel I', 'San Manuel II', 'San Mateo', 'San Miguel', 'San Miguel II', 'San Nicolas I', 'San Nicolas II', 'San Roque', 'San Simon', 'Santa Cristina I', 'Santa Cristina II', 'Santa Cruz I', 'Santa Cruz II', 'Santa Fe', 'Santa Lucia', 'Santa Maria', 'Santo Cristo', 'Santo Niño I', 'Santo Niño II', 'Santolan I', 'Santolan II', 'Victoria Reyes', 'Zone I-A', 'Zone I-B', 'Zone II-A', 'Zone II-B', 'Zone III', 'Zone IV-A', 'Zone IV-B'] as $barangay)
-                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
-                                    @endforeach
-                                @elseif($city === 'General Trias City')
-                                    @foreach(['Alingaro', 'Arnaldo Poblacion', 'Bacao I', 'Bacao II', 'Bagumbayan Poblacion', 'Biclatan', 'Buenavista I', 'Buenavista II', 'Buenavista III', 'Corregidor Poblacion', 'Dulong Bayan Poblacion', 'Gov. Ferrer Poblacion', 'Javalera', 'Manggahan', 'Navarro', 'Ninety Sixth Poblacion', 'Panungyanan', 'Pasong Camachile I', 'Pasong Camachile II', 'Pasong Kawayan I', 'Pasong Kawayan II', 'Pinagtipunan', 'Prinza Poblacion', 'Sampalucan Poblacion', 'San Francisco', 'San Gabriel Poblacion', 'San Juan I', 'San Juan II', 'Santa Clara', 'Santiago', 'Tapia', 'Tejero', 'Vibora Poblacion'] as $barangay)
-                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
-                                    @endforeach
-                                @elseif($city === 'Imus City')
-                                    @foreach(['Alapan I-A', 'Alapan I-B', 'Alapan I-C', 'Alapan II-A', 'Alapan II-B', 'Anabu I-A', 'Anabu I-B', 'Anabu I-C', 'Anabu I-D', 'Anabu I-E', 'Anabu I-F', 'Anabu I-G', 'Anabu II-A', 'Anabu II-B', 'Anabu II-C', 'Anabu II-D', 'Anabu II-E', 'Anabu II-F', 'Bagong Silang', 'Bayan Luma I', 'Bayan Luma II', 'Bayan Luma III', 'Bayan Luma IV', 'Bayan Luma V', 'Bayan Luma VI', 'Bayan Luma VII', 'Bayan Luma VIII', 'Bucandala I', 'Bucandala II', 'Bucandala III', 'Bucandala IV', 'Bucandala V', 'Buhay na Tubig', 'Carsadang Bago I', 'Carsadang Bago II', 'Lumang Bayan', 'Mabuhay', 'Maduya', 'Magdalo', 'Maharlika', 'Mahiwagang Dulang', 'Malagasang I-A', 'Malagasang I-B', 'Malagasang II-A', 'Malagasang II-B', 'Malhacan', 'Mariano Espeleta I', 'Mariano Espeleta II', 'Mariano Espeleta III', 'Medicion I-A', 'Medicion I-B', 'Medicion I-C', 'Medicion I-D', 'Medicion II-A', 'Medicion II-B', 'Medicion II-C', 'Medicion II-D', 'Medicion II-E', 'Medicion II-F', 'Pag-Asa I', 'Pag-Asa II', 'Pag-Asa III', 'Palico I', 'Palico II', 'Palico III', 'Palico IV', 'Pal-Palan I', 'Pal-Palan II', 'Pal-Palan III', 'Pasong Buaya I', 'Pasong Buaya II', 'Patindig Araw', 'Pinyahan', 'Poblacion I-A', 'Poblacion I-B', 'Poblacion I-C', 'Poblacion II-A', 'Poblacion II-B', 'Poblacion III-A', 'Poblacion III-B', 'Poblacion IV-A', 'Poblacion IV-B', 'Poblacion IV-C', 'Poblacion IV-D', 'Sapang I', 'Sapang II', 'Tabing Ilog', 'Tanzang Luma I', 'Tanzang Luma II', 'Tanzang Luma III', 'Tanzang Luma IV', 'Tanzang Luma V', 'Tanzang Luma VI', 'Tanzang Luma VII', 'Toclong I-A', 'Toclong I-B', 'Toclong I-C', 'Toclong II-A', 'Toclong II-B'] as $barangay)
-                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
-                                    @endforeach
-                                @elseif($city === 'Tagaytay City')
-                                    @foreach(['Asisan', 'Bagong Tubig', 'Calabuso', 'Dapdap East', 'Dapdap West', 'Francisco', 'Guinhawa North', 'Guinhawa South', 'Iruhin Central', 'Iruhin East', 'Iruhin South', 'Iruhin West', 'Kaybagal Central', 'Kaybagal North', 'Kaybagal South', 'Maharlika East', 'Maharlika West', 'Maitim 2nd Central', 'Maitim 2nd East', 'Maitim 2nd West', 'Mendez Crossing East', 'Mendez Crossing West', 'Neogan', 'Patutong Malaki North', 'Patutong Malaki South', 'Sambong', 'San Jose', 'Silang Crossing North', 'Silang Crossing South', 'Sungay East', 'Sungay West', 'Tolentino East', 'Tolentino West', 'Zambal'] as $barangay)
-                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
-                                    @endforeach
-                                @elseif($city === 'Trece Martires City')
-                                    @foreach(['Alulod', 'Cabezas (Luciano)', 'Cabuco', 'De Ocampo', 'Gregorio', 'Inocencio', 'Lapidario', 'Llavac', 'Osorio', 'Perez', 'Quintana (Barangay 5-A)', 'San Agustin (Poblacion)', 'Luciano'] as $barangay)
-                                        <option value="{{ $barangay }}">{{ $barangay }}</option>
-                                    @endforeach
-                                @endif
+                                @foreach($barangays as $brgy)
+                                    <option value="{{ $brgy }}">{{ $brgy }}</option>
+                                @endforeach
                             </select>
                             @error('barangay') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>

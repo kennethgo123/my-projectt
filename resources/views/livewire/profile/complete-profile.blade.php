@@ -102,30 +102,30 @@
                                     <option value="Rosario">Rosario</option>
                                 </optgroup>
                                 <optgroup label="Second District">
-                                    <option value="City of Bacoor">City of Bacoor</option>
+                                    <option value="Bacoor">Bacoor</option>
                                 </optgroup>
                                 <optgroup label="Third District">
-                                    <option value="City of Imus">City of Imus</option>
+                                    <option value="Imus">Imus</option>
                                 </optgroup>
                                 <optgroup label="Fourth District">
-                                    <option value="City of Dasmariñas">City of Dasmariñas</option>
+                                    <option value="Dasmariñas">Dasmariñas</option>
                                 </optgroup>
                                 <optgroup label="Fifth District">
-                                    <option value="City of Carmona">City of Carmona</option>
+                                    <option value="Carmona">Carmona</option>
                                     <option value="Silang">Silang</option>
                                     <option value="General Mariano Alvarez">General Mariano Alvarez</option>
                                 </optgroup>
                                 <optgroup label="Sixth District">
-                                    <option value="City of General Trias">City of General Trias</option>
+                                    <option value="General Trias">General Trias</option>
                                 </optgroup>
                                 <optgroup label="Seventh District">
                                     <option value="Amadeo">Amadeo</option>
                                     <option value="Indang">Indang</option>
                                     <option value="Tanza">Tanza</option>
-                                    <option value="Trece Martires City">Trece Martires City</option>
+                                    <option value="Trece Martires">Trece Martires</option>
                                 </optgroup>
                                 <optgroup label="Eighth District">
-                                    <option value="Tagaytay City">Tagaytay City</option>
+                                    <option value="Tagaytay">Tagaytay</option>
                                     <option value="Alfonso">Alfonso</option>
                                     <option value="General Emilio Aguinaldo">General Emilio Aguinaldo</option>
                                     <option value="Magallanes">Magallanes</option>
@@ -137,6 +137,19 @@
                             </select>
                             @error('city') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
+
+                        @if($city)
+                        <div>
+                            <label for="barangay" class="block text-sm font-medium text-gray-700">Barangay</label>
+                            <select wire:model="barangay" id="barangay" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">Select Barangay</option>
+                                @foreach($barangays as $brgy)
+                                    <option value="{{ $brgy }}">{{ $brgy }}</option>
+                                @endforeach
+                            </select>
+                            @error('barangay') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                        @endif
 
                         <div>
                             <label for="valid_id_type" class="block text-sm font-medium text-gray-700">Valid ID Type</label>
@@ -268,30 +281,30 @@
                                         <option value="Rosario">Rosario</option>
                                     </optgroup>
                                     <optgroup label="Second District">
-                                        <option value="City of Bacoor">City of Bacoor</option>
+                                        <option value="Bacoor">Bacoor</option>
                                     </optgroup>
                                     <optgroup label="Third District">
-                                        <option value="City of Imus">City of Imus</option>
+                                        <option value="Imus">Imus</option>
                                     </optgroup>
                                     <optgroup label="Fourth District">
-                                        <option value="City of Dasmariñas">City of Dasmariñas</option>
+                                        <option value="Dasmariñas">Dasmariñas</option>
                                     </optgroup>
                                     <optgroup label="Fifth District">
-                                        <option value="City of Carmona">City of Carmona</option>
+                                        <option value="Carmona">Carmona</option>
                                         <option value="Silang">Silang</option>
                                         <option value="General Mariano Alvarez">General Mariano Alvarez</option>
                                     </optgroup>
                                     <optgroup label="Sixth District">
-                                        <option value="City of General Trias">City of General Trias</option>
+                                        <option value="General Trias">General Trias</option>
                                     </optgroup>
                                     <optgroup label="Seventh District">
                                         <option value="Amadeo">Amadeo</option>
                                         <option value="Indang">Indang</option>
                                         <option value="Tanza">Tanza</option>
-                                        <option value="Trece Martires City">Trece Martires City</option>
+                                        <option value="Trece Martires">Trece Martires</option>
                                     </optgroup>
                                     <optgroup label="Eighth District">
-                                        <option value="Tagaytay City">Tagaytay City</option>
+                                        <option value="Tagaytay">Tagaytay</option>
                                         <option value="Alfonso">Alfonso</option>
                                         <option value="General Emilio Aguinaldo">General Emilio Aguinaldo</option>
                                         <option value="Magallanes">Magallanes</option>
@@ -304,6 +317,19 @@
                                 @error('city') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                         </div>
+
+                        @if($city)
+                        <div>
+                            <label for="barangay" class="block text-sm font-medium text-gray-700">Barangay</label>
+                            <select wire:model="barangay" id="barangay" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="">Select Barangay</option>
+                                @foreach($barangays as $brgy)
+                                    <option value="{{ $brgy }}">{{ $brgy }}</option>
+                                @endforeach
+                            </select>
+                            @error('barangay') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                        @endif
 
                         <!-- Documents Section -->
                         <div class="space-y-6">
@@ -472,7 +498,7 @@
 
                             <div>
                                 <label for="firm_city" class="block text-sm font-medium text-gray-700">City</label>
-                                <select wire:model.defer="firm_city" id="firm_city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <select wire:model="firm_city" id="firm_city" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                     <option value="">Select City/Municipality</option>
                                     <optgroup label="First District">
                                         <option value="Cavite City">Cavite City</option>
@@ -481,30 +507,30 @@
                                         <option value="Rosario">Rosario</option>
                                     </optgroup>
                                     <optgroup label="Second District">
-                                        <option value="City of Bacoor">City of Bacoor</option>
+                                        <option value="Bacoor">Bacoor</option>
                                     </optgroup>
                                     <optgroup label="Third District">
-                                        <option value="City of Imus">City of Imus</option>
+                                        <option value="Imus">Imus</option>
                                     </optgroup>
                                     <optgroup label="Fourth District">
-                                        <option value="City of Dasmariñas">City of Dasmariñas</option>
+                                        <option value="Dasmariñas">Dasmariñas</option>
                                     </optgroup>
                                     <optgroup label="Fifth District">
-                                        <option value="City of Carmona">City of Carmona</option>
+                                        <option value="Carmona">Carmona</option>
                                         <option value="Silang">Silang</option>
                                         <option value="General Mariano Alvarez">General Mariano Alvarez</option>
                                     </optgroup>
                                     <optgroup label="Sixth District">
-                                        <option value="City of General Trias">City of General Trias</option>
+                                        <option value="General Trias">General Trias</option>
                                     </optgroup>
                                     <optgroup label="Seventh District">
                                         <option value="Amadeo">Amadeo</option>
                                         <option value="Indang">Indang</option>
                                         <option value="Tanza">Tanza</option>
-                                        <option value="Trece Martires City">Trece Martires City</option>
+                                        <option value="Trece Martires">Trece Martires</option>
                                     </optgroup>
                                     <optgroup label="Eighth District">
-                                        <option value="Tagaytay City">Tagaytay City</option>
+                                        <option value="Tagaytay">Tagaytay</option>
                                         <option value="Alfonso">Alfonso</option>
                                         <option value="General Emilio Aguinaldo">General Emilio Aguinaldo</option>
                                         <option value="Magallanes">Magallanes</option>
@@ -516,6 +542,19 @@
                                 </select>
                                 @error('firm_city') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
+
+                            @if($firm_city)
+                            <div>
+                                <label for="firm_barangay" class="block text-sm font-medium text-gray-700">Barangay</label>
+                                <select wire:model="firm_barangay" id="firm_barangay" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <option value="">Select Barangay</option>
+                                    @foreach($firm_barangays as $brgy)
+                                        <option value="{{ $brgy }}">{{ $brgy }}</option>
+                                    @endforeach
+                                </select>
+                                @error('firm_barangay') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+                            @endif
 
                             <div>
                                 <label for="registration_type" class="block text-sm font-medium text-gray-700">Registration Type</label>

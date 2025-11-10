@@ -137,7 +137,7 @@ class OptimizeProfile extends Component
             if ($profile->lawFirm) {
                 $this->availableServices = $profile->lawFirm->services;
             } else {
-                $this->availableServices = LegalService::active()->get();
+                $this->availableServices = \App\Models\LegalService::active()->get();
             }
             
             // Get the lawyer's selected services
@@ -175,7 +175,7 @@ class OptimizeProfile extends Component
             $this->show_office_address = $profile->show_office_address ?? false;
             
             // Load available services
-            $this->availableServices = LegalService::active()->get();
+            $this->availableServices = \App\Models\LegalService::active()->get();
             
             // Get the lawyer's selected services
             $profile->load('services');
@@ -463,19 +463,7 @@ class OptimizeProfile extends Component
 
     private function getBarangaysByCity(string $city): array
     {
-        // Delegate to the LawFirm OptimizeProfile mapping
-        $lawFirmOptimize = new \App\Livewire\LawFirm\OptimizeProfile();
-        // Use reflection to access private method if necessary
-        try {
-            $ref = new \ReflectionClass($lawFirmOptimize);
-            if ($ref->hasMethod('getBarangaysByCity')) {
-                $method = $ref->getMethod('getBarangaysByCity');
-                $method->setAccessible(true);
-                return $method->invoke($lawFirmOptimize, $city);
-            }
-        } catch (\Throwable $e) {
-            // Fallback to empty
-        }
-        return [];
+        $lf = new \App\Livewire\LawFirm\OptimizeProfile();
+        return $lf->getBarangaysByCity($city) ?? [];
     }
 } 

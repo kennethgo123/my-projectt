@@ -271,30 +271,30 @@
                                     <option value="Rosario">Rosario</option>
                                 </optgroup>
                                 <optgroup label="Second District">
-                                    <option value="City of Bacoor">City of Bacoor</option>
+                                    <option value="Bacoor">Bacoor</option>
                                 </optgroup>
                                 <optgroup label="Third District">
-                                    <option value="City of Imus">City of Imus</option>
+                                    <option value="Imus">Imus</option>
                                 </optgroup>
                                 <optgroup label="Fourth District">
-                                    <option value="City of Dasmariñas">City of Dasmariñas</option>
+                                    <option value="Dasmariñas">Dasmariñas</option>
                                 </optgroup>
                                 <optgroup label="Fifth District">
-                                    <option value="City of Carmona">City of Carmona</option>
+                                    <option value="Carmona">Carmona</option>
                                     <option value="Silang">Silang</option>
                                     <option value="General Mariano Alvarez">General Mariano Alvarez</option>
                                 </optgroup>
                                 <optgroup label="Sixth District">
-                                    <option value="City of General Trias">City of General Trias</option>
+                                    <option value="General Trias">General Trias</option>
                                 </optgroup>
                                 <optgroup label="Seventh District">
                                     <option value="Amadeo">Amadeo</option>
                                     <option value="Indang">Indang</option>
                                     <option value="Tanza">Tanza</option>
-                                    <option value="Trece Martires City">Trece Martires City</option>
+                                    <option value="Trece Martires">Trece Martires</option>
                                 </optgroup>
                                 <optgroup label="Eighth District">
-                                    <option value="Tagaytay City">Tagaytay City</option>
+                                    <option value="Tagaytay">Tagaytay</option>
                                     <option value="Alfonso">Alfonso</option>
                                     <option value="General Emilio Aguinaldo">General Emilio Aguinaldo</option>
                                     <option value="Magallanes">Magallanes</option>
