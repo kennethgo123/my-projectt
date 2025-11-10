@@ -525,8 +525,11 @@ class ManageConsultations extends Component
         ])
         ->when($this->search, function ($query) {
             $query->where(function ($q) {
-                $q->whereHas('client.clientProfile', function ($clientQuery) {
-                      $clientQuery->where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $this->search . '%');
+                $searchTerm = '%' . $this->search . '%';
+                $q->whereHas('client.clientProfile', function ($clientQuery) use ($searchTerm) {
+                      $clientQuery->where('first_name', 'like', $searchTerm)
+                                 ->orWhere('last_name', 'like', $searchTerm)
+                                 ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', $searchTerm);
                   });
             });
         })

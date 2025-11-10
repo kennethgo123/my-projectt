@@ -581,12 +581,24 @@
             @endif
         </div>
 
-        <!-- Notes Tab (Placeholder) -->
+        <!-- Notes Tab -->
         <div x-show="activeTab === 'notes'" x-cloak>
             <div class="bg-white shadow-md rounded-lg p-6">
-                <h3 class="text-xl font-semibold text-gray-800">Case Notes</h3>
-                <p class="mt-4 text-gray-600">This section will display case notes. Functionality to be implemented.</p>
-                {{-- Add notes management UI here --}}
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Case Update Notes</h3>
+                    @if(!$isReadOnly)
+                        <button 
+                            @click="$dispatch('open-modal', 'add-update-note-modal')"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add Update Note
+                        </button>
+                    @endif
+                </div>
+                <p class="mt-4 text-gray-600">Create update notes to keep your client informed about case progress.</p>
             </div>
         </div>
 
@@ -1069,6 +1081,250 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Update Note Modal -->
+    <div
+        x-data="{ shown: false }"
+        x-on:open-modal.window="$event.detail == 'add-update-note-modal' ? shown = true : null"
+        x-on:close-modal.window="$event.detail == 'add-update-note-modal' ? shown = false : null"
+        x-show="shown"
+        x-cloak
+        class="fixed z-10 inset-0 overflow-y-auto"
+        aria-labelledby="modal-title"
+        role="dialog"
+        aria-modal="true"
+    >
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div x-show="shown" 
+                 x-transition:enter="ease-out duration-300" 
+                 x-transition:enter-start="opacity-0" 
+                 x-transition:enter-end="opacity-100" 
+                 x-transition:leave="ease-in duration-200" 
+                 x-transition:leave-start="opacity-100" 
+                 x-transition:leave-end="opacity-0" 
+                 class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+                 aria-hidden="true"
+                 @click="shown = false">
+            </div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <!-- Modal panel -->
+            <div x-show="shown" 
+                 x-transition:enter="ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave="ease-in duration-200" 
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
+            >
+                <div>
+                    <div class="mt-3 text-center sm:mt-5">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            Add Update Note
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500">
+                                Create an update note to inform your client about case progress.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-5 sm:mt-6">
+                    <form wire:submit.prevent="addUpdateNote">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="newUpdateTitle" class="block text-sm font-medium text-gray-700">
+                                    Update Title
+                                </label>
+                                <div class="mt-1">
+                                    <input 
+                                        type="text" 
+                                        id="newUpdateTitle" 
+                                        wire:model="newUpdateTitle" 
+                                        class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="e.g., Case Progress Update"
+                                    >
+                                </div>
+                                @error('newUpdateTitle') 
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            
+                            <div>
+                                <label for="newUpdateContent" class="block text-sm font-medium text-gray-700">
+                                    Update Content
+                                </label>
+                                <div class="mt-1">
+                                    <textarea 
+                                        id="newUpdateContent" 
+                                        wire:model="newUpdateContent" 
+                                        rows="4" 
+                                        class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="Describe the update or progress..."
+                                    ></textarea>
+                                </div>
+                                @error('newUpdateContent') 
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm">
+                                Create Update Note
+                            </button>
+                            <button type="button" @click="shown = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div
+        x-data="{
+            show: @entangle('showSuccessModal').live,
+        }"
+        x-show="show"
+        x-cloak
+        style="display: none; position: fixed; inset: 0; z-index: 99999 !important;"
+        x-init="
+            $watch('show', show => {
+                if (show) {
+                    $el.style.setProperty('z-index', '99999', 'important');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            });
+        "
+        x-on:keydown.escape.window="show = false; $wire.closeSuccessModal()"
+    >
+        <!-- Backdrop -->
+        <div x-show="show" 
+             style="position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); z-index: 99998 !important;"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"></div>
+
+        <!-- Modal Content Container -->
+        <div style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 99999 !important; pointer-events: none;">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full pointer-events-auto"
+                 x-show="show"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                <div class="p-6">
+                    <div class="flex justify-center items-center mb-4">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                            <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">
+                            {{ $successModalTitle }}
+                        </h3>
+                        <p class="text-sm text-gray-500 mb-6">
+                            {{ $successModalMessage }}
+                        </p>
+                        <div class="flex justify-center">
+                            <button 
+                                type="button"
+                                wire:click="closeSuccessModal"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                Proceed
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Error Modal -->
+    <div
+        x-data="{
+            show: @entangle('showErrorModal').live,
+        }"
+        x-show="show"
+        x-cloak
+        style="display: none; position: fixed; inset: 0; z-index: 99999 !important;"
+        x-init="
+            $watch('show', show => {
+                if (show) {
+                    $el.style.setProperty('z-index', '99999', 'important');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            });
+        "
+        x-on:keydown.escape.window="show = false; $wire.closeErrorModal()"
+    >
+        <!-- Backdrop -->
+        <div x-show="show" 
+             style="position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); z-index: 99998 !important;"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"></div>
+
+        <!-- Modal Content Container -->
+        <div style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1rem; z-index: 99999 !important; pointer-events: none;">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full pointer-events-auto"
+                 x-show="show"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                <div class="p-6">
+                    <div class="flex justify-center items-center mb-4">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">
+                            Error
+                        </h3>
+                        <p class="text-sm text-gray-500 mb-6">
+                            {{ $errorModalMessage }}
+                        </p>
+                        <div class="flex justify-center">
+                            <button 
+                                type="button"
+                                wire:click="closeErrorModal"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

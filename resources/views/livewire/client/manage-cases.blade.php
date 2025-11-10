@@ -17,16 +17,8 @@
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
                     <div>
                         <h2 class="text-xl font-semibold text-gray-800 mb-1">
-                            @if($showArchived)
-                                My Archived Cases
-                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Archived</span>
-                            @else
-                                My Legal Cases
-                            @endif
+                            My Legal Cases
                         </h2>
-                        @if($showArchived)
-                            <p class="text-sm text-gray-600">These cases have been closed but are kept for your reference.</p>
-                        @endif
                     </div>
                     <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-4 md:mt-0">
                         <div>
@@ -40,13 +32,6 @@
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>
-                        </div>
-                        <div>
-                            <button 
-                                wire:click="toggleArchivedView" 
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md {{ $showArchived ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 border-gray-300' }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                {{ $showArchived ? 'Show Active Cases' : 'Show Archived Cases' }}
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -190,12 +175,8 @@
                                                         Active
                                                     </span>
                                                 @elseif($case->status === \App\Models\LegalCase::STATUS_COMPLETED)
-                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                        Completed
-                                                    </span>
-                                                @elseif($case->status === \App\Models\LegalCase::STATUS_CLOSED)
                                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                                        Closed
+                                                        Completed
                                                     </span>
                                                 @elseif($case->status === \App\Models\LegalCase::STATUS_PENDING && $case->status !== \App\Models\LegalCase::STATUS_CHANGES_REQUESTED_BY_CLIENT)
                                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">

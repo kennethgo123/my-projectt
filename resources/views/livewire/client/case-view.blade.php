@@ -25,7 +25,7 @@
                     Filed: {{ $case->created_at ? $case->created_at->format('F d, Y') : 'N/A' }}
                 </p>
             </div>
-             <div class="mt-4 md:mt-0">
+             <div class="mt-4 md:mt-0 flex items-center gap-2">
                 <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium 
                     {{ $case->isClosed() ? 'bg-gray-500 text-white border border-gray-600' : 
                     ($case->status === 'active' ? 'bg-green-500 text-white border border-green-600' : 'bg-gray-100 text-gray-700 border border-gray-300') }}">
@@ -35,6 +35,17 @@
                     </svg>
                     {{ $case->isClosed() ? 'Closed' : ($case->status === 'active' ? 'Active' : ($case->status ? ucfirst($case->status) : 'Unknown')) }}
                 </span>
+                
+                @if($case->is_pro_bono)
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-700 border border-blue-300">
+                    <svg class="w-4 h-4 mr-1.5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M13 2C13 2 17 4 17 8C17 10 15.5 11.5 13.5 12.5L12 14L10.5 12.5C8.5 11.5 7 10 7 8C7 4 11 2 11 2H13Z"/>
+                        <path d="M6 12C6 12 2 14 2 18C2 20 3.5 21.5 5.5 22.5L7 24L8.5 22.5C10.5 21.5 12 20 12 18C12 14 8 12 8 12H6Z"/>
+                        <path d="M18 12C18 12 22 14 22 18C22 20 20.5 21.5 18.5 22.5L17 24L15.5 22.5C13.5 21.5 12 20 12 18C12 14 16 12 16 12H18Z"/>
+                    </svg>
+                    Pro Bono
+                </span>
+                @endif
             </div>
         </div>
         

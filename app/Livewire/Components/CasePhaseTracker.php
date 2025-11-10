@@ -669,12 +669,14 @@ class CasePhaseTracker extends Component
                 ]);
 
                 DB::commit();
-                session()->flash('success', 'Phase update added successfully!');
                 
                 $this->phaseUpdateText = ''; // Reset form field
                 
                 $this->loadPhases(); // Reload all phases and currentPhase with updates
                 $this->dispatch('close-modal', 'update-phase-modal');
+                
+                // Show success modal
+                $this->showSuccessModal = true;
 
             } catch (\Exception $e) {
                 DB::rollBack();

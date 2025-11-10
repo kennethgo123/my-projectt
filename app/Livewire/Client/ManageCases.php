@@ -21,7 +21,6 @@ class ManageCases extends Component
     public $status = '';
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
-    public $showArchived = false; // Flag to control archived cases view
     
     // Selected case properties
     public $selectedCase = null;
@@ -367,14 +366,6 @@ class ManageCases extends Component
         $this->actionType = null;
     }
 
-    /**
-     * Toggle between archived and active cases view
-     */
-    public function toggleArchivedView()
-    {
-        $this->showArchived = !$this->showArchived;
-        $this->resetPage(); // Reset pagination when switching views
-    }
 
     public function openRateLawyerModal($caseId)
     {
@@ -450,34 +441,21 @@ class ManageCases extends Component
             ])
             ->when($this->search, function ($query) {
                 $query->where(function($q) {
-                    $q->where('title', 'like', '%' . $this->search . '%')
-                      ->orWhere('case_number', 'like', '%' . $this->search . '%')
-                      ->orWhereHas('lawyer', function($lawyerQuery) {
-                          $lawyerQuery->where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $this->search . '%');
+                    $searchTerm = '%' . $this->search . '%';
+                    $q->where('title', 'like', $searchTerm)
+                      ->orWhere('case_number', 'like', $searchTerm)
+                      ->orWhereHas('lawyer.lawyerProfile', function($lawyerQuery) use ($searchTerm) {
+                          $lawyerQuery->where('first_name', 'like', $searchTerm)
+                                     ->orWhere('last_name', 'like', $searchTerm)
+                                     ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', $searchTerm);
+                      })
+                      ->orWhereHas('lawyer.lawFirmProfile', function($firmQuery) use ($searchTerm) {
+                          $firmQuery->where('firm_name', 'like', $searchTerm);
                       });
                 });
             })
             ->when($this->status, function ($query) {
                 $query->where('status', $this->status);
-            })
-            ->when($this->showArchived, function ($query) {
-                // Show archived cases and also cases with Completed status
-                $query->where(function($q) {
-                    $q->where('archived', true)
-                      ->orWhere('status', LegalCase::STATUS_COMPLETED);
-                });
-            }, function ($query) {
-                // Show only non-archived cases and cases not in Completed status
-                $query->where(function ($q) {
-                    $q->where(function($subQ) {
-                        $subQ->where('archived', false)
-                             ->orWhereNull('archived');
-                    })
-                    ->where(function($subQ) {
-                        $subQ->where('status', '!=', LegalCase::STATUS_COMPLETED)
-                             ->orWhereNull('status');
-                    });
-                });
             })
             ->orderBy($this->sortField, $this->sortDirection);
             
@@ -487,13 +465,12 @@ class ManageCases extends Component
             'pending' => 'Pending',
             LegalCase::STATUS_CONTRACT_SENT => 'Contract Sent',
             LegalCase::STATUS_ACTIVE => 'Active',
-            LegalCase::STATUS_CLOSED => 'Closed'
+            LegalCase::STATUS_COMPLETED => 'Completed'
         ];
             
         return view('livewire.client.manage-cases', [
             'cases' => $cases,
-            'statuses' => $statuses,
-            'showArchived' => $this->showArchived
+            'statuses' => $statuses
         ]);
     }
 } 

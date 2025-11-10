@@ -21,7 +21,6 @@ class ManageCases extends Component
     // Search and filter properties
     public $search = '';
     public $status = '';
-    public $showArchived = false; // Flag to control archived cases view
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
     
@@ -89,14 +88,6 @@ class ManageCases extends Component
         $this->resetPage();
     }
 
-    /**
-     * Toggle between archived and active cases view
-     */
-    public function toggleArchivedView()
-    {
-        $this->showArchived = !$this->showArchived;
-        $this->resetPage(); // Reset pagination when switching views
-    }
 
     public function render()
     {
@@ -112,49 +103,33 @@ class ManageCases extends Component
                 $query->where(function($q) {
                     $q->where('title', 'like', '%' . $this->search . '%')
                       ->orWhere('case_number', 'like', '%' . $this->search . '%')
-                      ->orWhereHas('client', function($clientQuery) {
-                          $clientQuery->where(\DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', '%' . $this->search . '%');
+                      ->orWhereHas('client.clientProfile', function($clientQuery) {
+                          $searchTerm = '%' . $this->search . '%';
+                          $clientQuery->where('first_name', 'like', $searchTerm)
+                                     ->orWhere('last_name', 'like', $searchTerm)
+                                     ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', $searchTerm);
                       });
                 });
             })
             ->when($this->status, function ($query) {
                 $query->where('status', $this->status);
             })
-            ->when($this->showArchived, function ($query) {
-                // Show only archived cases
-                $query->where(function ($q) {
-                    $q->where('archived', true)
-                      ->orWhere('closed_at', '!=', null);
-                });
-            }, function ($query) {
-                // Show only non-archived cases by default
-                $query->where(function ($q) {
-                    $q->where(function ($sq) {
-                        $sq->where('archived', false)
-                           ->orWhereNull('archived');
-                    })
-                    ->whereNull('closed_at');
-                });
-            })
             ->orderBy($this->sortField, $this->sortDirection);
 
-        // Get pending cases that require lawyer response - this should always show for non-archived view
-        $pendingCases = collect(); // Default to empty collection
-        if (!$this->showArchived) {
-            $pendingCases = LegalCase::with([
-                'client.clientProfile', 
-                'consultation'
-            ])
-                ->where(function($query) {
-                    $query->where('lawyer_id', Auth::id())
-                          ->orWhereHas('teamLawyers', function($q) {
-                              $q->where('user_id', Auth::id());
-                          });
-                })
-                ->where('status', LegalCase::STATUS_PENDING)
-                ->latest()
-                ->get();
-        }
+        // Get pending cases that require lawyer response
+        $pendingCases = LegalCase::with([
+            'client.clientProfile', 
+            'consultation'
+        ])
+            ->where(function($query) {
+                $query->where('lawyer_id', Auth::id())
+                      ->orWhereHas('teamLawyers', function($q) {
+                          $q->where('user_id', Auth::id());
+                      });
+            })
+            ->where('status', LegalCase::STATUS_PENDING)
+            ->latest()
+            ->get();
             
         $statuses = [
             LegalCase::STATUS_PENDING => 'Pending',
@@ -163,14 +138,13 @@ class ManageCases extends Component
             LegalCase::STATUS_CHANGES_REQUESTED_BY_CLIENT => 'Changes Requested by Client',
             LegalCase::STATUS_CONTRACT_REVISED_SENT => 'Contract Revised by Lawyer',
             LegalCase::STATUS_ACTIVE => 'Active',
-            LegalCase::STATUS_CLOSED => 'Closed'
+            LegalCase::STATUS_COMPLETED => 'Completed'
         ];
             
         return view('livewire.lawyers.manage-cases', [
             'cases' => $casesQuery->paginate(10),
             'statuses' => $statuses,
-            'pendingCases' => $pendingCases,
-            'showArchived' => $this->showArchived
+            'pendingCases' => $pendingCases
         ]);
     }
 

@@ -344,10 +344,10 @@
                     </div>
                     <div class="text-center">
                         <h3 class="text-lg font-medium text-gray-900 mb-2">
-                            Phase Added Successfully!
+                            Phase Update Created Successfully!
                         </h3>
                         <p class="text-sm text-gray-500 mb-6">
-                            The phase has been added to your case timeline.
+                            The phase update has been added and your client has been notified.
                         </p>
                         <div class="flex justify-center">
                             <button 

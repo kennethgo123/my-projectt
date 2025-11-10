@@ -8,10 +8,10 @@
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div class="mb-4 lg:mb-0">
                 <h1 class="text-2xl font-bold text-gray-900">
-                    {{ $showArchived ? 'Case Archive' : 'Manage Cases' }}
+                    Manage Cases
                 </h1>
                 <p class="text-gray-600 mt-1">
-                    {{ $showArchived ? 'View your archived and completed cases' : 'Manage your active legal cases and client requests' }}
+                    Manage your legal cases and client requests
                 </p>
             </div>
             
@@ -29,21 +29,12 @@
                         @endforeach
                     </select>
                 </div>
-                <div>
-                    <button 
-                        wire:click="toggleArchivedView" 
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md {{ $showArchived ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 border-gray-300' }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        {{ $showArchived ? 'Show Active Cases' : 'Show Case Archive' }}
-                    </button>
-                </div>
             </div>
         </div>
     </div>
 
     <!-- Pending Case Requests Section -->
-    @if(!$showArchived)
-        @include('livewire.lawyer.partials.pending-case-requests')
-    @endif
+    @include('livewire.lawyer.partials.pending-case-requests')
 
     <!-- Cases Grid -->
     @if($cases->count() > 0)
@@ -87,13 +78,11 @@
                                         </span>
                                     @endif
                                     
-                                    @if(!$showArchived)
-                                        <button @click="editing = true" class="ml-2 text-gray-400 hover:text-gray-600">
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                                            </svg>
-                                        </button>
-                                    @endif
+                                    <button @click="editing = true" class="ml-2 text-gray-400 hover:text-gray-600">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                        </svg>
+                                    </button>
                                 </div>
                                 <div x-show="editing" class="flex items-center">
                                     <select x-model="label" class="block w-full py-1.5 text-xs border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md">
@@ -133,9 +122,9 @@
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     Active
                                 </span>
-                            @elseif($case->status === 'closed')
+                            @elseif($case->status === 'completed')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    Closed
+                                    Completed
                                 </span>
                             @elseif($case->status === 'rejected')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -192,76 +181,65 @@
                     <!-- Card Footer - Actions -->
                     <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
                         <div class="flex flex-wrap gap-2">
-                            @if($showArchived)
+                            @if($case->status === LegalCase::STATUS_PENDING && ($case->lawyer_id === Auth::id() || ($case->lawFirm && $case->lawFirm->owner_id === Auth::id())))
+                                <button wire:click="showStartCaseForm({{ $case->id }})" 
+                                       class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    Start Case
+                                </button>
+                            @endif
+
+                            @if($case->status === LegalCase::STATUS_CHANGES_REQUESTED_BY_CLIENT)
+                                <button wire:click="openUploadRevisedContractModal({{ $case->id }})" 
+                                       class="inline-flex items-center px-3 py-1.5 bg-yellow-500 text-white text-xs font-medium rounded-md hover:bg-yellow-600 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    Upload Revised
+                                </button>
+                            @endif
+                            
+                            @if($case->status === LegalCase::STATUS_CONTRACT_SENT && $case->lawyer_response_required)
+                                <a href="{{ route('lawyer.contract.review', $case->id) }}" 
+                                   class="inline-flex items-center px-3 py-1.5 bg-orange-500 text-white text-xs font-medium rounded-md hover:bg-orange-600 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Review Changes
+                                </a>
+                            @endif
+
+                            @if($case->status === LegalCase::STATUS_CONTRACT_SIGNED)
                                 <a href="{{ route('lawyer.case.setup', $case->id) }}" 
                                    class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 transition-colors">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
-                                    View Details
+                                    Setup Case
                                 </a>
-                            @else
-                                @if($case->status === LegalCase::STATUS_PENDING && ($case->lawyer_id === Auth::id() || ($case->lawFirm && $case->lawFirm->owner_id === Auth::id())))
-                                    <button wire:click="showStartCaseForm({{ $case->id }})" 
-                                           class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                        </svg>
-                                        Start Case
-                                    </button>
-                                @endif
-
-                                @if($case->status === LegalCase::STATUS_CHANGES_REQUESTED_BY_CLIENT)
-                                    <button wire:click="openUploadRevisedContractModal({{ $case->id }})" 
-                                           class="inline-flex items-center px-3 py-1.5 bg-yellow-500 text-white text-xs font-medium rounded-md hover:bg-yellow-600 transition-colors">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                        </svg>
-                                        Upload Revised
-                                    </button>
-                                @endif
-                                
-                                @if($case->status === LegalCase::STATUS_CONTRACT_SENT && $case->lawyer_response_required)
-                                    <a href="{{ route('lawyer.contract.review', $case->id) }}" 
-                                       class="inline-flex items-center px-3 py-1.5 bg-orange-500 text-white text-xs font-medium rounded-md hover:bg-orange-600 transition-colors">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Review Changes
-                                    </a>
-                                @endif
-
-                                @if($case->status === LegalCase::STATUS_CONTRACT_SIGNED)
-                                    <a href="{{ route('lawyer.case.setup', $case->id) }}" 
-                                       class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 transition-colors">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Setup Case
-                                    </a>
-                                @endif
-                                
-                                @if(in_array($case->status, [LegalCase::STATUS_ACTIVE, LegalCase::STATUS_CONTRACT_REVISED_SENT]) && !($case->status === LegalCase::STATUS_CONTRACT_SENT && $case->lawyer_response_required))
-                                    <a href="{{ route('lawyer.case.setup', $case->id) }}" 
-                                       class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
-                                        Manage Case
-                                    </a>
-                                @endif
-                                
-                                @if($case->signature_path || in_array($case->status, [LegalCase::STATUS_CONTRACT_SIGNED, LegalCase::STATUS_ACTIVE]))
-                                    <button wire:click="viewSignature({{ $case->id }})"
-                                            class="inline-flex items-center px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded-md hover:bg-emerald-700 transition-colors">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        View Signature
-                                    </button>
-                                @endif
+                            @endif
+                            
+                            @if(in_array($case->status, [LegalCase::STATUS_ACTIVE, LegalCase::STATUS_CONTRACT_REVISED_SENT, LegalCase::STATUS_COMPLETED]) && !($case->status === LegalCase::STATUS_CONTRACT_SENT && $case->lawyer_response_required))
+                                <a href="{{ route('lawyer.case.setup', $case->id) }}" 
+                                   class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Manage Case
+                                </a>
+                            @endif
+                            
+                            @if($case->signature_path || in_array($case->status, [LegalCase::STATUS_CONTRACT_SIGNED, LegalCase::STATUS_ACTIVE, LegalCase::STATUS_COMPLETED]))
+                                <button wire:click="viewSignature({{ $case->id }})"
+                                        class="inline-flex items-center px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded-md hover:bg-emerald-700 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    View Signature
+                                </button>
                             @endif
                         </div>
                     </div>
@@ -282,11 +260,7 @@
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No Cases Found</h3>
             <p class="text-gray-600">
-                @if($showArchived)
-                    No archived cases found matching your criteria.
-                @else
-                    You don't have any active cases yet. They will appear here when clients request your services.
-                @endif
+                You don't have any cases yet matching your criteria. They will appear here when clients request your services.
             </p>
         </div>
     @endif

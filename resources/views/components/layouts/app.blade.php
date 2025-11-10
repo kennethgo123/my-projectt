@@ -10,6 +10,8 @@
         </style>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
     <body class="min-h-screen bg-gray-50">
         <!-- Navigation -->
@@ -302,6 +304,27 @@
                     }
                 }
             });
+            
+            // SweetAlert for flash messages
+            @if (session()->has('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#4F46E5',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+            
+            @if (session()->has('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#4F46E5',
+                    confirmButtonText: 'OK'
+                });
+            @endif
         </script>
     </body>
 </html> 

@@ -41,7 +41,6 @@ class ManageCases extends Component
     public $priorityFilter = '';
     public $sortField = 'created_at';
     public $sortDirection = 'desc';
-    public $showArchived = false; // Added for archived cases view
     
     // Selected case properties
     public $selectedCase = null;
@@ -120,13 +119,6 @@ class ManageCases extends Component
         $this->resetPage();
     }
 
-    // Added method to toggle archived view
-    public function toggleArchivedView()
-    {
-        $this->showArchived = !$this->showArchived;
-        $this->status = ''; // Reset status filter when toggling archived view
-        $this->resetPage();
-    }
     
     public function viewContract($caseId)
     {
@@ -1791,24 +1783,21 @@ class ManageCases extends Component
         ])
             ->whereIn('lawyer_id', $lawyerIds);
 
-        // Filter for archived or active cases
-        if ($this->showArchived) {
-            $query->whereIn('status', [LegalCase::STATUS_COMPLETED, LegalCase::STATUS_CLOSED]);
-        } else {
-            $query->whereNotIn('status', [LegalCase::STATUS_COMPLETED, LegalCase::STATUS_CLOSED]);
-            if ($this->status) { // Apply status filter only for active cases view
-                $query->where('status', $this->status);
-            }
+        // Apply status filter if selected
+        if ($this->status) {
+            $query->where('status', $this->status);
         }
 
         if ($this->search) {
             $query->where(function($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('case_number', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%')
-                  ->orWhereHas('client.clientProfile', function($q) {
-                      $q->where('first_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'like', '%' . $this->search . '%');
+                $searchTerm = '%' . $this->search . '%';
+                $q->where('title', 'like', $searchTerm)
+                  ->orWhere('case_number', 'like', $searchTerm)
+                  ->orWhere('description', 'like', $searchTerm)
+                  ->orWhereHas('client.clientProfile', function($clientQuery) use ($searchTerm) {
+                      $clientQuery->where('first_name', 'like', $searchTerm)
+                                 ->orWhere('last_name', 'like', $searchTerm)
+                                 ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', $searchTerm);
                   });
             });
         }
@@ -1820,27 +1809,23 @@ class ManageCases extends Component
         $cases = $query->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
 
-        // Get pending cases that require lawyer response - this should always show for non-archived view
-        $pendingCases = collect(); // Default to empty collection
-        if (!$this->showArchived) {
-            $pendingCases = LegalCase::with([
-                'client.clientProfile', 
-                'consultation',
-                'lawyer.lawyerProfile',
-                'lawyer.lawFirmProfile',
-                'lawyer.lawFirmLawyer'
-            ])
-                ->whereIn('lawyer_id', $lawyerIds)
-                ->where('status', 'pending')
-                ->where('lawyer_response_required', true)
-                ->latest()
-                ->get();
-        }
+        // Get pending cases that require lawyer response
+        $pendingCases = LegalCase::with([
+            'client.clientProfile', 
+            'consultation',
+            'lawyer.lawyerProfile',
+            'lawyer.lawFirmProfile',
+            'lawyer.lawFirmLawyer'
+        ])
+            ->whereIn('lawyer_id', $lawyerIds)
+            ->where('status', 'pending')
+            ->where('lawyer_response_required', true)
+            ->latest()
+            ->get();
 
         $statuses = [
             'pending' => 'Pending',
             'active' => 'Active',
-            // Removed completed, closed, archived as they are handled by the toggle
             LegalCase::STATUS_CONTRACT_SENT => 'Contract Sent',
             LegalCase::STATUS_CONTRACT_SIGNED => 'Contract Signed',
             LegalCase::STATUS_CHANGES_REQUESTED_BY_CLIENT => 'Changes Requested',
@@ -1848,21 +1833,13 @@ class ManageCases extends Component
             LegalCase::STATUS_ACCEPTED => 'Accepted',
             LegalCase::STATUS_REJECTED => 'Rejected',
             LegalCase::STATUS_IN_PROGRESS => 'In Progress',
+            LegalCase::STATUS_COMPLETED => 'Completed',
         ];
-        
-        // If showing archived, only allow filtering by completed or closed
-        if ($this->showArchived) {
-            $statuses = [
-                LegalCase::STATUS_COMPLETED => 'Completed',
-                LegalCase::STATUS_CLOSED => 'Closed',
-            ];
-        }
 
         return view('livewire.law-firm.manage-cases', [
             'cases' => $cases,
             'statuses' => $statuses,
-            'pendingCases' => $pendingCases,
-            'showArchived' => $this->showArchived // Pass showArchived to the view
+            'pendingCases' => $pendingCases
         ]);
     }
 } 

@@ -3,51 +3,42 @@
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div class="mb-4 lg:mb-0">
                 <h1 class="text-2xl font-bold text-gray-900">
-                    {{ $showArchived ? 'Case Archive' : 'Manage Cases' }}
+                    Manage Cases
                 </h1>
                 <p class="text-gray-600 mt-1">
-                    {{ $showArchived ? 'View your archived and completed cases' : 'Manage your law firm\'s legal cases and client requests' }}
+                    Manage your law firm's legal cases and client requests
                 </p>
-                    </div>
+            </div>
             
             <!-- Search and Filters -->
             <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                        <div class="w-full sm:w-auto">
-                            <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search cases..." 
-                                class="w-full sm:w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        </div>
-                        <div class="w-full sm:w-auto">
-                            <select wire:model.live="status" class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                <option value="">All Statuses</option>
-                                @foreach($statuses as $value => $label)
-                                    <option value="{{ $value }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="w-full sm:w-auto">
-                            <select wire:model.live="priorityFilter" class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                <option value="">All Priorities</option>
-                                <option value="low">Low Priority</option>
-                                <option value="medium">Medium Priority</option>
-                                <option value="high">High Priority</option>
-                                <option value="urgent">High Priority/Urgent</option>
-                            </select>
-                        </div>
                 <div class="w-full sm:w-auto">
-                    <button 
-                        wire:click="toggleArchivedView" 
-                        class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md {{ $showArchived ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 border-gray-300' }} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        {{ $showArchived ? 'Show Active Cases' : 'Show Case Archive' }}
-                    </button>
+                    <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search cases..." 
+                        class="w-full sm:w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                 </div>
-                        </div>
-                    </div>
+                <div class="w-full sm:w-auto">
+                    <select wire:model.live="status" class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <option value="">All Statuses</option>
+                        @foreach($statuses as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
                 </div>
+                <div class="w-full sm:w-auto">
+                    <select wire:model.live="priorityFilter" class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <option value="">All Priorities</option>
+                        <option value="low">Low Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="high">High Priority</option>
+                        <option value="urgent">High Priority/Urgent</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Pending Case Requests Section -->
-                @if(!$showArchived)
-                    @include('livewire.law-firm.partials.pending-case-requests')
-                @endif
+    <!-- Pending Case Requests Section -->
+    @include('livewire.law-firm.partials.pending-case-requests')
 
     <!-- Cases Grid -->
     @if($cases->count() > 0)
@@ -202,14 +193,9 @@
                                                         Active
                                                     </span>
                                                     @break
-                                @case('completed')
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        Completed
-                                                    </span>
-                                                    @break
-                                                @case('closed')
+                                                @case('completed')
                                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                                        Closed
+                                        Completed
                                                     </span>
                                                     @break
                                                 @default
@@ -233,16 +219,6 @@
                     <!-- Card Footer - Actions -->
                     <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
                         <div class="flex flex-wrap gap-2">
-                            @if($showArchived)
-                                <a href="{{ route('law-firm.case-details', $case->id) }}" 
-                                   class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 transition-colors">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                    </svg>
-                                    View Details
-                                </a>
-                            @else
                                 @if($case->status == 'pending')
                                     <button wire:click="showAction({{ $case->id }}, 'accept')" 
                                            class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors">
@@ -300,7 +276,7 @@
                                                             </button>
                                                 @endif
 
-                                @if(in_array($case->status, ['active', 'contract_signed', 'contract_sent']))
+                                @if(in_array($case->status, ['active', 'contract_signed', 'contract_sent', 'completed']))
                                     <a href="{{ route('law-firm.case-details', $case->id) }}" 
                                        class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -337,7 +313,17 @@
                                 </svg>
                                     Details
                                 </button>
-                            @endif
+                                
+                                @if(in_array($case->status, ['completed']))
+                                    <a href="{{ route('law-firm.case-details', $case->id) }}" 
+                                       class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                        View Case
+                                    </a>
+                                @endif
                         </div>
                     </div>
                 </div>
@@ -357,11 +343,7 @@
                             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">No Cases Found</h3>
             <p class="text-gray-600">
-                @if($showArchived)
-                    No archived cases found matching your criteria.
-                @else
-                    You don't have any active cases yet. They will appear here when clients request your services or when you create them from consultations.
-                @endif
+                You don't have any cases yet matching your criteria. They will appear here when clients request your services or when you create them from consultations.
             </p>
         </div>
     @endif

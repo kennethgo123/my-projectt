@@ -98,6 +98,17 @@ class CaseSetup extends Component
     public $editCaseNumber = '';
     public $editCaseTitle = '';
     
+    // Success and Error Modals
+    public $showSuccessModal = false;
+    public $successModalTitle = '';
+    public $successModalMessage = '';
+    public $showErrorModal = false;
+    public $errorModalMessage = '';
+    
+    // Update Note properties
+    public $newUpdateTitle = '';
+    public $newUpdateContent = '';
+    
     protected $rules = [
         'newPhaseName' => 'required|string|max:100',
         'newPhaseDescription' => 'required|string',
@@ -430,7 +441,6 @@ class CaseSetup extends Component
             
             $this->resetEventForm(); // Resets the date/time inputs
             $this->loadCaseData();
-            session()->flash('success', 'Event added successfully!');
 
             // Notify client about the new event
             if ($this->case->client_id) {
@@ -450,8 +460,18 @@ class CaseSetup extends Component
             // Close modal and scroll to top
             $this->dispatch('close-modal', 'add-event-modal');
             $this->dispatch('scrollToTop');
+            
+            $this->showSuccessMessage('Event Added Successfully!', 'The event has been added to your case.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Show validation errors in error modal
+            $errors = [];
+            foreach ($e->validator->errors()->all() as $error) {
+                $errors[] = $error;
+            }
+            $this->showErrorMessage(implode(' ', $errors));
+            Log::error('Add event validation error: ' . implode(', ', $errors));
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to add event: ' . $e->getMessage());
+            $this->showErrorMessage('Failed to add event: ' . $e->getMessage());
             Log::error('Add event error: ' . $e->getMessage()); // Add logging
         }
     }
@@ -489,7 +509,6 @@ class CaseSetup extends Component
             
             $this->resetTaskForm();
             $this->loadCaseData();
-            session()->flash('success', 'Task added successfully!');
             
             // Notify client if the task is assigned to them or if they should be aware of it
             if ($this->case->client_id) {
@@ -513,8 +532,18 @@ class CaseSetup extends Component
             // Close modal and scroll to top
             $this->dispatch('close-modal', 'add-task-modal');
             $this->dispatch('scrollToTop');
+            
+            $this->showSuccessMessage('Task Added Successfully!', 'The task has been added to your case.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Show validation errors in error modal
+            $errors = [];
+            foreach ($e->validator->errors()->all() as $error) {
+                $errors[] = $error;
+            }
+            $this->showErrorMessage(implode(' ', $errors));
+            Log::error('Add task validation error: ' . implode(', ', $errors));
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to add task: ' . $e->getMessage());
+            $this->showErrorMessage('Failed to add task: ' . $e->getMessage());
             Log::error('Add task error: ' . $e->getMessage());
         }
     }
@@ -793,7 +822,6 @@ class CaseSetup extends Component
                 
                 $this->resetEditTaskForm();
                 $this->loadCaseData();
-                session()->flash('success', 'Task updated successfully!');
                 
                 // Notify client if the task was assigned to them or updated
                 if ($this->case->client_id) {
@@ -818,9 +846,19 @@ class CaseSetup extends Component
                 // Close modal and scroll to top
                 $this->dispatch('close-modal', 'edit-task-modal');
                 $this->dispatch('scrollToTop');
+                
+                $this->showSuccessMessage('Task Updated Successfully!', 'The task has been updated successfully.');
             }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Show validation errors in error modal
+            $errors = [];
+            foreach ($e->validator->errors()->all() as $error) {
+                $errors[] = $error;
+            }
+            $this->showErrorMessage(implode(' ', $errors));
+            Log::error('Update task validation error: ' . implode(', ', $errors));
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to update task: ' . $e->getMessage());
+            $this->showErrorMessage('Failed to update task: ' . $e->getMessage());
             Log::error('Update task error: ' . $e->getMessage());
         }
     }
@@ -978,7 +1016,7 @@ class CaseSetup extends Component
     {
         // Only primary lawyers can close cases
         if (!$this->isPrimaryLawyer) {
-            session()->flash('error', 'Only the primary lawyer can close this case.');
+            $this->showErrorMessage('Only the primary lawyer can close this case.');
             return;
         }
         
@@ -1012,18 +1050,31 @@ class CaseSetup extends Component
                 \Illuminate\Support\Facades\Log::error('Error sending case closed notification: ' . $e->getMessage());
             }
             
-            session()->flash('success', 'Case has been successfully closed and archived.');
+            // Reload the case model with relationships to reflect the changes
+            $this->case = LegalCase::with('client.clientProfile')->findOrFail($this->case->id);
+            
+            // Update read-only status immediately
+            $this->isReadOnly = $this->case->status === LegalCase::STATUS_CLOSED || 
+                                $this->case->status === LegalCase::STATUS_COMPLETED ||
+                                $this->case->closed_at !== null;
+            
+            // Reload case data to reflect closed status
+            $this->loadCaseData();
+            
+            // Close the close case modal
+            $this->dispatch('close-modal', 'simple-close-case-modal');
             
             // Reset the close case note
             $this->caseCloseNote = '';
             
-            // Redirect to case listing
-            return redirect()->route('lawyer.cases');
+            // Show success modal
+            $this->showSuccessMessage('Case Closed Successfully!', 'The case has been successfully closed and archived. The client has been notified.');
+            
         } catch (\Exception $e) {
             // Log the error
             \Illuminate\Support\Facades\Log::error('Error closing case: ' . $e->getMessage());
             
-            session()->flash('error', 'There was an error closing the case. Please try again or contact support.');
+            $this->showErrorMessage('There was an error closing the case. Please try again or contact support.');
         }
     }
 
@@ -1137,12 +1188,12 @@ class CaseSetup extends Component
             DB::commit();
             
             $this->dispatch('close-modal', 'edit-court-details-modal');
-            session()->flash('success', 'Court details updated successfully.');
+            $this->showSuccessMessage('Court Details Updated!', 'The court details have been updated successfully.');
             
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error updating court details: ' . $e->getMessage());
-            session()->flash('error', 'Failed to update court details. Please try again.');
+            $this->showErrorMessage('Failed to update court details. Please try again.');
         }
     }
     
@@ -1227,6 +1278,85 @@ class CaseSetup extends Component
             Log::error('Error updating case details: ' . $e->getMessage());
             session()->flash('error', 'Failed to update case details. Please try again.');
         }
+    }
+
+    public function addUpdateNote()
+    {
+        // Check if case is closed
+        if ($this->case->isClosed()) {
+            $this->showErrorMessage('Cannot add update notes to a closed case.');
+            return;
+        }
+        
+        $this->validate([
+            'newUpdateTitle' => 'required|string|max:200',
+            'newUpdateContent' => 'required|string|min:10|max:5000',
+        ]);
+        
+        try {
+            // Create the update
+            $update = new \App\Models\CaseUpdate([
+                'legal_case_id' => $this->case->id,
+                'user_id' => Auth::id(),
+                'title' => $this->newUpdateTitle,
+                'content' => $this->newUpdateContent,
+                'visibility' => 'both', // Visible to both lawyer and client
+                'is_client_visible' => true,
+            ]);
+            $update->save();
+            
+            // Notify the client about the update
+            if ($this->case->client) {
+                $this->case->client->notify(new CaseUpdatedNotification($this->case, $this->newUpdateTitle, $this->newUpdateContent));
+            }
+            
+            // Reset form
+            $this->newUpdateTitle = '';
+            $this->newUpdateContent = '';
+            
+            // Close modal and show success
+            $this->dispatch('close-modal', 'add-update-note-modal');
+            $this->dispatch('scrollToTop');
+            
+            $this->showSuccessMessage('Update Note Created!', 'The update note has been successfully created and the client has been notified.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Show validation errors in error modal
+            $errors = [];
+            foreach ($e->validator->errors()->all() as $error) {
+                $errors[] = $error;
+            }
+            $this->showErrorMessage(implode(' ', $errors));
+            Log::error('Add update note validation error: ' . implode(', ', $errors));
+        } catch (\Exception $e) {
+            $this->showErrorMessage('Failed to create update note: ' . $e->getMessage());
+            Log::error('Add update note error: ' . $e->getMessage());
+        }
+    }
+    
+    public function showSuccessMessage($title, $message)
+    {
+        $this->successModalTitle = $title;
+        $this->successModalMessage = $message;
+        $this->showSuccessModal = true;
+    }
+    
+    public function closeSuccessModal()
+    {
+        $this->showSuccessModal = false;
+        $this->successModalTitle = '';
+        $this->successModalMessage = '';
+    }
+    
+    public function showErrorMessage($message)
+    {
+        $this->errorModalMessage = $message;
+        $this->showErrorModal = true;
+    }
+    
+    public function closeErrorModal()
+    {
+        $this->showErrorModal = false;
+        $this->errorModalMessage = '';
     }
 
     public function render()
