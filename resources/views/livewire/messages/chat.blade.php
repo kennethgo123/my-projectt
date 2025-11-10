@@ -217,7 +217,11 @@
             <div class="p-4 border-b bg-white sticky top-0 z-10">
                 <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="flex-shrink-0">
+                    @if($recipient->isLawyer())
+                        <a href="{{ route('lawyer.profile', $recipient->id) }}" class="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
+                    @else
+                        <div class="flex-shrink-0">
+                    @endif
                             @if($recipient->isLawyer() && $recipient->lawyerProfile && $recipient->lawyerProfile->photo_path)
                                 <img class="w-12 h-12 rounded-full object-cover" 
                                     src="{{ Storage::url($recipient->lawyerProfile->photo_path) }}" 
@@ -255,9 +259,17 @@
                                     </span>
                                 </div>
                             @endif
+                    @if($recipient->isLawyer())
+                        </a>
+                    @else
                         </div>
+                    @endif
                         <div>
-                            <h3 class="text-lg font-medium">
+                            @if($recipient->isLawyer())
+                                <a href="{{ route('lawyer.profile', $recipient->id) }}" class="text-lg font-medium hover:text-indigo-600 transition-colors cursor-pointer">
+                            @else
+                                <h3 class="text-lg font-medium">
+                            @endif
                                 @if($recipient->isLawyer() && $recipient->lawyerProfile)
                                     {{ $recipient->lawyerProfile->first_name }} {{ $recipient->lawyerProfile->last_name }}
                                 @elseif($recipient->isLawyer() && $recipient->lawFirmLawyer)
@@ -269,7 +281,11 @@
                                 @else
                                     {{ $recipient->name }}
                                 @endif
-                            </h3>
+                            @if($recipient->isLawyer())
+                                </a>
+                            @else
+                                </h3>
+                            @endif
                             <p class="text-xs text-gray-500">
                                 {{ $recipient->isLawyer() ? 'Lawyer' : ($recipient->isClient() ? 'Client' : $recipient->role->name) }}
                             </p>

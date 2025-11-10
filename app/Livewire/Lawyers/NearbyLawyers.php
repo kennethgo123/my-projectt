@@ -139,34 +139,34 @@ class NearbyLawyers extends Component
     {
         $services = LegalService::active()->orderBy('name')->get();
         
-        // Get all unique cities for the dropdown
-        $lawyerCities = LawyerProfile::select('city')
-            ->distinct()
-            ->whereNotNull('city')
-            ->whereHas('user', function($q) {
-                $q->where('profile_completed', true)
-                    ->where('status', 'approved');
-            })
-            ->pluck('city')
-            ->toArray();
-            
-        $lawFirmCities = LawFirmProfile::select('city')
-            ->distinct()
-            ->whereNotNull('city')
-            ->whereHas('user', function($q) {
-                $q->where('profile_completed', true)
-                    ->where('status', 'approved');
-            })
-            ->pluck('city')
-            ->toArray();
-            
-        $lawFirmLawyerCities = LawFirmLawyer::select('city')
-            ->distinct()
-            ->whereNotNull('city')
-            ->pluck('city')
-            ->toArray();
+        // Predefined list of cities in Cavite
+        $allCities = [
+            'Cavite City',
+            'Kawit',
+            'Noveleta',
+            'Rosario',
+            'Bacoor',
+            'Imus',
+            'Dasmariñas',
+            'Carmona',
+            'Silang',
+            'General Mariano Alvarez',
+            'General Trias',
+            'Amadeo',
+            'Indang',
+            'Tanza',
+            'Trece Martires',
+            'Tagaytay',
+            'Alfonso',
+            'General Emilio Aguinaldo',
+            'Magallanes',
+            'Maragondon',
+            'Mendez',
+            'Naic',
+            'Ternate'
+        ];
         
-        $allCities = array_unique(array_merge($lawyerCities, $lawFirmCities, $lawFirmLawyerCities));
+        // Sort cities alphabetically
         sort($allCities);
         
         // ----------------------
