@@ -19,21 +19,26 @@
                             <x-nav-link href="{{ route('lawyer.welcome') }}" :active="request()->routeIs('lawyer.welcome')">
                                 {{ __('Home') }}
                             </x-nav-link>
-                            {{-- Only show Optimize Profile link when not on cases or consultations pages --}}
-                            @if(!request()->routeIs('lawyer.cases') && !request()->routeIs('lawyer.consultations'))
-                                <x-nav-link href="{{ route('profile.optimize') }}" :active="request()->routeIs('profile.optimize')">
-                                    {{ __('Optimize Your Profile') }}
-                                </x-nav-link>
-                            @endif
+                            
+                            <x-nav-link href="{{ route('profile.optimize') }}" :active="request()->routeIs('profile.optimize')">
+                                {{ __('Optimize Your Profile') }}
+                            </x-nav-link>
+                            
                             <x-nav-link href="{{ route('lawyer.cases') }}" :active="request()->routeIs('lawyer.cases')">
                                 {{ __('Manage Your Cases') }}
                             </x-nav-link>
+                            
                             <x-nav-link href="{{ route('lawyer.consultations') }}" :active="request()->routeIs('lawyer.consultations')" class="relative">
-                                {{ __('Consultations') }}
+                                {{ __('Consultation') }}
                                 <span id="lawyer-notification-indicator" class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500 hidden"></span>
                             </x-nav-link>
+                            
                             <x-nav-link href="{{ route('messages') }}" :active="request()->routeIs('messages')">
                                 {{ __('Messages') }}
+                            </x-nav-link>
+                            
+                            <x-nav-link href="{{ route('lawyer.invoices') }}" :active="request()->routeIs('lawyer.invoices')">
+                                {{ __('Invoices') }}
                             </x-nav-link>
                         @elseif(auth()->user()->role->name === 'client')
                             <x-nav-link href="{{ route('client.welcome') }}" :active="request()->routeIs('client.welcome')">
@@ -302,16 +307,20 @@
         <div class="pt-2 pb-3 space-y-1">
                 @if(auth()->user()->role->name === 'lawyer')
                     <x-responsive-nav-link href="{{ route('lawyer.welcome') }}" :active="request()->routeIs('lawyer.welcome')">{{ __('Home') }}</x-responsive-nav-link>
-                    {{-- Only show Optimize Profile link when not on cases or consultations pages --}}
-                    @if(!request()->routeIs('lawyer.cases') && !request()->routeIs('lawyer.consultations'))
-                        <x-responsive-nav-link href="{{ route('profile.optimize') }}" :active="request()->routeIs('profile.optimize')">{{ __('Optimize Profile') }}</x-responsive-nav-link>
-                    @endif
-                    <x-responsive-nav-link href="{{ route('lawyer.cases') }}" :active="request()->routeIs('lawyer.cases')">{{ __('Manage Cases') }}</x-responsive-nav-link>
+                    
+                    <x-responsive-nav-link href="{{ route('profile.optimize') }}" :active="request()->routeIs('profile.optimize')">{{ __('Optimize Your Profile') }}</x-responsive-nav-link>
+                    
+                    <x-responsive-nav-link href="{{ route('lawyer.cases') }}" :active="request()->routeIs('lawyer.cases')">{{ __('Manage Your Cases') }}</x-responsive-nav-link>
+                    
                     <x-responsive-nav-link href="{{ route('lawyer.consultations') }}" :active="request()->routeIs('lawyer.consultations')" class="relative">
-                        {{ __('Consultations') }}
+                        {{ __('Consultation') }}
                         <span id="lawyer-notification-indicator" class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500 hidden"></span>
                     </x-responsive-nav-link>
+                    
                     <x-responsive-nav-link href="{{ route('messages') }}" :active="request()->routeIs('messages')">{{ __('Messages') }}</x-responsive-nav-link>
+                    
+                    <x-responsive-nav-link href="{{ route('lawyer.invoices') }}" :active="request()->routeIs('lawyer.invoices')">{{ __('Invoices') }}</x-responsive-nav-link>
+                    
                     {{-- Mobile Notifications for Lawyers --}}
                     <div class="px-4 py-2 flex items-center justify-between">
                         <span class="font-medium text-base text-gray-800">Notifications</span>

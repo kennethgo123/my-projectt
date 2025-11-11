@@ -42,20 +42,20 @@
                                     <a href="{{ route('lawyer.welcome') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out {{ request()->routeIs('lawyer.welcome') ? 'border-indigo-500 text-gray-900' : 'border-transparent' }}">
                                         Home
                                     </a>
-                                    <a href="{{ route('profile.optimize') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out">
+                                    <a href="{{ route('profile.optimize') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out {{ request()->routeIs('profile.optimize') ? 'border-indigo-500 text-gray-900' : 'border-transparent' }}">
                                         Optimize Your Profile
                                     </a>
-                                    <a href="{{ route('lawyer.consultations') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out">
-                                        Manage Consultations
+                                    <a href="{{ route('lawyer.cases') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out {{ request()->routeIs('lawyer.cases') ? 'border-indigo-500 text-gray-900' : 'border-transparent' }}">
+                                        Manage Your Cases
                                     </a>
-                                    <a href="{{ route('lawyer.cases') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out">
-                                        Manage Cases
+                                    <a href="{{ route('lawyer.consultations') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out {{ request()->routeIs('lawyer.consultations') ? 'border-indigo-500 text-gray-900' : 'border-transparent' }}">
+                                        Consultation
+                                    </a>
+                                    <a href="{{ route('messages') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out {{ request()->routeIs('messages') ? 'border-indigo-500 text-gray-900' : 'border-transparent' }}">
+                                        Messages
                                     </a>
                                     <a href="{{ route('lawyer.invoices') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out {{ request()->routeIs('lawyer.invoices') ? 'border-indigo-500 text-gray-900' : 'border-transparent' }}">
                                         Invoices
-                                    </a>
-                                    <a href="{{ route('messages') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out">
-                                        Messages
                                     </a>
                                     {{-- <x-find-legal-help-dropdown />
                                     <a href="{{ route('services') }}" class="inline-flex items-center h-16 px-1 border-b-2 text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition duration-150 ease-in-out">
@@ -162,20 +162,20 @@
                             <a href="{{ route('lawyer.welcome') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('lawyer.welcome') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
                                 Home
                             </a>
-                            <a href="{{ route('lawyer.consultations') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('lawyer.consultations') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
-                                Manage Consultations
+                            <a href="{{ route('profile.optimize') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('profile.optimize') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
+                                Optimize Your Profile
                             </a>
                             <a href="{{ route('lawyer.cases') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('lawyer.cases') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
-                                Manage Cases
+                                Manage Your Cases
                             </a>
-                            <a href="{{ route('lawyer.invoices') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('lawyer.invoices') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
-                                Invoices
+                            <a href="{{ route('lawyer.consultations') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('lawyer.consultations') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
+                                Consultation
                             </a>
                             <a href="{{ route('messages') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('messages') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
                                 Messages
                             </a>
-                            <a href="{{ route('profile.optimize') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('profile.optimize') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
-                                Optimize Profile
+                            <a href="{{ route('lawyer.invoices') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('lawyer.invoices') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
+                                Invoices
                             </a>
                         @elseif(auth()->user()->isClient())
                             <a href="{{ route('client.welcome') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 {{ request()->routeIs('client.welcome') ? 'bg-gray-100 border-l-4 border-indigo-500 font-semibold' : '' }}">
