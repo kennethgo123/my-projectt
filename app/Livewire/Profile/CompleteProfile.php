@@ -493,16 +493,64 @@ class CompleteProfile extends Component
                 Log::info('Processing law firm profile');
                 
                 try {
-                    // Set law_firm_name and law_firm_description from firm_name if not set
-                    if (empty($this->law_firm_name)) {
-                        $this->law_firm_name = $this->firm_name;
-                    }
-                    if (empty($this->law_firm_description)) {
-                        $this->law_firm_description = null;
+                    // Add more robust file handling with error checking for registration certificate
+                    try {
+                        if (!$this->registration_certificate_file) {
+                            throw new \Exception("Registration certificate file is not set in the component property");
+                        }
+                        
+                        // Additional file validation
+                        if (!$this->registration_certificate_file->isValid()) {
+                            throw new \Exception("The uploaded registration certificate file is not valid: " . $this->registration_certificate_file->getErrorMessage());
+                        }
+                        
+                        $registrationCertificatePath = $this->registration_certificate_file->store('firm_registrations', 'public');
+                        
+                        if (!$registrationCertificatePath) {
+                            throw new \Exception("Registration certificate file storage operation returned empty path");
+                        }
+                        
+                        Log::info('Registration certificate file stored at: ' . $registrationCertificatePath);
+                    } catch (\Exception $fileException) {
+                        Log::error('Registration certificate file upload error: ' . $fileException->getMessage(), [
+                            'file' => $fileException->getFile(),
+                            'line' => $fileException->getLine(),
+                        ]);
+                        
+                        // Set a specific error message
+                        session()->flash('upload_error', 'There was a problem uploading your registration certificate: ' . $fileException->getMessage());
+                        throw $fileException;
                     }
                     
-                    $registrationCertificatePath = $this->registration_certificate_file->store('firm_registrations', 'public');
-                    $birCertificatePath = $this->bir_certificate_file->store('firm_bir_certificates', 'public');
+                    // Add more robust file handling with error checking for BIR certificate
+                    try {
+                        if (!$this->bir_certificate_file) {
+                            throw new \Exception("BIR certificate file is not set in the component property");
+                        }
+                        
+                        // Additional file validation
+                        if (!$this->bir_certificate_file->isValid()) {
+                            throw new \Exception("The uploaded BIR certificate file is not valid: " . $this->bir_certificate_file->getErrorMessage());
+                        }
+                        
+                        $birCertificatePath = $this->bir_certificate_file->store('firm_bir_certificates', 'public');
+                        
+                        if (!$birCertificatePath) {
+                            throw new \Exception("BIR certificate file storage operation returned empty path");
+                        }
+                        
+                        Log::info('BIR certificate file stored at: ' . $birCertificatePath);
+                    } catch (\Exception $fileException) {
+                        Log::error('BIR certificate file upload error: ' . $fileException->getMessage(), [
+                            'file' => $fileException->getFile(),
+                            'line' => $fileException->getLine(),
+                        ]);
+                        
+                        // Set a specific error message
+                        session()->flash('upload_error', 'There was a problem uploading your BIR certificate: ' . $fileException->getMessage());
+                        throw $fileException;
+                    }
+                    
                     Log::info('Law firm files stored', ['registration' => $registrationCertificatePath, 'bir' => $birCertificatePath]);
 
                     $lawFirmProfile = LawFirmProfile::create([
@@ -518,8 +566,6 @@ class CompleteProfile extends Component
                         'max_budget' => $this->max_budget,
                         'pricing_description' => $this->pricing_description,
                         'barangay' => $this->firm_barangay,
-                        'name' => $this->law_firm_name,
-                        'description' => $this->law_firm_description,
                     ]);
                     Log::info('Law firm profile created', ['profile_id' => $lawFirmProfile->id]);
 
