@@ -259,7 +259,7 @@
                                     @if($consultation->consultation_type === 'Online Consultation')
                                         <div class="w-full mb-2">
                                             <input type="url" wire:model="customMeetingLink" 
-                                                placeholder="Meeting link (optional)" 
+                                                placeholder="Meeting link (Kindly provide a meeting link for your online consultation)" 
                                                 class="w-full text-xs border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                                         </div>
                                     @endif
@@ -576,3 +576,69 @@
         </div>
     </div>
     @endif
+
+    <!-- Meeting Link Success Modal -->
+    <div 
+        x-data="{ showModal: @entangle('showMeetingLinkSuccessModal') }"
+        x-show="showModal"
+        x-cloak
+        @keydown.escape.window="showModal = false; $wire.set('showMeetingLinkSuccessModal', false)"
+        class="fixed inset-0 flex items-center justify-center z-50"
+        style="display: none;"
+        wire:ignore.self
+    >
+        <!-- Backdrop -->
+        <div 
+            x-show="showModal" 
+            x-transition:enter="transition ease-out duration-300" 
+            x-transition:enter-start="opacity-0" 
+            x-transition:enter-end="opacity-100" 
+            x-transition:leave="transition ease-in duration-200" 
+            x-transition:leave-start="opacity-100" 
+            x-transition:leave-end="opacity-0" 
+            class="fixed inset-0 bg-black bg-opacity-50"
+            @click="showModal = false; $wire.set('showMeetingLinkSuccessModal', false)"
+        ></div>
+        
+        <!-- Modal Content -->
+        <div 
+            x-show="showModal" 
+            x-transition:enter="transition ease-out duration-300" 
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+            x-transition:leave="transition ease-in duration-200" 
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+            class="bg-white rounded-lg shadow-xl p-6 mx-4 sm:mx-auto sm:max-w-lg relative z-10 transform transition-all"
+        >
+            <div class="text-center">
+                <!-- Success Icon -->
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                    <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Meeting Link Successfully Updated!</h3>
+                
+                <!-- Content -->
+                <div class="mb-6">
+                    <p class="text-gray-700">Your meeting link has been successfully updated and the client has been notified.</p>
+                </div>
+                
+                <!-- Action Button -->
+                <div class="flex justify-center">
+                    <button 
+                        type="button"
+                        @click="showModal = false; $wire.set('showMeetingLinkSuccessModal', false)"
+                        class="inline-flex items-center px-6 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white text-sm tracking-wide hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    >
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

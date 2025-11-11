@@ -45,6 +45,7 @@ class ManageConsultations extends Component
     public $showCompleteModal = false;
     public $showStartCaseModal = false;
     public $showCustomLinkModal = false;
+    public $showMeetingLinkSuccessModal = false;
 
     // Properties for Review Contract Modal
     public $showReviewContractModal = false;
@@ -913,7 +914,8 @@ class ManageConsultations extends Component
             $this->googleMeetLink = '';
             $this->showGoogleMeetInput[$consultationId] = false;
             
-            session()->flash('message', 'Meeting link successfully updated!');
+            // Show success modal
+            $this->showMeetingLinkSuccessModal = true;
             
             // Trigger a full component refresh to ensure the UI shows the updated link
             $this->dispatch('refreshConsultations');
