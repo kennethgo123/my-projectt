@@ -1058,8 +1058,10 @@
                                         <option value="MTCC">Municipal Trial Court in Cities (MTCC)</option>
                                         <option value="MTC">Municipal Trial Court (MTC)</option>
                                         <option value="MCTC">Municipal Circuit Trial Court (MCTC)</option>
+                                        <option value="Shari'a Circuit Courts">Shari'a Circuit Courts</option>
                                     @elseif($courtLevelMain === 'Second Level Courts')
                                         <option value="RTC">Regional Trial Court (RTC)</option>
+                                        <option value="Shari'a District Courts">Shari'a District Courts</option>
                                     @elseif($courtLevelMain === 'Appellate Courts')
                                         <option value="Court of Appeals">Court of Appeals</option>
                                         <option value="Sandiganbayan">Sandiganbayan</option>
