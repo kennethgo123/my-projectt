@@ -124,7 +124,7 @@ class ServiceManagement extends Component
     public function addCategory()
     {
         $this->validate([
-            'newCategoryName' => 'required|min:2|max:50',
+            'newCategoryName' => 'required|min:2|max:100',
             'newCategoryDescription' => 'nullable|max:500'
         ]);
         
@@ -154,7 +154,7 @@ class ServiceManagement extends Component
     public function updateCategory()
     {
         $this->validate([
-            'editCategoryName' => 'required|min:2|max:50',
+            'editCategoryName' => 'required|min:2|max:100',
             'editCategoryDescription' => 'nullable|max:500'
         ]);
         
