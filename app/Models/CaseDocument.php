@@ -18,7 +18,7 @@ class CaseDocument extends Model
         'file_name',
         'file_type',
         'file_size',
-        // 'uploaded_by', // Removed to prevent conflict with polymorphic relation
+        'uploaded_by', // Temporarily included for backward compatibility until migration completes
         'uploaded_by_type',
         'uploaded_by_id',
         'is_shared'

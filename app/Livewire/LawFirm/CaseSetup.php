@@ -13,6 +13,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -529,7 +530,7 @@ class CaseSetup extends Component
             $path = $this->newDocument->store('case-documents/' . $this->case->id, 'public');
             
             // Create document record
-            $document = CaseDocument::create([
+            $documentData = [
                 'legal_case_id' => $this->case->id,
                 'title' => $this->newDocumentTitle,
                 'description' => $this->newDocumentDescription,
@@ -540,7 +541,14 @@ class CaseSetup extends Component
                 'uploaded_by_id' => Auth::id(),
                 'uploaded_by_type' => User::class,
                 'is_shared' => true
-            ]);
+            ];
+            
+            // Temporarily include uploaded_by if column exists (until migration makes it nullable)
+            if (Schema::hasColumn('case_documents', 'uploaded_by')) {
+                $documentData['uploaded_by'] = Auth::id();
+            }
+            
+            $document = CaseDocument::create($documentData);
             
             // Reset form
             $this->newDocumentTitle = '';
