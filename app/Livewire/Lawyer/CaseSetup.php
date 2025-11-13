@@ -1111,11 +1111,11 @@ class CaseSetup extends Component
             // Reload case data to reflect closed status
             $this->loadCaseData();
             
-            // Close the close case modal
-            $this->dispatch('close-modal', 'simple-close-case-modal');
-            
             // Reset the close case note
             $this->caseCloseNote = '';
+            
+            // Close the close case modal
+            $this->dispatch('close');
             
             // Show success modal
             $this->showSuccessMessage('Case Closed Successfully!', 'The case has been successfully closed and archived. The client has been notified.');
