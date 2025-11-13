@@ -72,6 +72,20 @@ class OptimizeProfile extends Component
         $this->barangays = $this->getBarangaysByCity($this->city);
     }
 
+    public function updatedStartYear()
+    {
+        // Reset end year if it's less than 4 years after start year
+        if (!empty($this->startYear) && !empty($this->endYear)) {
+            $startYearInt = (int) $this->startYear;
+            $endYearInt = (int) $this->endYear;
+            $minEndYear = $startYearInt + 4;
+            
+            if ($endYearInt < $minEndYear) {
+                $this->endYear = '';
+            }
+        }
+    }
+
     public function addExperience()
     {
         if (!empty($this->newExperience)) {
@@ -368,6 +382,18 @@ class OptimizeProfile extends Component
             }
         } elseif (!empty($this->customUniversity)) {
             $universityName = trim($this->customUniversity);
+        }
+
+        // Validate start year and end year difference
+        if (!empty($this->startYear) && !empty($this->endYear)) {
+            $startYearInt = (int) $this->startYear;
+            $endYearInt = (int) $this->endYear;
+            $yearDifference = $endYearInt - $startYearInt;
+            
+            if ($yearDifference < 4) {
+                session()->flash('error', 'The end year must be at least 4 years after the start year. For example, if start year is ' . $this->startYear . ', the minimum end year should be ' . ($startYearInt + 4) . '.');
+                return;
+            }
         }
 
         if (!empty($universityName)) {

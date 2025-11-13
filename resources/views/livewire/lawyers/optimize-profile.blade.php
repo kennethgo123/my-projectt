@@ -278,7 +278,7 @@
                         <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="startYear" class="block text-sm font-medium text-gray-700">Start Year</label>
-                                <select id="startYear" wire:model="startYear" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <select id="startYear" wire:model.live="startYear" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                     <option value="">Select start year</option>
                                     @for($y = 2021; $y >= 1960; $y--)
                                         <option value="{{ $y }}">{{ $y }}</option>
@@ -289,10 +289,20 @@
                                 <label for="endYear" class="block text-sm font-medium text-gray-700">End Year</label>
                                 <select id="endYear" wire:model="endYear" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                     <option value="">Select end year</option>
-                                    @for($y = 2025; $y >= 1960; $y--)
+                                    @php
+                                        $minEndYear = !empty($startYear) ? ((int)$startYear + 4) : 1960;
+                                        $maxYear = 2025;
+                                    @endphp
+                                    @for($y = $maxYear; $y >= $minEndYear; $y--)
                                         <option value="{{ $y }}">{{ $y }}</option>
                                     @endfor
                                 </select>
+                                @if(!empty($startYear) && empty($endYear))
+                                    <p class="mt-1 text-xs text-gray-500">Minimum end year: {{ (int)$startYear + 4 }}</p>
+                                @endif
+                                @error('endYear') 
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
