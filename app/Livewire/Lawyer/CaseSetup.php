@@ -93,6 +93,11 @@ class CaseSetup extends Component
     
     public $isPrimaryLawyer = false; // Flag to track if current user is primary lawyer
     
+    // Setup modals
+    public $showWelcomeModal = false;
+    public $showFinishSetupModal = false;
+    public $finishSetupProBono = false;
+    
     // Case editing properties
     public $editingCase = false;
     public $editCaseNumber = '';
@@ -194,6 +199,11 @@ class CaseSetup extends Component
         
         // Load court details
         $this->loadCourtDetails();
+        
+        // Show welcome modal if this is the first time accessing setup (contract signed but setup not completed)
+        if (($case->status === LegalCase::STATUS_CONTRACT_SIGNED || ($case->contract_status === 'signed' && $case->status !== 'active')) && !$case->setup_completed) {
+            $this->showWelcomeModal = true;
+        }
         
         // Check if case is in read-only mode (closed or completed)
         $this->isReadOnly = $case->status === LegalCase::STATUS_CLOSED || 
@@ -600,12 +610,30 @@ class CaseSetup extends Component
             return;
         }
         
+        // Show confirmation modal instead of directly completing
+        $this->showFinishSetupModal = true;
+    }
+    
+    public function proceedWithFinishSetup()
+    {
+        if ($this->case->lawyer_id !== Auth::id()) {
+            session()->flash('error', 'You are not authorized to update this case.');
+            return;
+        }
+        
         try {
             // Update the case status to completed setup
-            $this->case->update([
+            $updateData = [
                 'status' => 'active',
                 'setup_completed' => true,
-            ]);
+            ];
+            
+            // If Pro Bono is toggled, mark it as Pro Bono
+            if ($this->finishSetupProBono) {
+                $updateData['is_pro_bono'] = true;
+            }
+            
+            $this->case->update($updateData);
             
             // Notify the client
             try {
@@ -630,10 +658,23 @@ class CaseSetup extends Component
                 Log::warning('Failed to create notification: ' . $e->getMessage());
             }
             
+            $this->showFinishSetupModal = false;
+            $this->finishSetupProBono = false;
             session()->flash('success', 'Case setup has been marked as complete and is now visible to the client.');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to mark case setup as complete: ' . $e->getMessage());
         }
+    }
+    
+    public function closeWelcomeModal()
+    {
+        $this->showWelcomeModal = false;
+    }
+    
+    public function closeFinishSetupModal()
+    {
+        $this->showFinishSetupModal = false;
+        $this->finishSetupProBono = false;
     }
     
     // Method to reset task form fields

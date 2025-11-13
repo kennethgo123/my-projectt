@@ -91,6 +91,11 @@ class CaseSetup extends Component
     
     public $isPrimaryLawyer = false; // Flag to track if current user is primary lawyer
     
+    // Setup modals
+    public $showWelcomeModal = false;
+    public $showFinishSetupModal = false;
+    public $finishSetupProBono = false;
+    
     protected $rules = [
         'newPhaseName' => 'required|string|max:100',
         'newPhaseDescription' => 'required|string',
@@ -182,6 +187,11 @@ class CaseSetup extends Component
         
         $this->case = $case;
         $this->isPrimaryLawyer = $this->checkIfPrimaryLawyer(); // Set the property here
+        
+        // Show welcome modal if this is the first time accessing setup (contract signed but setup not completed)
+        if (($case->status === LegalCase::STATUS_CONTRACT_SIGNED || ($case->contract_status === 'signed' && $case->status !== 'active')) && !$case->setup_completed) {
+            $this->showWelcomeModal = true;
+        }
         
         // Initialize collections
         $this->phases = collect();
@@ -819,12 +829,25 @@ class CaseSetup extends Component
     
     public function markSetupComplete()
     {
+        // Show confirmation modal instead of directly completing
+        $this->showFinishSetupModal = true;
+    }
+    
+    public function proceedWithFinishSetup()
+    {
         try {
             // Update the case status to completed setup
-            $this->case->update([
+            $updateData = [
                 'status' => 'active',
                 'setup_completed' => true,
-            ]);
+            ];
+            
+            // If Pro Bono is toggled, mark it as Pro Bono
+            if ($this->finishSetupProBono) {
+                $updateData['is_pro_bono'] = true;
+            }
+            
+            $this->case->update($updateData);
             
             // Notify the client
             try {
@@ -849,10 +872,23 @@ class CaseSetup extends Component
                 Log::warning('Failed to create notification: ' . $e->getMessage());
             }
             
+            $this->showFinishSetupModal = false;
+            $this->finishSetupProBono = false;
             session()->flash('success', 'Case setup has been marked as complete and is now visible to the client.');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to mark case setup as complete: ' . $e->getMessage());
         }
+    }
+    
+    public function closeWelcomeModal()
+    {
+        $this->showWelcomeModal = false;
+    }
+    
+    public function closeFinishSetupModal()
+    {
+        $this->showFinishSetupModal = false;
+        $this->finishSetupProBono = false;
     }
     
     /**
