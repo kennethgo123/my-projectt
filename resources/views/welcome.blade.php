@@ -44,8 +44,8 @@
                         <a href="#services" class="inline-flex items-center px-4 py-2 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out mr-4 hover:text-gray-700">
                             Services
                         </a>
-                        <a href="#featured-lawyers" class="inline-flex items-center px-4 py-2 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out mr-4 hover:text-gray-700">
-                            Featured Lawyers
+                        <a href="#about-us" class="inline-flex items-center px-4 py-2 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out mr-4 hover:text-gray-700">
+                            About us
                         </a>
                         @auth
                             <a href="{{ url('/dashboard') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out mr-4">
@@ -82,8 +82,8 @@
                     <a href="#services" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 transition duration-150 ease-in-out">
                         Services
                     </a>
-                    <a href="#featured-lawyers" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 transition duration-150 ease-in-out">
-                        Featured Lawyers
+                    <a href="#about-us" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 transition duration-150 ease-in-out">
+                        About us
                     </a>
                     @auth
                         <a href="{{ url('/dashboard') }}" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 transition duration-150 ease-in-out">
@@ -582,20 +582,17 @@
             </div>
         </section>
 
-        <!-- Featured Lawyers Section (Placeholder) -->
-        <section id="featured-lawyers" class="py-16 bg-white dark:bg-gray-800">
+        <!-- About Us Section -->
+        <section id="about-us" class="py-16 bg-white dark:bg-gray-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Featured Lawyers</h2>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">About us</h2>
                     <div class="w-24 h-1 bg-indigo-600 mx-auto mb-6"></div>
-                    <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                        Connect with our top-rated legal professionals specializing in various areas of law.
-                    </p>
                 </div>
                 
-                <div class="flex justify-center items-center py-12">
-                    <p class="text-gray-500 dark:text-gray-400 text-lg">
-                        Coming soon! This section will showcase our featured legal professionals.
+                <div class="max-w-4xl mx-auto">
+                    <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed text-center">
+                        At Lexcav, we believe that access to legal assistance should be simple, transparent, and within everyone's reach. Our platform bridges the gap between clients and qualified legal professionals, making it easier to find trusted lawyers who can address your specific needs. Whether you're seeking legal advice, consultation, or representation, Lexcav provides a secure and convenient space to connect with experts who care. Guided by our mission of making legal services accessible, we're redefining how people access justice—one connection at a time.
                     </p>
                 </div>
             </div>

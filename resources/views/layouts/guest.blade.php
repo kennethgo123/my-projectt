@@ -29,7 +29,7 @@
                         <div class="flex space-x-8 ml-8">
                             <a href="{{ route('home') }}" class="text-white hover:text-green-300 transition">Home</a>
                             <a href="{{ route('home') }}#services" class="text-white hover:text-green-300 transition">Services</a>
-                            <a href="{{ route('home') }}#featured-lawyers" class="text-white hover:text-green-300 transition">Featured Lawyers</a>
+                            <a href="{{ route('home') }}#about-us" class="text-white hover:text-green-300 transition">About us</a>
                         </div>
                         <div class="flex space-x-8">
                             <a href="{{ route('register') }}" class="text-white hover:text-green-300 transition {{ request()->routeIs('register') ? 'text-green-300' : '' }}">Register</a>
@@ -49,7 +49,7 @@
                         <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
                             <a href="{{ route('home') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Home</a>
                             <a href="{{ route('home') }}#services" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Services</a>
-                            <a href="{{ route('home') }}#featured-lawyers" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Featured Lawyers</a>
+                            <a href="{{ route('home') }}#about-us" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About us</a>
                             <a href="{{ route('register') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Register</a>
                             <a href="{{ route('login') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Login</a>
                         </div>
