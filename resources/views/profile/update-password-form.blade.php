@@ -18,6 +18,9 @@
             <x-label for="password" value="{{ __('New Password') }}" />
             <x-input id="password" type="password" class="mt-1 block w-full" wire:model="state.password" autocomplete="new-password" />
             <x-input-error for="password" class="mt-2" />
+            <p class="mt-2 text-xs text-gray-500">
+                {{ __('Must be at least 12 characters and include 1 uppercase letter, 1 number, and 1 special character.') }}
+            </p>
         </div>
 
         <div class="col-span-6 sm:col-span-4">

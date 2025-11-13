@@ -62,8 +62,17 @@
         <!-- Email -->
         <div class="col-span-6 sm:col-span-4">
             <x-label for="email" value="{{ __('Email') }}" />
-            <x-input id="email" type="email" class="mt-1 block w-full" wire:model="state.email" required autocomplete="username" />
-            <x-input-error for="email" class="mt-2" />
+            <x-input
+                id="email"
+                type="email"
+                class="mt-1 block w-full bg-gray-100 text-gray-600 cursor-not-allowed"
+                wire:model="state.email"
+                readonly
+                autocomplete="username"
+            />
+            <p class="mt-2 text-xs text-gray-500">
+                {{ __('Email updates are managed by the administrator. Contact support if you need to change this address.') }}
+            </p>
 
             @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::emailVerification()) && ! $this->user->hasVerifiedEmail())
                 <p class="text-sm mt-2">
