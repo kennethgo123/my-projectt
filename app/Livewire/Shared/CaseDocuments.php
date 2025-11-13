@@ -8,6 +8,7 @@ use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class CaseDocuments extends Component
@@ -44,7 +45,7 @@ class CaseDocuments extends Component
         try {
             $path = $this->document->store('case-documents', 'public');
             
-            CaseDocument::create([
+            $documentData = [
                 'legal_case_id' => $this->case->id,
                 'title' => $this->documentTitle,
                 'description' => $this->documentDescription,
@@ -54,8 +55,19 @@ class CaseDocuments extends Component
                 'file_type' => $this->document->getMimeType(),
                 'uploaded_by_type' => User::class,
                 'uploaded_by_id' => Auth::id(),
-                'is_shared' => true
-            ]);
+            ];
+            
+            // Include is_shared if column exists
+            if (Schema::hasColumn('case_documents', 'is_shared')) {
+                $documentData['is_shared'] = true;
+            }
+            
+            // Temporarily include uploaded_by if column exists
+            if (Schema::hasColumn('case_documents', 'uploaded_by')) {
+                $documentData['uploaded_by'] = Auth::id();
+            }
+            
+            CaseDocument::create($documentData);
 
             $this->showUploadModal = false;
             $this->resetForm();
@@ -109,11 +121,15 @@ class CaseDocuments extends Component
             $this->case = \App\Models\LegalCase::findOrFail(request()->route('case'));
         }
         
+        $query = CaseDocument::where('legal_case_id', $this->case->id);
+        
+        // Only filter by is_shared if the column exists
+        if (Schema::hasColumn('case_documents', 'is_shared')) {
+            $query->where('is_shared', true);
+        }
+        
         return view('livewire.shared.case-documents', [
-            'documents' => CaseDocument::where('legal_case_id', $this->case->id)
-                ->where('is_shared', true)
-                ->latest()
-                ->get()
+            'documents' => $query->latest()->get()
         ]);
     }
 } 
