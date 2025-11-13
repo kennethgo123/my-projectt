@@ -17,7 +17,7 @@
                         <div class="flex space-x-8 ml-8">
                             <a href="#home" class="text-white hover:text-green-300 transition">Home</a>
                             <a href="#services" class="text-white hover:text-green-300 transition">Services</a>
-                            <a href="#featured-lawyers" class="text-white hover:text-green-300 transition">Featured Lawyers</a>
+                            <a href="#about-us" class="text-white hover:text-green-300 transition">About us</a>
                         </div>
                         <div class="flex space-x-8">
                             <a href="{{ route('register') }}" class="text-white hover:text-green-300 transition">Register</a>
@@ -37,7 +37,7 @@
                         <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
                             <a href="#home" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Home</a>
                             <a href="#services" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Services</a>
-                            <a href="#featured-lawyers" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Featured Lawyers</a>
+                            <a href="#about-us" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About us</a>
                             <a href="{{ route('register') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Register</a>
                             <a href="{{ route('login') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Login</a>
                         </div>
@@ -193,50 +193,20 @@
         </div>
     </div>
 
-    <!-- Featured Lawyers Section -->
-    <div id="featured-lawyers" class="py-16 bg-white">
+    <!-- About Us Section -->
+    <div id="about-us" class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-                    Featured Legal Professionals
+                    About us
                 </h2>
-                <p class="mt-4 text-lg text-gray-500">
-                    Meet our highly qualified legal experts ready to help with your case
+                <div class="w-24 h-1 bg-yellow-500 mx-auto my-6"></div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <p class="text-lg text-gray-700 leading-relaxed text-center">
+                    At Lexcav, we believe that access to legal assistance should be simple, transparent, and within everyone's reach. Our platform bridges the gap between clients and qualified legal professionals, making it easier to find trusted lawyers who can address your specific needs. Whether you're seeking legal advice, consultation, or representation, Lexcav provides a secure and convenient space to connect with experts who care. Guided by our mission of making legal services accessible, we're redefining how people access justice—one connection at a time.
                 </p>
-            </div>
-            
-            <!-- Featured Lawyers Placeholder -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                @for($i = 0; $i < 4; $i++)
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="h-12 w-12 rounded-full bg-gray-200"></div>
-                                <div class="ml-4">
-                                    <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
-                                    <div class="h-3 w-24 bg-gray-200 rounded"></div>
-                                </div>
-                            </div>
-                            <div class="mt-4">
-                                <div class="flex items-center">
-                                    @for($j = 0; $j < 5; $j++)
-                                        <svg class="h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                        </svg>
-                                    @endfor
-                                    <div class="ml-2 h-3 w-16 bg-gray-200 rounded"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endfor
-            </div>
-            
-            <div class="text-center mt-8">
-                <p class="text-sm text-gray-500 italic">Featured lawyers will be available soon</p>
-                <a href="{{ route('register') }}" class="mt-6 inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-700 hover:bg-green-800">
-                    Register as a Lawyer
-                </a>
             </div>
         </div>
     </div>
