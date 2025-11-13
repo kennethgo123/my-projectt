@@ -120,7 +120,7 @@ class CaseSetup extends Component
         
         'newDocumentTitle' => 'required|string|max:100',
         'newDocumentDescription' => 'nullable|string',
-        'newDocument' => 'required|file|max:10240', // 10MB max
+        'newDocument' => 'required|file|max:15360|mimes:pdf,png,jpg,jpeg', // 15MB max, PDF, PNG, JPG only
         
         // Updated validation rules for editing
         'editEventTitle' => 'required|string|max:100',
@@ -142,7 +142,8 @@ class CaseSetup extends Component
     {
         return [
             'newPhaseEndDate.after_or_equal' => 'The end date must be after or equal to the start date.',
-            'newDocument.max' => 'The document must not be larger than 10MB.',
+            'newDocument.max' => 'The document must not be larger than 15 MB.',
+            'newDocument.mimes' => 'Only PDF, PNG, and JPG files are accepted.',
         ];
     }
 
@@ -520,7 +521,7 @@ class CaseSetup extends Component
         $this->validate([
             'newDocumentTitle' => 'required|string|max:100',
             'newDocumentDescription' => 'nullable|string',
-            'newDocument' => 'required|file|max:10240', // 10MB max
+            'newDocument' => 'required|file|max:15360|mimes:pdf,png,jpg,jpeg', // 15MB max, PDF, PNG, JPG only
         ]);
         
         try {
