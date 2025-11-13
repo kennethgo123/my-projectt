@@ -211,47 +211,5 @@
         </div>
     </div>
 
-    <!-- Provider Listings -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                @foreach($providers as $provider)
-                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <img class="h-12 w-12 rounded-full" src="{{ $provider->profile_photo_url }}" alt="{{ $provider->name }}">
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-gray-900">
-                                        {{ $provider->profile->first_name ?? '' }} {{ $provider->profile->last_name ?? '' }}
-                                        {{ $provider->profile->company_name ?? '' }}
-                                    </h3>
-                                    <p class="text-sm text-gray-500">{{ ucfirst($provider->role->name) }}</p>
-                                </div>
-                            </div>
-                            <div class="mt-4">
-                                <p class="text-sm text-gray-500">{{ Str::limit($provider->profile->bio ?? '', 150) }}</p>
-                            </div>
-                            <div class="mt-4">
-                                <div class="mt-4 flex items-center justify-between">
-                                    <div class="flex items-center text-sm text-gray-500">
-                                        <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                        </svg>
-                                        {{ $provider->years_of_experience ?? 0 }} years experience
-                                    </div>
-                                    <a href="{{ route('providers.show', $provider) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                        View Profile
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-            <div class="mt-6">
-                {{ $providers->links() }}
-            </div>
-        </div>
-    </div>
-</div> 
-</div> 
+</div>
+</div>
