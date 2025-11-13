@@ -30,7 +30,7 @@
             </div>
         </div>
 
-        @if($case->status !== \App\Models\LegalCase::STATUS_ACTIVE && $case->status !== \App\Models\LegalCase::STATUS_CONTRACT_REJECTED_BY_CLIENT)
+        @if($case->status !== \App\Models\LegalCase::STATUS_ACTIVE && $case->status !== \App\Models\LegalCase::STATUS_CONTRACT_REJECTED_BY_CLIENT && $case->status !== \App\Models\LegalCase::STATUS_CHANGES_REQUESTED_BY_CLIENT)
             <!-- Case setup pending message -->
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
                 <div class="flex">
@@ -430,7 +430,7 @@
                     </div>
                 </div>
 
-                @if (!$case->setup_completed)
+                @if (!$case->setup_completed && $case->status !== \App\Models\LegalCase::STATUS_CHANGES_REQUESTED_BY_CLIENT)
                     <!-- Case setup pending message -->
                     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
                         <div class="flex">
