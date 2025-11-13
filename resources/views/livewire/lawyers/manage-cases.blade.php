@@ -221,7 +221,7 @@
                                 </a>
                             @endif
                             
-                            @if(in_array($case->status, [LegalCase::STATUS_ACTIVE, LegalCase::STATUS_CONTRACT_REVISED_SENT, LegalCase::STATUS_COMPLETED]) && !($case->status === LegalCase::STATUS_CONTRACT_SENT && $case->lawyer_response_required))
+                            @if(in_array($case->status, [LegalCase::STATUS_ACTIVE, LegalCase::STATUS_COMPLETED]) && !($case->status === LegalCase::STATUS_CONTRACT_SENT && $case->lawyer_response_required))
                                 <a href="{{ route('lawyer.case.setup', $case->id) }}" 
                                    class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

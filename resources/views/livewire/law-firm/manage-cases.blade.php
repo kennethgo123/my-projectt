@@ -276,7 +276,7 @@
                                                             </button>
                                                 @endif
 
-                                @if(in_array($case->status, ['active', 'contract_signed', 'contract_sent', 'completed']))
+                                @if(in_array($case->status, ['active', 'contract_signed', 'contract_sent', 'completed']) && $case->status !== 'contract_revised_sent')
                                     <a href="{{ route('law-firm.case-details', $case->id) }}" 
                                        class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

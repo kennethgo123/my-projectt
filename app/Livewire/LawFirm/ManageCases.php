@@ -155,6 +155,16 @@ class ManageCases extends Component
         $this->selectedCase = \App\Models\LegalCase::with(['contractActions'])->findOrFail($caseId);
         
         try {
+            // Check if signature is already acknowledged
+            $contractAction = $this->selectedCase->contractActions()
+                ->whereNotNull('signature_path')
+                ->where('lawyer_acknowledged', true)
+                ->where('acknowledged_by', Auth::id())
+                ->latest()
+                ->first();
+            
+            $isAlreadyAcknowledged = $contractAction !== null;
+            
             // First, directly check for signature_path on the case
             if ($case->signature_path) {
                 Log::info('Using signature directly from case record', [
@@ -162,7 +172,7 @@ class ManageCases extends Component
                 ]);
                 
                 $this->selectedCase->signature_path = $case->signature_path;
-                $this->signatureAcknowledged = false;
+                $this->signatureAcknowledged = $isAlreadyAcknowledged;
                 $this->showSignatureModal = true;
                 
                 // Debug the state after setting
@@ -192,9 +202,13 @@ class ManageCases extends Component
                     'action_type' => $contractAction->action_type
                 ]);
                 
+                // Check if this specific contract action is already acknowledged
+                $isAcknowledged = $contractAction->lawyer_acknowledged && 
+                                 $contractAction->acknowledged_by === Auth::id();
+                
                 $this->selectedCase->signature_path = $contractAction->signature_path;
-        $this->signatureAcknowledged = false;
-        $this->showSignatureModal = true;
+                $this->signatureAcknowledged = $isAcknowledged;
+                $this->showSignatureModal = true;
                 
                 // Update the case record with this signature path for future reference
                 \DB::table('legal_cases')
@@ -264,7 +278,20 @@ class ManageCases extends Component
         }
         
         if (!$this->signatureAcknowledged) {
-            session()->flash('error', 'You must acknowledge the statement to proceed.');
+            // If unchecking, don't allow it if already saved
+            $contractAction = $this->selectedCase->contractActions()
+                ->whereNotNull('signature_path')
+                ->where('lawyer_acknowledged', true)
+                ->where('acknowledged_by', Auth::id())
+                ->latest()
+                ->first();
+            
+            if ($contractAction) {
+                // Already acknowledged, prevent unchecking
+                $this->signatureAcknowledged = true;
+                session()->flash('error', 'This acknowledgment has already been saved and cannot be undone.');
+                return;
+            }
             return;
         }
         
@@ -276,7 +303,22 @@ class ManageCases extends Component
                 ->first();
                 
             if (!$contractAction) {
-                session()->flash('error', 'No signed contract found for this case.');
+                // Try to find any contract action with a signature
+                $contractAction = $this->selectedCase->contractActions()
+                    ->whereNotNull('signature_path')
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+                    
+                if (!$contractAction) {
+                    session()->flash('error', 'No signed contract found for this case.');
+                    return;
+                }
+            }
+            
+            // Check if already acknowledged by this user
+            if ($contractAction->lawyer_acknowledged && $contractAction->acknowledged_by === Auth::id()) {
+                // Already acknowledged by this user, keep it checked
+                $this->signatureAcknowledged = true;
                 return;
             }
             
@@ -287,13 +329,15 @@ class ManageCases extends Component
                 'acknowledged_by' => Auth::id()
             ]);
             
-            // Record a case update
-            $this->selectedCase->caseUpdates()->create([
-                'title' => 'Signature Acknowledged',
-                'content' => 'Law firm has acknowledged receipt of client\'s electronic signature.',
-                'user_id' => Auth::id(),
-                'visibility' => 'both'
-            ]);
+            // Record a case update only if not already acknowledged
+            if (!$contractAction->wasChanged('lawyer_acknowledged')) {
+                $this->selectedCase->caseUpdates()->create([
+                    'title' => 'Signature Acknowledged',
+                    'content' => 'Law firm has acknowledged receipt of client\'s electronic signature.',
+                    'user_id' => Auth::id(),
+                    'visibility' => 'both'
+                ]);
+            }
             
             session()->flash('message', 'Client signature has been acknowledged.');
             $this->showSignatureModal = false;

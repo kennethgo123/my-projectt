@@ -97,15 +97,30 @@
                         
                         <div class="relative flex items-start mt-3">
                             <div class="flex items-center h-5">
+                                @php
+                                    $contractAction = $selectedCase->contractActions()
+                                        ->whereNotNull('signature_path')
+                                        ->where('lawyer_acknowledged', true)
+                                        ->where('acknowledged_by', auth()->id())
+                                        ->latest()
+                                        ->first();
+                                    $isAcknowledged = $contractAction !== null;
+                                @endphp
                                 <input 
                                     wire:model.live="signatureAcknowledged" 
                                     wire:change="acknowledgeSignature"
                                     id="signature-acknowledgment" 
                                     type="checkbox" 
-                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                                    @if($isAcknowledged) disabled @endif
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded @if($isAcknowledged) opacity-50 cursor-not-allowed @endif">
                             </div>
                             <div class="ml-3 text-sm">
-                                <label for="signature-acknowledgment" class="font-medium text-gray-700">I acknowledge and agree to the statement above</label>
+                                <label for="signature-acknowledgment" class="font-medium text-gray-700 @if($isAcknowledged) text-gray-500 @endif">
+                                    I acknowledge and agree to the statement above
+                                    @if($isAcknowledged)
+                                        <span class="text-xs text-green-600 ml-2">(Saved)</span>
+                                    @endif
+                                </label>
                             </div>
                         </div>
                     </div>
