@@ -50,7 +50,7 @@
                                             <p class="mt-1 text-sm text-gray-500">{{ $document->description }}</p>
                                         @endif
                                         <div class="mt-2 flex items-center text-xs text-gray-500">
-                                            <p>Uploaded by {{ ucfirst($document->uploaded_by_type) }} • {{ $document->created_at->format('M d, Y') }}</p>
+                                            <p>{{ $document->created_at->format('M d, Y') }}</p>
                                         </div>
                                     </div>
                                 </div>
