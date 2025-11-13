@@ -21,6 +21,7 @@ class Invoice extends Model
         'subtotal',
         'tax',
         'discount',
+        'consultation_discount',
         'total',
         'issue_date',
         'due_date',
@@ -40,6 +41,7 @@ class Invoice extends Model
         'subtotal' => 'decimal:2',
         'tax' => 'decimal:2',
         'discount' => 'decimal:2',
+        'consultation_discount' => 'decimal:2',
         'total' => 'decimal:2',
     ];
 
@@ -119,7 +121,8 @@ class Invoice extends Model
         $subtotal = $this->items()->sum('amount');
         $this->subtotal = $subtotal;
         $this->tax = 0;
-        $this->total = $subtotal - $this->discount;
+        $totalDiscount = $this->discount + ($this->consultation_discount ?? 0);
+        $this->total = max($subtotal - $totalDiscount, 0);
         $this->save();
     }
 

@@ -35,6 +35,7 @@ class InvoiceManagement extends Component
     public $invoiceDueDate;
     public $invoiceNotes = '';
     public $invoicePaymentPlan = 'full';
+    public $isConsultationInvoice = false;
     public $selectedClient = null;
     public $selectedCase = null;
     public $clientCases = [];
@@ -75,6 +76,7 @@ class InvoiceManagement extends Component
         'invoiceItems.*.quantity' => 'nullable|numeric|min:0',
         'invoiceItems.*.unit_price' => 'required|numeric|min:0',
         'invoiceItems.*.type' => 'required|string|in:service,expense,billable_hours,other',
+        'isConsultationInvoice' => 'boolean',
     ];
 
     public function mount()
@@ -301,6 +303,7 @@ class InvoiceManagement extends Component
             'clientCases',
             'invoicePaymentPlan',
         ]);
+        $this->isConsultationInvoice = false;
         
         // Set default dates
         $this->invoiceIssueDate = now()->format('Y-m-d');
@@ -317,7 +320,7 @@ class InvoiceManagement extends Component
     {
         $this->invoiceItems[$this->nextItemKey] = [
             'description' => '',
-            'quantity' => null,
+            'quantity' => 1,
             'unit_price' => 0,
             'type' => 'service',
         ];
@@ -336,20 +339,31 @@ class InvoiceManagement extends Component
     {
         $subtotal = 0;
         foreach ($this->invoiceItems as $item) {
-            if (isset($item['quantity']) && $item['quantity'] !== null) {
-                $subtotal += $item['quantity'] * ($item['unit_price'] ?? 0);
-            } else {
-                $subtotal += $item['unit_price'] ?? 0;
-            }
+            $quantity = isset($item['quantity']) && $item['quantity'] !== null ? (float) $item['quantity'] : 1;
+            $unitPrice = isset($item['unit_price']) ? (float) $item['unit_price'] : 0;
+            $subtotal += $quantity * $unitPrice;
         }
         return $subtotal;
+    }
+    
+    public function getConsultationDiscountAmount(): float
+    {
+        return $this->isConsultationInvoice ? 500.0 : 0.0;
+    }
+    
+    public function calculateTotalDiscount(): float
+    {
+        $manualDiscount = max((float) $this->invoiceDiscount, 0);
+        return $manualDiscount + $this->getConsultationDiscountAmount();
     }
     
     public function calculateTotal()
     {
         // Setting tax to 0 as per requirement
         $this->invoiceTax = 0;
-        return $this->calculateSubtotal() - $this->invoiceDiscount;
+        $subtotal = $this->calculateSubtotal();
+        $discount = min($subtotal, $this->calculateTotalDiscount());
+        return max($subtotal - $discount, 0);
     }
     
     public function generateInvoiceNumber()
@@ -382,7 +396,8 @@ class InvoiceManagement extends Component
             $invoice->description = $this->invoiceDescription;
             $invoice->subtotal = $this->calculateSubtotal();
             $invoice->tax = 0; // Set tax to 0 as per requirement
-            $invoice->discount = $this->invoiceDiscount;
+            $invoice->discount = max((float) $this->invoiceDiscount, 0);
+            $invoice->consultation_discount = $this->getConsultationDiscountAmount();
             $invoice->total = $this->calculateTotal();
             $invoice->issue_date = $this->invoiceIssueDate;
             $invoice->due_date = $this->invoiceDueDate;
@@ -414,10 +429,13 @@ class InvoiceManagement extends Component
                     $invoiceItem->invoice_id = $invoice->id;
                 }
                 
+                $quantity = isset($item['quantity']) && $item['quantity'] !== null ? (float) $item['quantity'] : 1;
+                $unitPrice = isset($item['unit_price']) ? (float) $item['unit_price'] : 0;
+                
                 $invoiceItem->description = $item['description'];
-                $invoiceItem->quantity = $item['quantity'];
-                $invoiceItem->unit_price = $item['unit_price'];
-                $invoiceItem->amount = $item['quantity'] * $item['unit_price'];
+                $invoiceItem->quantity = $quantity;
+                $invoiceItem->unit_price = $unitPrice;
+                $invoiceItem->amount = $quantity * $unitPrice;
                 $invoiceItem->type = $item['type'];
                 $invoiceItem->save();
             }
@@ -490,6 +508,7 @@ class InvoiceManagement extends Component
         $this->selectedClient = $invoice->client_id;
         $this->selectedCase = $invoice->legal_case_id;
         $this->invoicePaymentPlan = $invoice->payment_plan;
+        $this->isConsultationInvoice = ($invoice->consultation_discount ?? 0) > 0;
         
         $this->updatedSelectedClient($invoice->client_id);
         
@@ -501,6 +520,7 @@ class InvoiceManagement extends Component
             $this->invoiceItems[$this->nextItemKey] = [
                 'id' => $item->id,
                 'description' => $item->description,
+                'quantity' => $item->quantity ?? 1,
                 'unit_price' => $item->unit_price,
                 'type' => $item->type,
             ];

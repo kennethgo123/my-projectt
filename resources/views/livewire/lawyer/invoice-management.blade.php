@@ -309,6 +309,20 @@
                             </div>
                         </div>
 
+                        <!-- Consultation Invoice Toggle -->
+                        <div class="mt-4">
+                            <label class="flex items-start bg-indigo-50 border border-indigo-100 rounded-lg p-4">
+                                <input type="checkbox" wire:model="isConsultationInvoice" class="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <span class="ml-3 text-sm text-gray-700">
+                                    <span class="font-semibold">Consultation Invoice:</span>
+                                    Kindly check this box if you are creating an invoice for your consultation.
+                                    @if($isConsultationInvoice)
+                                        <span class="block text-xs text-indigo-600 mt-1">A PHP 500.00 discount will be applied automatically.</span>
+                                    @endif
+                                </span>
+                            </label>
+                        </div>
+
                         <!-- Invoice Totals -->
                         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -328,6 +342,16 @@
                                         <div class="w-24">
                                             <x-input type="number" step="0.01" min="0" class="block w-full" wire:model="invoiceDiscount" />
                                         </div>
+                                    </div>
+                                    @if($isConsultationInvoice)
+                                        <div class="flex justify-between items-center mb-2 text-sm text-indigo-700">
+                                            <span>Consultation Discount:</span>
+                                            <span class="font-medium">- PHP {{ number_format($this->getConsultationDiscountAmount(), 2) }}</span>
+                                        </div>
+                                    @endif
+                                    <div class="flex justify-between items-center mb-2 text-sm text-gray-600">
+                                        <span>Total Discount:</span>
+                                        <span class="font-medium">- PHP {{ number_format($this->calculateTotalDiscount(), 2) }}</span>
                                     </div>
                                     <div class="flex justify-between font-bold text-lg mt-4 pt-2 border-t border-gray-200">
                                         <span>Total:</span>
@@ -445,9 +469,23 @@
                                     <td colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-500">Subtotal:</td>
                                     <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">PHP {{ number_format($selectedInvoice->subtotal, 2) }}</td>
                                 </tr>
+                                @if($selectedInvoice->discount > 0)
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-500">Manual Discount:</td>
+                                        <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">- PHP {{ number_format($selectedInvoice->discount, 2) }}</td>
+                                    </tr>
+                                @endif
+                                @if(($selectedInvoice->consultation_discount ?? 0) > 0)
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-500">Consultation Discount:</td>
+                                        <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">- PHP {{ number_format($selectedInvoice->consultation_discount, 2) }}</td>
+                                    </tr>
+                                @endif
                                 <tr>
-                                    <td colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-500">Discount:</td>
-                                    <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">PHP {{ number_format($selectedInvoice->discount, 2) }}</td>
+                                    <td colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-500">Total Discount:</td>
+                                    <td class="px-6 py-3 text-right text-sm font-medium text-gray-900">
+                                        - PHP {{ number_format($selectedInvoice->discount + ($selectedInvoice->consultation_discount ?? 0), 2) }}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td colspan="4" class="px-6 py-3 text-right text-sm font-bold text-gray-900">Total:</td>
