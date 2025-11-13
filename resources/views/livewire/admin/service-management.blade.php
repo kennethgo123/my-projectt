@@ -1,9 +1,20 @@
 <div>
     <div class="sm:flex sm:items-center sm:justify-between mb-6">
         <h2 class="text-2xl font-semibold text-gray-900">Law Services Management</h2>
-        <button wire:click="$set('isModalOpen', true)" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Add New Service
-        </button>
+        <div class="flex items-center space-x-4">
+            <!-- Status Filter -->
+            <div class="flex items-center space-x-2">
+                <label for="statusFilter" class="text-sm font-medium text-gray-700">Filter:</label>
+                <select wire:model.live="statusFilter" id="statusFilter" class="block w-40 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <option value="all">All Services</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            <button wire:click="$set('isModalOpen', true)" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Add New Service
+            </button>
+        </div>
     </div>
 
     <!-- Service List -->
@@ -39,8 +50,14 @@
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button wire:click="viewCategories({{ $service->id }})" class="text-green-600 hover:text-green-900 mr-3">Categories</button>
                             <button wire:click="editService({{ $service->id }})" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
-                            <button wire:click="toggleStatus({{ $service->id }})" class="text-{{ $service->status === 'active' ? 'red' : 'green' }}-600 hover:text-{{ $service->status === 'active' ? 'red' : 'green' }}-900">
+                            <button wire:click="toggleStatus({{ $service->id }})" class="text-{{ $service->status === 'active' ? 'red' : 'green' }}-600 hover:text-{{ $service->status === 'active' ? 'red' : 'green' }}-900 mr-3">
                                 {{ $service->status === 'active' ? 'Deactivate' : 'Activate' }}
+                            </button>
+                            <button 
+                                wire:click="deleteService({{ $service->id }})" 
+                                wire:confirm="Are you sure you want to delete this service? This action cannot be undone."
+                                class="text-red-600 hover:text-red-900">
+                                Delete
                             </button>
                         </td>
                     </tr>

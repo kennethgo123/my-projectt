@@ -29,6 +29,9 @@ class ServiceManagement extends Component
     public $editingCategory = null;
     public $editCategoryName = '';
     public $editCategoryDescription = '';
+    
+    // For filtering services by status
+    public $statusFilter = 'all';
 
     protected $rules = [
         'name' => 'required|min:3',
@@ -83,6 +86,12 @@ class ServiceManagement extends Component
         ]);
 
         session()->flash('message', 'Service status updated successfully.');
+    }
+
+    public function deleteService(LegalService $service)
+    {
+        $service->delete();
+        session()->flash('message', 'Service deleted successfully.');
     }
     
     // Methods for handling service categories
@@ -187,10 +196,23 @@ class ServiceManagement extends Component
         $this->editingCategory = null;
     }
 
+    public function updatingStatusFilter()
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
+        $query = LegalService::query();
+        
+        if ($this->statusFilter === 'active') {
+            $query->where('status', 'active');
+        } elseif ($this->statusFilter === 'inactive') {
+            $query->where('status', 'inactive');
+        }
+        
         return view('livewire.admin.service-management', [
-            'services' => LegalService::latest()->paginate(10),
+            'services' => $query->latest()->paginate(10),
             'currentService' => $this->currentServiceId ? LegalService::find($this->currentServiceId) : null,
         ])->layout('components.layouts.admin');
     }
