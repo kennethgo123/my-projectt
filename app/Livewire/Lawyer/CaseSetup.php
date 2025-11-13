@@ -606,7 +606,11 @@ class CaseSetup extends Component
             // Reload data
             $this->loadCaseData();
             
-            session()->flash('success', 'Document uploaded successfully!');
+            // Close the document upload modal
+            $this->dispatch('close-modal', 'add-document-modal');
+            
+            // Show success modal
+            $this->showSuccessMessage('Document Uploaded Successfully!', 'Your document has been uploaded successfully!');
         } catch (\Exception $e) {
             session()->flash('error', 'Failed to upload document: ' . $e->getMessage());
         }
@@ -1395,6 +1399,8 @@ class CaseSetup extends Component
         $this->showSuccessModal = false;
         $this->successModalTitle = '';
         $this->successModalMessage = '';
+        // Ensure document upload modal is also closed
+        $this->dispatch('close-modal', 'add-document-modal');
     }
     
     public function showErrorMessage($message)
