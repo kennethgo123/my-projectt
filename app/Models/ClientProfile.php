@@ -17,6 +17,7 @@ class ClientProfile extends Model
         'contact_number',
         'address',
         'city',
+        'barangay',
         'valid_id_type',
         'valid_id_file',
         'photo_path',
