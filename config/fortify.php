@@ -73,18 +73,7 @@ return [
     |
     */
 
-    'home' => function () {
-        if (auth()->check()) {
-            if (auth()->user()->role->name === 'client') {
-                return route('client.welcome');
-            } elseif (auth()->user()->role->name === 'lawyer') {
-                return route('lawyer.welcome');
-            } elseif (auth()->user()->role->name === 'law_firm') {
-                return route('law-firm.dashboard');
-            }
-        }
-        return '/dashboard';
-    },
+    'home' => '/dashboard',
 
     /*
     |--------------------------------------------------------------------------
