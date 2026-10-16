@@ -77,7 +77,7 @@ Route::middleware(['auth'])->group(function () {
 
 // Lawyer Routes
 Route::middleware(['auth', 'profile.completed'])->group(function () {
-    Route::get('/lawyers', LawyerSearch::class)->name('lawyers.search');
+    Route::get('/lawyers', LawyerSearch::class)->name('lawyers.index');
     Route::get('/lawyers/{lawyer}', LawyerProfile::class)->name('lawyers.profile');
     
     // Use the client messages view for clients, otherwise use the regular Chat component
