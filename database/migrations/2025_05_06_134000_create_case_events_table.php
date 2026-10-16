@@ -18,6 +18,8 @@ return new class extends Migration
                 $table->foreignId('legal_case_id')->constrained('legal_cases')->onDelete('cascade');
                 $table->string('title');
                 $table->text('description')->nullable();
+                $table->date('event_date')->nullable();
+                $table->time('event_time')->nullable();
                 $table->dateTime('start_datetime');
                 $table->string('event_type')->nullable();
                 $table->string('location')->nullable();
